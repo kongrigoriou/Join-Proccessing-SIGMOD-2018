@@ -19,3 +19,8 @@ struct relation {
 struct result {
     
 };
+
+struct partitionResult{
+    int* pSum;
+    int max;
+};
