@@ -1,4 +1,7 @@
+#ifndef STRUCTURES_FILE
+#define STRUCTURES_FILE
 /** Type definition for a tuple */
+
 #include <stdint.h>
 typedef struct tuple {
     int32_t key;
@@ -19,3 +22,5 @@ struct relation {
 struct result {
     
 };
+
+#endif
