@@ -16,8 +16,12 @@ typedef struct node {
 
 int insert(node* new_array,tuple element,int size);
 
-int hash2(int key){
-    return key;
+//found in https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key
+uint32_t hash2(uint32_t x){
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = (x >> 16) ^ x;
+    return x;
 }
 
 //makes sure your hash fits the array
@@ -184,8 +188,7 @@ int insert(node* array, tuple element, int n){
 }
 
 typedef struct result_node {
-    int index;  //the tuple
-    
+    int index;          //the tuple
     int occupied;       //whether node is empty or not
 } result_node;
 
