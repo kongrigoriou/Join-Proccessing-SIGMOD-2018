@@ -1,7 +1,7 @@
 #include "structures.h"
 
 typedef struct node{
-    int data;
+    tuple* data;
     struct node* next;
 }ListNode;
 
@@ -11,7 +11,7 @@ typedef struct list{
 }List;
 
 List* list_create();
-void list_insert(List*, int);
+void list_insert(List*, tuple*);
 void list_print(List*);
 void list_destroy(List*);
 
