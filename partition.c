@@ -1,7 +1,7 @@
 //
 //  partition.c
 //  
-
+#include "mainPartitionTest.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -17,19 +17,19 @@ void Partition(struct relation initialRelation, int startIndex, int endIndex, in
     for(int i=0;i<(int)pow(2,numberOfBytes);i++){
         hist[i]=0;
     }
-    max=0;
+    *max=0;
     for(int j=startIndex;j<=endIndex;j++){
         hashedValue=initialRelation.tuples[j].key>>((partitionStep-1)*numberOfBytes); // petaw ta teleutaia pshfia pou de xreiazomai
         hashedValue=hashedValue%((int)pow(2,numberOfBytes));  //petaw ta prwta pshfia pou de xreiazomai
         hist[hashedValue]++;
-        if(hist[hashedValue]>*max)
-            *max=hist[hashedValue];
+        if(hist[hashedValue]>(*max))
+            (*max)=hist[hashedValue];
     }
     (*pSum)[0]=0;
     currentIndex[0]=startIndex;
     for(int i=1;i<(int)pow(2,numberOfBytes);i++){
         (*pSum)[i]=(*pSum)[i-1]+hist[i-1];
-        currentIndex[i]+=(*pSum)[i];
+        currentIndex[i]=(*pSum)[i];
     }
     for(int j=startIndex;j<=endIndex;j++){
         hashedValue=initialRelation.tuples[j].key>>((partitionStep-1)*numberOfBytes); // petaw ta teleutaia pshfia pou de xreiazomai
@@ -38,5 +38,5 @@ void Partition(struct relation initialRelation, int startIndex, int endIndex, in
         reOrdered->tuples[currentIndex[hashedValue]].payload=initialRelation.tuples[j].payload;
         currentIndex[hashedValue]++;
     }
-    
+    //free hist
 }
