@@ -31,8 +31,13 @@ int hash(int key,int size_of_array){
 
 //creates the array
 node* create_array(int n){
-    
-    return malloc(n*sizeof(node));
+    //node * array=malloc(n*sizeof(node));
+    node* array=malloc(n*sizeof(node));
+    for(int i=0;i<n;i++){
+        array[i].bitmap=0;
+        array[i].occupied=0;
+    }
+    return array;
 }
 
 //gets H
@@ -96,7 +101,7 @@ void print_array(node* array, int size){
 
 int resize(node** array, tuple element, int n){
     node* new_array=create_array(2*n);
-    node * current_array=*array;
+    node* current_array=*array;
     for(int i=0;i<n;i++){
         if(current_array[i].occupied!=0){
             insert(new_array,current_array[i].info,2*n);
