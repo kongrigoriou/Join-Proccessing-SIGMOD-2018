@@ -1,3 +1,6 @@
+#ifndef LIST
+#define LIST
+
 #include "structures.h"
 
 typedef struct node{
@@ -14,4 +17,6 @@ List* list_create();
 void list_insert(List*, tuple*);
 void list_print(List*);
 void list_destroy(List*);
+
+#endif
 

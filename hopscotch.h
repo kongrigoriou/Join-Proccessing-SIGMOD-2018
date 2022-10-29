@@ -17,11 +17,10 @@ typedef struct result_node {
     int occupied;       //whether node is empty or not
 } result_node;
 
-int insert(node* new_array,tuple element,int size);
 uint32_t hash2(uint32_t key);
 int hash(int key,int size_of_array);
 node* create_array(int n);
-int get_H(int n);
+int get_H(int n);   
 int bitmapisfull(uint32_t bitmap, int size);
 int get_first_1(uint32_t bitmap, int size);
 int closest_empty_spot(node* array,int start, int size);
