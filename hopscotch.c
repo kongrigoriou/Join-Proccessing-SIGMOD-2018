@@ -45,7 +45,7 @@ int get_H(int n){
 int bitmapisfull(uint32_t bitmap, int size){
     int isfull=1;
     for(int i=0;i<size;i++){
-        int bit=get_bit((bitmap_t*)&bitmap,i);
+        int bit=get_bit((bitmap_t)&bitmap,i);
         printf("Bit=%d\n",bit);
         if(bit==0){
             isfull=0;
@@ -59,7 +59,7 @@ int bitmapisfull(uint32_t bitmap, int size){
 int get_first_1(uint32_t bitmap, int size){
     
     for(int i=0;i<size;i++){
-        int bit=get_bit((bitmap_t*)&bitmap,i);
+        int bit=get_bit((bitmap_t)&bitmap,i);
         if(bit==1){
             return i;
         }
@@ -172,16 +172,16 @@ int insert(node* array, tuple element, int n){
             
             return size;
         }
-        clear_bit((bitmap_t*)&(array[check_index].bitmap ),element_to_be_moved);
+        clear_bit((bitmap_t)&(array[check_index].bitmap ),element_to_be_moved);
         array[element_to_be_moved].occupied=0;
         array[j].occupied=1;
         array[j].info=array[element_to_be_moved].info;
-        set_bit((bitmap_t*)&array[j].bitmap,0);
+        set_bit((bitmap_t)&array[j].bitmap,0);
         j=check_index;
     }
     array[j].info=element;
     printf("\nset bit with index %d\n",abs(j-hash_of_key));
-    set_bit((bitmap_t*)&(array[hash_of_key].bitmap),dist(j,hash_of_key,n));
+    set_bit((bitmap_t)&(array[hash_of_key].bitmap),dist(j,hash_of_key,n));
     array[j].occupied=1;
     print_array(array,n);
     return n;
@@ -202,7 +202,7 @@ result_node* search(node* array,tuple element, int size){
             i=0;
         }
         printf("hello\n");
-        int curr_bit=get_bit((bitmap_t*)&bitmap,bit_i);
+        int curr_bit=get_bit((bitmap_t)&bitmap,bit_i);
         if(curr_bit==1&&(array[i].info).key==element.key){
             result[bit_i].occupied=1;
             result[bit_i].index=element.payload;
