@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "bitmap.h"
+#include "list.h"
 
 
 
@@ -197,11 +198,12 @@ typedef struct result_node {
     int occupied;       //whether node is empty or not
 } result_node;
 
-result_node* search(node* array,tuple element, int size){
+List* search(node* array,tuple element, int size){
     int hash_of_key=hash( element.key,size);
     uint32_t bitmap=array[hash_of_key].bitmap;
     int H=get_H(size);
-    result_node* result=malloc(sizeof(tuple)*H);
+    //result_node* result=malloc(sizeof(tuple)*H);
+    List * result_list=list_create();
     for(int i=hash_of_key, bit_i=0;bit_i<H;i++,bit_i++){
         if(i>=size){
             i=0;
@@ -209,15 +211,18 @@ result_node* search(node* array,tuple element, int size){
         printf("hello\n");
         int curr_bit=get_bit((bitmap_t)&bitmap,bit_i);
         if(curr_bit==1&&(array[i].info).key==element.key){
-            result[bit_i].occupied=1;
+            /*result[bit_i].occupied=1;
             result[bit_i].index=element.payload;
-        }
-        else{
-            result[bit_i].occupied=0;
+            */
+           tuple temp_t;
+           temp_t.key=(array[i].info).payload;
+           temp_t.payload=element.payload;
+           list_insert(result_list,temp_t);
         }
         
+        
     }
-    return result;
+    return result_list;
 }
 
 int main(){
@@ -240,13 +245,10 @@ int main(){
     size=insert(array,t,size);
     print_array(array,size);
     t.key=9;
-    result_node* r;
+    List* r;
     r=search(array,t, size);
-    for(int i=0;i<get_H(size);i++){
-        if(r[i].occupied==1){
-            printf("\n%d:%d\n",i,r[i].index);
-        }
-    }
+    list_print(r);
+    list_destroy(r);
     
     
 }

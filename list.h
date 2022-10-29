@@ -3,9 +3,9 @@
 
 #include "structures.h"
 
-typedef struct node{
-    tuple* data;
-    struct node* next;
+typedef struct listnode{
+    tuple data;
+    struct listnode* next;
 }ListNode;
 
 typedef struct list{
@@ -14,7 +14,7 @@ typedef struct list{
 }List;
 
 List* list_create();
-void list_insert(List*, tuple*);
+void list_insert(List*, tuple);
 void list_print(List*);
 void list_destroy(List*);
 

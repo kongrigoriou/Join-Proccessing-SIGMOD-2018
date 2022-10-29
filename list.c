@@ -11,7 +11,7 @@ List* list_create(){
     return list;
 }
 
-void list_insert(List* list, tuple* data){
+void list_insert(List* list, tuple data){
     //create new node
     ListNode* newNode = malloc(sizeof(ListNode));
     
@@ -35,7 +35,7 @@ void list_print(List* list){
     ListNode* node;
     node = list->head;
     for(int i = 0; i < list->size; i++){
-        printf("%d\n", node->data->payload);
+        printf("%d %d\n", node->data.payload, node->data.payload);
         node = node->next;
     }
 }
@@ -46,11 +46,11 @@ void list_destroy(List* list){
     while (node->next != NULL) {		
 		ListNode* next = node->next;
         
-        free(node->data);
+        //free(node->data);
         free(node);
 		node = next;
 	}
-    free(node->data);
+    //free(node->data);
     free(node);
 	free(list);
 }
