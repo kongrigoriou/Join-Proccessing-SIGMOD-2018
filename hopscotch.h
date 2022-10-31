@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "structures.h"
+#include "list.h"
 
 // node of hopscotch array
 typedef struct node {
@@ -28,6 +29,6 @@ void print_array(node* array, int size);
 int resize(node** array, tuple element, int n);
 int dist(int j, int hash,int n);
 int insert(node* array, tuple element, int n);
-result_node* search(node* array,tuple element, int size);
+List* search(node* array,tuple element, int size);
 
 #endif
