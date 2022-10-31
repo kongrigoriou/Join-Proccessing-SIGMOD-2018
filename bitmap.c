@@ -1,6 +1,7 @@
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 #define BYTE_TO_BINARY(byte)  \
@@ -27,9 +28,14 @@ int get_bit(bitmap_t b, int i) {
     return b[i / 8] & (1 << (i & 7)) ? 1 : 0;
 }
 
-void print_bitmap(uint32_t array){
-    printf(BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(array));
+void print_bitmap(bitmap_t array){
+    printf(BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(*array));
 }
+
+bitmap_t create_bitmap(int n) {
+    return malloc((n + 7) / 8);
+}
+
 
 void bitmap_main(){
     uint32_t array;
