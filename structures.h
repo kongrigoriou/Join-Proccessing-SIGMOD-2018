@@ -3,6 +3,10 @@
 /** Type definition for a tuple */
 
 #include <stdint.h>
+
+int TableFitsCache(int cacheSize, int tableSize, int offSet);
+
+
 typedef struct tuple {
     int32_t key;
     int32_t payload;
