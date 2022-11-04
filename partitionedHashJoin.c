@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include "mainPartitionTest.h"
+#include "hopscotch.h"
+#include "functions.h"
 // #include "structures.h"
-
-typedef struct relation relation;
-typedef struct result result;
 
 int TableFitsCache(int cacheSize, int tableSize, int offSet);
 
@@ -14,17 +13,40 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     //1. partitioning
     //2. building (hopschoch hashing)
     //3. probing 
-    relation* reOrdered = NULL;
-    relation* reOrderedSecStep = NULL;
+    relation* reOrderedR, *reOrderedS;
+    relation* reOrderedSecStepR, *reOrderedSecStepS;
 
-    int max = 0;                //max bucket size after partition
-    int curMax;
-    int *pSum;
-    int *pSumSecStep;
-    //check if table fits cache if not first partition
-    int tableFits=TableFitsCache(15,10,5);
-    printf("Table fits %d\n", tableFits);
+    //for R relation
+    reOrderedR = malloc(sizeof(relation));
+    reOrderedR->tuples = malloc(relR->num_tuples * sizeof(tuple));
 
+    reOrderedSecStepR = malloc(sizeof(relation));
+    reOrderedSecStepR->tuples = malloc(relR->num_tuples * sizeof(tuple));
+
+    //for S relation
+    reOrderedS = malloc(sizeof(relation));
+    reOrderedS->tuples = malloc(relS->num_tuples * sizeof(tuple));
+
+    reOrderedSecStepS = malloc(sizeof(relation));
+    reOrderedSecStepS->tuples = malloc(relS->num_tuples * sizeof(tuple));
+
+    // int max = 0;                //max bucket size after partition
+    // int curMax;
+    int *pSumR, *pSumS;
+    // int *pSumSecStep;          //array of pSums
+    int stepR, stepS;               //how many partiotions were needed
+    int** pSumFinalR = calloc(pow(2,3),sizeof(int*));
+    int** pSumFinalS = calloc(pow(2,3),sizeof(int*));
+
+    stepR = num_of_partitions(reOrderedR, relR, &pSumR, reOrderedSecStepR, pSumFinalR);
+    stepS = num_of_partitions(reOrderedS, relS, &pSumS, reOrderedSecStepS, pSumFinalS);
+
+    printf("steps for R %d\n", stepR);
+    printf("steps for S %d\n", stepS);
+    
+    //find relation with fewer partitions
+
+    int size;
     relation* smallerRel;
     //find smaller partition
     if(relR->num_tuples < relS->num_tuples){
@@ -35,53 +57,58 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
         printf("r2\n");
     }
 
-    if(!tableFits){
-        reOrdered = malloc(sizeof(relation));
-        reOrdered->tuples = malloc(relR->num_tuples * sizeof(tuple));
-        //firts partition
-        Partition(*smallerRel, 0, smallerRel->num_tuples, 1, 3,reOrdered, &max, &pSum);
+    //after partitioning
+    //for each bucket use hopscotch hashing
+    // printf("Step: %d\n", step);
+    hop* hopscotch = NULL;
+    hop** hopscothArr = NULL;
 
-        printf("reOrdered\n");
-        for(int i=0;i<10;i++){
-            printf("%d\n",reOrdered->tuples[i].key);
+    if(stepR == 0){
+        hopscotch = create_array(15, 3);
+
+        for(int i = 0; i < smallerRel->num_tuples; i++){
+            size = insert(hopscotch, smallerRel->tuples[i]);
         }
-        printf("pSum\n");
-        for(int i=0;i<pow(2,3);i++){
-            printf("%d\n",pSum[i]);
+    }else if(stepR == 1){
+        //array of hopscotch hash tables
+        hopscothArr = malloc(pow(2,3) * sizeof(hop*));
+        for(int i = 0; i < pow(2,3); i++){
+            hopscothArr[i] = create_array(15,3);
         }
 
-        if(TableFitsCache(15, max, 5)){
-            printf("First partition was succesfull\n");
-        }else{
-            //begin second partition
-            reOrderedSecStep = malloc(sizeof(relation));
-            reOrderedSecStep->tuples = malloc(smallerRel->num_tuples * sizeof(tuple));
-            max = 0;
-            int j = 0;
-            int* pSumFinal = malloc(pow(2,3)*sizeof(int));
-
-            while(j < pow(2,3) -1){
-                if(pSum[j] != pSum[j + 1]){
-                    Partition(*reOrdered, pSum[j], pSum[j + 1] -1, 2, 3, reOrderedSecStep, &curMax, &pSumSecStep);
-                    if(curMax > max) max = curMax;
+        int counter = 0;
+        while(counter < pow(2,3)){
+            if(pSumR[counter] != pSumR[counter + 1]){
+                for(int j = pSumR[counter]; j < pSumR[counter + 1]; j++){
+                    size = insert(hopscothArr[counter], reOrderedR->tuples[j]);
                 }
-                //add new pSum to an existing one so we can have a final
-                for(int i = 0; i < pow(2, 3); i++){
-                    pSumFinal[i] += pSumSecStep[i];
-                }
-                j++;
             }
-            printf("reOrdered\n");
-            for(int i=0;i<10;i++){
-                printf("%d\n",reOrderedSecStep->tuples[i].key);
-            }
-
-            printf("pSum\n");
-            for(int i=0;i<pow(2,3);i++){
-                printf("%d\n",pSumFinal[i]);
-            }
+            counter++;
         }
     }
+
+    //probing 
+    //for each element of every partition
+    //search the hopscotch array
+    List* results;
+    if(stepR == 0){
+        int index = 0;
+        while(index < pow(2,3)){
+            results = search(hopscotch, relS->tuples[index]);
+            printf("main print %d\n", results->size);
+            list_print(results);
+            index++;
+        }
+    }
+
+    //frees
+    free(reOrderedR->tuples);
+    free(reOrderedR);
+    free(reOrderedS->tuples);
+    free(reOrderedS);
+
+    free(pSumFinalR);
+    free(pSumFinalS);
     
     return NULL;
 }
@@ -107,6 +134,8 @@ int main(void){
     for(int i = 0; i < 20; i++){
         r2.tuples[i].key = 26437895/(i+1);
     }
+
+    r2.tuples[3].key = 33633760;
 
     result* res = PartitionedHashJoin(&r1, &r2);
 }

@@ -5,24 +5,25 @@
 #include <stdint.h>
 #include "bitmap.h"
 #include "list.h"
+#include "hopscotch.h"
 
 
 
 // node of hopscotch array
-typedef struct node {
-    struct tuple info;  //the tuple
-    bitmap_t  bitmap;   //the bitmap
-    int occupied;        //whether node is empty or not
+// typedef struct node {
+//     struct tuple info;  //the tuple
+//     bitmap_t  bitmap;   //the bitmap
+//     int occupied;        //whether node is empty or not
     
-} node;
+// } node;
 
-typedef struct hopscotch_array {
-    node* array;
-    int H;
-    int size;
-} hop;
+// typedef struct hopscotch_array {
+//     node* array;
+//     int H;
+//     int size;
+// } hop;
 
-int insert(hop* new_array,tuple element);
+// int insert(hop* new_array,tuple element);
 
 //found in https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key
 uint32_t hash2(uint32_t x){
@@ -257,10 +258,10 @@ int insert(hop* hops, tuple element){
     return n;
 }
 
-typedef struct result_node {
-    int index;          //the tuple
-    int occupied;       //whether node is empty or not
-} result_node;
+// typedef struct result_node {
+//     int index;          //the tuple
+//     int occupied;       //whether node is empty or not
+// } result_node;
 
 List* search(hop*  hops ,tuple element){
     node* array=hops->array;
@@ -281,7 +282,7 @@ List* search(hop*  hops ,tuple element){
             result[bit_i].index=element.payload;
             */
            tuple temp_t;
-           temp_t.key=(array[i].info).payload;
+           temp_t.key=(array[i].info).key;
            temp_t.payload=element.payload;
            list_insert(result_list,temp_t);
         }
@@ -295,35 +296,35 @@ void print_hops(hop* hops){
     print_array(hops->array,hops->size);
 }
 
-int main(){
-    hop* array=create_array(10,1);
+// int main(){
+//     hop* array=create_array(10,1);
 
-    tuple t;
-    t.key=0;
-    t.payload=0;
-    int size=10;
-    for(int i=0;i<4;i++){
+//     tuple t;
+//     t.key=0;
+//     t.payload=0;
+//     int size=10;
+//     for(int i=0;i<4;i++){
 
-        t.key=9;
-        size=insert(array,t);
-    }
-    printf("after loop\n");
-    print_hops(array);
+//         t.key=9;
+//         size=insert(array,t);
+//     }
+//     printf("after loop\n");
+//     print_hops(array);
 
     
-    //return 0;
-    t.key=1;
-    size=insert(array,t);
-    t.key=1;
-    size=insert(array,t);
-    t.key=0;
-    size=insert(array,t);
-    print_hops(array);
-    t.key=9;
-    List* r;
-    r=search(array,t);
-    list_print(r);
-    list_destroy(r); 
-    destroy_hop(array);
+//     //return 0;
+//     t.key=1;
+//     size=insert(array,t);
+//     t.key=1;
+//     size=insert(array,t);
+//     t.key=0;
+//     size=insert(array,t);
+//     print_hops(array);
+//     t.key=9;
+//     List* r;
+//     r=search(array,t);
+//     list_print(r);
+//     list_destroy(r); 
+//     destroy_hop(array);
     
-}
+// }

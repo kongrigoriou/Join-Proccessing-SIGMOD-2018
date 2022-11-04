@@ -24,7 +24,8 @@ struct relation {
 * It consists of an array of tuples and a size of the relation.
 */
 struct result {
-    
+    tuple* tuplesR;
+    tuple* tuplesS;
 };
 
 #endif
