@@ -13,10 +13,10 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
     if(!tableFits){
             
             //firts partition
-            Partition(*rel, 0, rel->num_tuples, 1, 3,reOrdered, &max, &(*pSum));
+            Partition(*rel, 0, rel->num_tuples -1, 1, 3,reOrdered, &max, &(*pSum));
 
             printf("reOrdered\n");
-            for(int i=0;i<10;i++){
+            for(int i=0;i<rel->num_tuples;i++){
                 printf("%d\n",reOrdered->tuples[i].key);
             }
             printf("pSum\n");

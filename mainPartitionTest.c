@@ -3,6 +3,7 @@
 
 
 #include "mainPartitionTest.h"
+#include "structures.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -57,7 +58,11 @@ int main(void){
                     Partition(*reOrdered,pSum[j],pSum[j+1]-1,2,3,reOrderedSecondStep,&curMax,&pSumSecondStep);
                     if(curMax>max)
                         max=curMax;
-                    free(pSumSecondStep); //den xreiazomai allo ton pSumSecondStep
+                    printf("start\n");
+                    for(int i = 0; i < pow(2,3); i++){
+                        printf("Psumsec %d, %d\n",pSumSecondStep[i], i);
+                    }
+                    // free(pSumSecondStep); //den xreiazomai allo ton pSumSecondStep
                 }
                 j++;
             }

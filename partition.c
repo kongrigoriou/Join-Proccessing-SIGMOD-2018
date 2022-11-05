@@ -25,7 +25,7 @@ void Partition(struct relation initialRelation, int startIndex, int endIndex, in
         if(hist[hashedValue]>(*max))
             (*max)=hist[hashedValue];
     }
-    (*pSum)[0]=0;
+    (*pSum)[0]=startIndex;
     currentIndex[0]=startIndex;
     for(int i=1;i<(int)pow(2,numberOfBytes);i++){
         (*pSum)[i]=(*pSum)[i-1]+hist[i-1];
@@ -38,5 +38,5 @@ void Partition(struct relation initialRelation, int startIndex, int endIndex, in
         reOrdered->tuples[currentIndex[hashedValue]].payload=initialRelation.tuples[j].payload;
         currentIndex[hashedValue]++;
     }
-    //free hist
+    free(hist);
 }

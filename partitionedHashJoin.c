@@ -62,13 +62,15 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     // printf("Step: %d\n", step);
     hop* hopscotch = NULL;
     hop** hopscothArr = NULL;
+    int flagS = 0;
 
     if(stepR == 0){
         hopscotch = create_array(15, 3);
 
-        for(int i = 0; i < smallerRel->num_tuples; i++){
-            size = insert(hopscotch, smallerRel->tuples[i]);
+        for(int i = 0; i < relR->num_tuples; i++){
+            size = insert(hopscotch, relR->tuples[i]);
         }
+        // print_array(hopscotch->array, hopscotch->size);j
     }else if(stepR == 1){
         //array of hopscotch hash tables
         hopscothArr = malloc(pow(2,3) * sizeof(hop*));
@@ -85,19 +87,69 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
             }
             counter++;
         }
+        
+    }else if(stepR == 2){
+        //2d array of psums
+        for(int i = 0; i < pow(2,3) -1; i++){
+            //same
+
+        }
+
     }
+    //else if stepR = 2
+
+
 
     //probing 
     //for each element of every partition
     //search the hopscotch array
-    List* results;
+    List* results, *sum;
+    int index = 0;
+    result* res_array = malloc(sizeof(result));
+    res_array->tuplesR = malloc(50*sizeof(tuple));
+    res_array->tuplesS = malloc(50*sizeof(tuple));
+
+
     if(stepR == 0){
-        int index = 0;
-        while(index < pow(2,3)){
-            results = search(hopscotch, relS->tuples[index]);
-            printf("main print %d\n", results->size);
-            list_print(results);
-            index++;
+        if(stepS == 0){
+            while(index < relS->num_tuples){
+                results = search(hopscotch, relS->tuples[index]);
+                printf("main print %d\n", relS->tuples[index]);
+                list_print(results);
+                index++;
+            }
+        }else if(stepS == 1){
+            while(index < pow(2,3)){
+                if(pSumS[index] != pSumS[index + 1]){
+                    for(int j = pSumS[index]; j < pSumS[index + 1]; j++){
+                        results = search(hopscotch, reOrderedS->tuples[j]);
+                    }
+                    list_print(results);
+                }
+                index++;
+            }
+        }
+    }else if(stepR == 1){
+        //has an array of hash tables
+        if(stepS == 0){
+            //hash table on 
+            int count = 0;
+            while(index < pow(2,3)){
+                results = search(hopscothArr[index], relS->tuples[index]);
+                list_print(results);
+                index++;
+            }
+
+        }else if(stepS == 1){
+            while(index < pow(2,3)){
+                if(pSumS[index] != pSumS[index + 1]){
+                    for(int j = pSumS[index]; j < pSumS[index + 1]; j++){
+                        results = search(hopscothArr[index], reOrderedS->tuples[j]);
+                    }
+                    list_print(results);
+                }   
+                index++;
+            }
         }
     }
 
@@ -115,27 +167,40 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
 int main(void){
     struct relation r1, r2;
-    r1.num_tuples=10;
-    r2.num_tuples = 20;
-    r1.tuples=malloc(10*sizeof(struct tuple));
-    r2.tuples = malloc(20*sizeof(tuple));
+    r1.num_tuples=4;
+    r2.num_tuples = 3;
+    r1.tuples=malloc(4*sizeof(struct tuple));
+    r2.tuples = malloc(3*sizeof(tuple));
     
-    r1.tuples[0].key=26468015;
-    r1.tuples[1].key=22766314;
-    r1.tuples[2].key=65339549;
-    r1.tuples[3].key=33633760;
-    r1.tuples[4].key=42163975;
-    r1.tuples[5].key=25949786;
-    r1.tuples[6].key=21354045;
-    r1.tuples[7].key=20344488;
-    r1.tuples[8].key=16341213;
-    r1.tuples[9].key=62732974;
+    r1.tuples[0].key=1;
+    r1.tuples[1].key=2;
+    r1.tuples[2].key=3;
+    r1.tuples[3].key=4;
+    // r1.tuples[4].key=42163975;
+    // r1.tuples[5].key=25949786;
+    // r1.tuples[6].key=21354045;
+    // r1.tuples[7].key=20344488;
+    // r1.tuples[8].key=16341213;
+    // r1.tuples[9].key=62732974;
 
-    for(int i = 0; i < 20; i++){
-        r2.tuples[i].key = 26437895/(i+1);
+    // for(int i = 0; i < 20; i++){
+    //     r2.tuples[i].key = i;
+    //     r2.tuples[i].payload = 0;
+    // }
+
+    r2.tuples[0].key = 1;
+    r2.tuples[1].key = 1;
+    r2.tuples[2].key = 3;
+
+
+    for(int i = 0; i < 3; i++){
+        r2.tuples[i].payload = i;
+        r1.tuples[i].payload = i;
     }
 
-    r2.tuples[3].key = 33633760;
+    r1.tuples[3].payload = 3;
 
-    result* res = PartitionedHashJoin(&r1, &r2);
+    // r2.tuples[3].key = 33633760;
+
+    result* res = PartitionedHashJoin(&r2, &r1);
 }

@@ -25,7 +25,7 @@ void list_insert(List* list, tuple data){
         list->head = newNode;        
     }
 
-    // printf("Inserted: %d\n", data);
+    printf("Inserted: %d\n", data.key);
 
     //update size
     list->size++;
@@ -35,7 +35,7 @@ void list_print(List* list){
     ListNode* node;
     node = list->head;
     for(int i = 0; i < list->size; i++){
-        printf("%d %d\n", node->data.payload, node->data.payload);
+        printf("%d %d\n", node->data.key, node->data.payload);
         node = node->next;
     }
 }

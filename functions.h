@@ -1,7 +1,7 @@
 #ifndef FUNCTIONS
 #define FUNCTIONS
 
-#define CACHE_SIZE 90
+#define CACHE_SIZE 25
 
 typedef struct relation relation;
 typedef struct result result;
