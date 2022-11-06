@@ -31,21 +31,27 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
 
                 max = 0;
                 int j = 0;
-                int** pSumFinal = calloc(pow(2,3),sizeof(int*));
+                // int** pSumFinal = calloc(pow(2,3),sizeof(int*));
 
                 while(j < pow(2,3) -1){
                     if((*pSum)[j] != (*pSum)[j + 1]){
                         Partition(*reOrdered, (*pSum)[j], (*pSum)[j + 1] -1, 2, 3, reOrderedSecStep, &curMax, &pSumSecStep);
                         if(curMax > max) max = curMax;
+                    }else{
+                        pSumSecStep = calloc(pow(3,3), sizeof(int));
                     }
-                    //add new pSum to an existing one so we can have a final
                     pSumFinal[j] = pSumSecStep;
                     
                     j++;
                 }
 
+                // if((*pSum)[j] != (*pSum)[])
+                Partition(*reOrdered, (*pSum)[j], reOrdered->num_tuples, 2, 3, reOrderedSecStep, &curMax, &pSumSecStep);
+                pSumFinal[j] = pSumSecStep;
+
+
                 printf("reOrdered\n");
-                for(int i=0;i<10;i++){
+                for(int i=0;i<rel->num_tuples;i++){
                     printf("%d\n",reOrderedSecStep->tuples[i].key);
                 }
 

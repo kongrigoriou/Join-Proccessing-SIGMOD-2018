@@ -40,6 +40,26 @@ void list_print(List* list){
     }
 }
 
+List* list_append(List* list1, List* list2){
+    ListNode* node = list1->head;
+    if(list1->head == NULL){
+
+        list1->head = list2->head;
+        list1->size += list2->size;
+
+        return list1;
+    }
+
+    while(node->next != NULL){
+        node = node->next;
+    }
+
+    node->next = list2->head;
+    list1->size += list2->size;
+    return list1;
+
+}
+
 void list_destroy(List* list){
     ListNode* node = list->head;
 

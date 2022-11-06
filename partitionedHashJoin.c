@@ -9,26 +9,32 @@
 int TableFitsCache(int cacheSize, int tableSize, int offSet);
 
 
-result* PartitionedHashJoin(relation *relR, relation *relS){
+List* PartitionedHashJoin(relation *relR, relation *relS){
     //1. partitioning
     //2. building (hopschoch hashing)
     //3. probing 
     relation* reOrderedR, *reOrderedS;
     relation* reOrderedSecStepR, *reOrderedSecStepS;
 
+    // printf("num tuples %d %d\n", relR->num_tuples, relS->num_tuples);
+
     //for R relation
     reOrderedR = malloc(sizeof(relation));
     reOrderedR->tuples = malloc(relR->num_tuples * sizeof(tuple));
+    reOrderedR->num_tuples = relR->num_tuples;
 
     reOrderedSecStepR = malloc(sizeof(relation));
     reOrderedSecStepR->tuples = malloc(relR->num_tuples * sizeof(tuple));
+    reOrderedSecStepR->num_tuples = relR->num_tuples;
 
     //for S relation
     reOrderedS = malloc(sizeof(relation));
     reOrderedS->tuples = malloc(relS->num_tuples * sizeof(tuple));
+    reOrderedS->num_tuples = relS->num_tuples;
 
     reOrderedSecStepS = malloc(sizeof(relation));
     reOrderedSecStepS->tuples = malloc(relS->num_tuples * sizeof(tuple));
+    reOrderedSecStepS->num_tuples = relS->num_tuples;
 
     // int max = 0;                //max bucket size after partition
     // int curMax;
@@ -47,22 +53,23 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     //find relation with fewer partitions
 
     int size;
-    relation* smallerRel;
-    //find smaller partition
-    if(relR->num_tuples < relS->num_tuples){
-        smallerRel = relR;
-        printf("r1\n");
-    }else{
-        smallerRel = relS;
-        printf("r2\n");
-    }
+    // relation* smallerRel;
+    // //find smaller partition
+    // if(relR->num_tuples < relS->num_tuples){
+    //     smallerRel = relR;
+    //     printf("r1\n");
+    // }else{
+    //     smallerRel = relS;
+    //     printf("r2\n");
+    // }
 
     //after partitioning
     //for each bucket use hopscotch hashing
     // printf("Step: %d\n", step);
     hop* hopscotch = NULL;
     hop** hopscothArr = NULL;
-    int flagS = 0;
+    hop*** hopscotchTwoSteps = NULL;
+    // int flagS = 0;
 
     if(stepR == 0){
         hopscotch = create_array(15, 3);
@@ -73,29 +80,74 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
         // print_array(hopscotch->array, hopscotch->size);j
     }else if(stepR == 1){
         //array of hopscotch hash tables
-        hopscothArr = malloc(pow(2,3) * sizeof(hop*));
-        for(int i = 0; i < pow(2,3); i++){
-            hopscothArr[i] = create_array(15,3);
+        if(stepS == 0){
+            hopscotch = create_array(15, 3);
+
+            for(int i = 0; i < relS->num_tuples; i++){
+                size = insert(hopscotch, relS->tuples[i]);
+            }
+        }else{
+            hopscothArr = malloc(pow(2,3) * sizeof(hop*));
+            for(int i = 0; i < pow(2,3); i++){
+                hopscothArr[i] = create_array(15,3);
+            }
+
+            int counter = 0;
+            while(counter < pow(2,3)){
+                if(pSumR[counter] != pSumR[counter + 1]){
+                    for(int j = pSumR[counter]; j < pSumR[counter + 1]; j++){
+                        size = insert(hopscothArr[counter], reOrderedR->tuples[j]);
+                    }
+                }
+                counter++;
+            }
         }
 
-        int counter = 0;
-        while(counter < pow(2,3)){
-            if(pSumR[counter] != pSumR[counter + 1]){
-                for(int j = pSumR[counter]; j < pSumR[counter + 1]; j++){
-                    size = insert(hopscothArr[counter], reOrderedR->tuples[j]);
-                }
-            }
-            counter++;
-        }
-        
     }else if(stepR == 2){
         //2d array of psums
-        for(int i = 0; i < pow(2,3) -1; i++){
-            //same
+        if(stepS == 0){
+            hopscotch = create_array(15, 3);
 
+            for(int i = 0; i < relS->num_tuples; i++){
+                size = insert(hopscotch, relS->tuples[i]);
+            }
+        }else if(stepS == 1){
+            hopscothArr = malloc(pow(2,3) * sizeof(hop*));
+            for(int i = 0; i < pow(2,3); i++){
+                hopscothArr[i] = create_array(15,3);
+            }
+
+            int counter = 0;
+            while(counter < pow(2,3)){
+                if(pSumS[counter] != pSumS[counter + 1]){
+                    for(int j = pSumS[counter]; j < pSumS[counter + 1]; j++){
+                        size = insert(hopscothArr[counter], reOrderedS->tuples[j]);
+                    }
+                }
+                counter++;
+            }
+        }else{
+            //hsit
+            hopscotchTwoSteps = malloc(pow(2,3) * sizeof(hop**));
+            for(int i = 0; i < pow(2,3); i++){
+                hopscotchTwoSteps[i] = malloc(pow(2,3) * sizeof(hop*));
+                for(int j = 0; j < pow(2,3); j++){
+                    hopscotchTwoSteps[i][j] = create_array(15,3);
+                }
+            }
+
+            for(int i = 0; i < pow(2,3); i++){
+                for(int j = 0; j < pow(2,3); j++){
+                    if(pSumFinalR[i][j] != pSumFinalR[i][j+1]){
+                        for(int k = pSumFinalR[i][j]; k < pSumFinalR[i][j + 1]; k++){
+                            size = insert(hopscotchTwoSteps[i][j], reOrderedSecStepR->tuples[k]);
+                        }
+                    }
+                }
+            }
         }
-
     }
+
     //else if stepR = 2
 
 
@@ -103,18 +155,17 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     //probing 
     //for each element of every partition
     //search the hopscotch array
-    List* results, *sum;
+    List* results, *final;
     int index = 0;
-    result* res_array = malloc(sizeof(result));
-    res_array->tuplesR = malloc(50*sizeof(tuple));
-    res_array->tuplesS = malloc(50*sizeof(tuple));
-
+    // result* res_array = malloc(sizeof(result));
+    final = list_create();
 
     if(stepR == 0){
         if(stepS == 0){
             while(index < relS->num_tuples){
                 results = search(hopscotch, relS->tuples[index]);
-                printf("main print %d\n", relS->tuples[index]);
+                // printf("main print %d\n", relS->tuples[index]);
+                final = list_append(final, results);
                 list_print(results);
                 index++;
             }
@@ -123,19 +174,35 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
                 if(pSumS[index] != pSumS[index + 1]){
                     for(int j = pSumS[index]; j < pSumS[index + 1]; j++){
                         results = search(hopscotch, reOrderedS->tuples[j]);
+                        final = list_append(final, results);
                     }
                     list_print(results);
                 }
                 index++;
+            }
+        }else if(stepS == 2){
+            for(int i = 0; i < pow(2,3); i++){
+                index = 0;
+                while(index < pow(2,3)){
+                    if(pSumFinalS[i][index] != pSumFinalS[i][index + 1]){
+                        for(int j = pSumFinalS[i][index]; j < pSumFinalS[i][index + 1]; j++){
+                            results = search(hopscotch, reOrderedSecStepS->tuples[j]);
+                            final = list_append(final, results);
+
+                        }
+                    }
+                    index++;
+                }
             }
         }
     }else if(stepR == 1){
         //has an array of hash tables
         if(stepS == 0){
             //hash table on 
-            int count = 0;
-            while(index < pow(2,3)){
-                results = search(hopscothArr[index], relS->tuples[index]);
+            // int count = 0;
+            while(index < relR->num_tuples){
+                results = search(hopscotch, relR->tuples[index]);
+                final = list_append(final, results);
                 list_print(results);
                 index++;
             }
@@ -145,13 +212,75 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
                 if(pSumS[index] != pSumS[index + 1]){
                     for(int j = pSumS[index]; j < pSumS[index + 1]; j++){
                         results = search(hopscothArr[index], reOrderedS->tuples[j]);
+                        final = list_append(final, results);
                     }
                     list_print(results);
                 }   
                 index++;
             }
+        }else if(stepS == 2){
+            for(int i = 0; i < pow(2,3); i++){
+                index = 0;
+                while(index < pow(2,3)){
+                    if(pSumFinalS[i][index] != pSumFinalS[i][index + 1]){
+                        for(int j = pSumFinalS[i][index]; j < pSumFinalS[i][index + 1]; j++){
+                            results = search(hopscothArr[i], reOrderedSecStepS->tuples[j]);
+                            final = list_append(final, results);
+
+                            list_print(results);
+                        }
+                    }
+                    index++;
+                }
+            }
+        }
+    }else if(stepR == 2){
+        if(stepS == 0){
+            for(int i = 0; i < pow(2,3); i++){
+                index = 0;
+                while(index < pow(2,3)){
+                    if(pSumFinalR[i][index] != pSumFinalR[i][index + 1]){
+                        for(int j = pSumFinalR[i][index]; j < pSumFinalR[i][index + 1]; j++){
+                            results = search(hopscotch, reOrderedSecStepR->tuples[j]);
+                            final = list_append(final, results);
+                        }
+                    }
+                    index++;
+                }
+            }
+        }else if(stepS == 1){
+            for(int i = 0; i < pow(2,3); i++){
+                index = 0;
+                while(index < pow(2,3)){
+                    if(pSumFinalR[i][index] != pSumFinalR[i][index + 1]){
+                        for(int j = pSumFinalR[i][index]; j < pSumFinalR[i][index + 1]; j++){
+                            results = search(hopscothArr[i], reOrderedSecStepR->tuples[j]);
+                            final = list_append(final, results);
+
+                            list_print(results);
+                        }
+                    }
+                    index++;
+                }
+            }
+        }else if(stepS == 2){
+            for(int i = 0; i < pow(2,3); i++){
+                index = 0;
+                while(index < pow(2,3)){
+                    if(pSumFinalS[i][index] != pSumFinalS[i][index + 1]){
+                        for(int j = pSumFinalS[i][index]; j < pSumFinalS[i][index + 1]; j++){
+                            results = search(hopscotchTwoSteps[i][index], reOrderedSecStepS->tuples[j]);
+                            final = list_append(final, results);
+
+                            list_print(results);
+                        }
+                    }
+                    index++;
+                }
+            }
         }
     }
+    list_print(final);
 
     //frees
     free(reOrderedR->tuples);
@@ -162,45 +291,51 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     free(pSumFinalR);
     free(pSumFinalS);
     
-    return NULL;
+    return final;
 }
 
-int main(void){
-    struct relation r1, r2;
-    r1.num_tuples=4;
-    r2.num_tuples = 3;
-    r1.tuples=malloc(4*sizeof(struct tuple));
-    r2.tuples = malloc(3*sizeof(tuple));
+// int main(void){
+//     struct relation r1, r2;
+//     r1.num_tuples=7;
+//     r2.num_tuples = 3;
+//     r1.tuples=malloc(7*sizeof(struct tuple));
+//     r2.tuples = malloc(3*sizeof(tuple));
     
-    r1.tuples[0].key=1;
-    r1.tuples[1].key=2;
-    r1.tuples[2].key=3;
-    r1.tuples[3].key=4;
-    // r1.tuples[4].key=42163975;
-    // r1.tuples[5].key=25949786;
-    // r1.tuples[6].key=21354045;
-    // r1.tuples[7].key=20344488;
-    // r1.tuples[8].key=16341213;
-    // r1.tuples[9].key=62732974;
-
-    // for(int i = 0; i < 20; i++){
-    //     r2.tuples[i].key = i;
-    //     r2.tuples[i].payload = 0;
-    // }
-
-    r2.tuples[0].key = 1;
-    r2.tuples[1].key = 1;
-    r2.tuples[2].key = 3;
+//     r1.tuples[0].key=1;
+//     r1.tuples[1].key=2;
+//     r1.tuples[2].key=3;
+//     r1.tuples[3].key=4;
+//     r1.tuples[4].key=4;
+//     r1.tuples[5].key=4;
+//     r1.tuples[6].key=4;
 
 
-    for(int i = 0; i < 3; i++){
-        r2.tuples[i].payload = i;
-        r1.tuples[i].payload = i;
-    }
+//     // r1.tuples[4].key=42163975;
+//     // r1.tuples[5].key=25949786;
+//     // r1.tuples[6].key=21354045;
+//     // r1.tuples[7].key=20344488;
+//     // r1.tuples[8].key=16341213;
+//     // r1.tuples[9].key=62732974;
 
-    r1.tuples[3].payload = 3;
+//     // for(int i = 0; i < 20; i++){
+//     //     r2.tuples[i].key = i;
+//     //     r2.tuples[i].payload = 0;
+//     // }
 
-    // r2.tuples[3].key = 33633760;
+//     r2.tuples[0].key = 1;
+//     r2.tuples[1].key = 1;
+//     r2.tuples[2].key = 3;
 
-    result* res = PartitionedHashJoin(&r2, &r1);
-}
+
+//     for(int i = 0; i < 6; i++){
+//         r1.tuples[i].payload = i;
+//     }
+
+//     for(int i = 0; i < 3; i++){
+//         r2.tuples[i].payload = i;
+//     }    
+
+//     // r2.tuples[3].key = 33633760;
+
+//     result* res = PartitionedHashJoin(&r1, &r2);
+// }
