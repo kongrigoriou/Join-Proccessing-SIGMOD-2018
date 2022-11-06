@@ -282,7 +282,7 @@ List* search(hop*  hops ,tuple element){
             result[bit_i].index=element.payload;
             */
            tuple temp_t;
-           temp_t.key=(array[i].info).key;
+           temp_t.key=(array[i].info).payload;
            temp_t.payload=element.payload;
            list_insert(result_list,temp_t);
         }

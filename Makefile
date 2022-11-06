@@ -1,43 +1,41 @@
-OBJS	= hopscotch.o partition.o bitmap.o partitionedHashJoin.o list.o utilities.o functions.o
-SOURCE	= hopscotch.c partition.c bitmap.c partitionedHashJoin.c list.cutilities.c functions.c
-HEADER	= hopscotch.h bitmap.h mainPartitionTest.h list.h functions.h
-OUT	= test
+OBJS	= bitmap.o functions.o hashedjoinmain.o hopscotch.o list.o partition.o partitionedHashJoin.o utilities.o
+SOURCE	= bitmap.c functions.c hashedjoinmain.c hopscotch.c list.c partition.c partitionedHashJoin.c utilities.c
+HEADER	= bitmap.h functions.h list.h mainPartitionTest.h structures.h hopscotch.h
+OUT	= exec
 CC	 = gcc
-FLAGS	 = -g3 -c -Wall
+FLAGS	 = -g -c -Wall
 LFLAGS	 = -lm
 
 all: $(OBJS)
-	$(CC) -g3 $(OBJS) -o $(OUT) $(LFLAGS)
+	$(CC) -g $(OBJS) -o $(OUT) $(LFLAGS)
 
 bitmap.o: bitmap.c
 	$(CC) $(FLAGS) bitmap.c 
 
+functions.o: functions.c
+	$(CC) $(FLAGS) functions.c 
+
+hashedjoinmain.o: hashedjoinmain.c
+	$(CC) $(FLAGS) hashedjoinmain.c 
+
 hopscotch.o: hopscotch.c
 	$(CC) $(FLAGS) hopscotch.c 
 
-# hopscotch_test.o: hopscotch_test.c
-# 	$(CC) $(FLAGS) hopscotch_test.c 
+list.o: list.c
+	$(CC) $(FLAGS) list.c 
 
 partition.o: partition.c
-	$(CC) $(FLAGS) partition.c
+	$(CC) $(FLAGS) partition.c 
 
 partitionedHashJoin.o: partitionedHashJoin.c
-	$(CC) $(FLAGS) partitionedHashJoin.c
-
-list.o: list.c
-	$(CC) $(FLAGS) list.c
+	$(CC) $(FLAGS) partitionedHashJoin.c 
 
 utilities.o: utilities.c
 	$(CC) $(FLAGS) utilities.c 
 
-mainPartitionTest.o: mainPartitionTest.c
-	$(CC) $(FLAGS) mainPartitionTest.c
-
-functions.o: functions.c
-	$(CC) $(FLAGS) functions.c
 
 clean:
 	rm -f $(OBJS) $(OUT)
 
 run: $(OUT)
-	./$(OUT)
+	./$(OUT) inputSmall.txt
