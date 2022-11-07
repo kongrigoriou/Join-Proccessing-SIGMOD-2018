@@ -47,7 +47,7 @@ utilities.o: utilities.c
 
 
 clean:
-	rm -f $(OBJS) $(OUT)
+	rm -f $(OBJS) $(OUT) partition_test hop_test partition_test.o hopscotch_test.o
 
 run: $(OUT)
 	./$(OUT) inputSmall.txt
