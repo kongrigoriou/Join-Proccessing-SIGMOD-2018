@@ -25,7 +25,7 @@ void list_insert(List* list, tuple data){
         list->head = newNode;        
     }
 
-    printf("Inserted: %d\n", data.key);
+    // printf("Inserted: %d\n", data.key);
 
     //update size
     list->size++;
@@ -41,13 +41,8 @@ void list_print(List* list){
 }
 
 List* list_append(List* list1, List* list2){
-    list_print(list2);
+    // list_print(list2);
     if(list1 == NULL){
-        // list1 = list_create();
-
-        // list1->head = list2->head;
-        // list1->size += list2->size;
-        // list_print(list2);
 
         return list2;
     }

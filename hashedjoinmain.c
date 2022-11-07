@@ -14,7 +14,7 @@ void get_array(tuple** array,uint32_t * f_size ,tuple** s_array, uint32_t * s_si
     fgets(buff,sizeof(buff),myFile);
     char *p = strtok(buff," ");
     
-    int i=0;
+    // int i=0;
     size=atoi(p);
     tuple* firstarray=malloc(sizeof(tuple)*size);
     p=strtok(NULL, " ");
@@ -29,7 +29,7 @@ void get_array(tuple** array,uint32_t * f_size ,tuple** s_array, uint32_t * s_si
     fgets(buff,sizeof(buff),myFile);
     p = strtok(buff," ");
     
-    i=0;
+    // i=0;
     size=atoi(p);
     firstarray=malloc(sizeof(tuple)*size);
     p=strtok(NULL, " ");
@@ -48,11 +48,11 @@ int main(int argc, char **argv){
     struct relation second_r;
     
     get_array(&first_r.tuples,&first_r.num_tuples, &second_r.tuples, &second_r.num_tuples , name);
-    for(int i=0;i<first_r.num_tuples;i++ ){
-        printf("[%d]=%d\n\n",i,first_r.tuples[i].key);
-    }
+    // for(int i=0;i<first_r.num_tuples;i++ ){
+    //     printf("[%d]=%d\n\n",i,first_r.tuples[i].key);
+    // }
     //printf("last element=%ld\n",sizeof(first_r.tuples)/sizeof(tuple) );
-    List* result=PartitionedHashJoin(&first_r ,  &second_r);
+    List* result=PartitionedHashJoin(&second_r ,  &first_r);
     printf("\nMain print:\n");
     list_print(result);
     
