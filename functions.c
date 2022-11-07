@@ -45,9 +45,15 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
                     j++;
                 }
 
-                // if((*pSum)[j] != (*pSum)[])
-                Partition(*reOrdered, (*pSum)[j], reOrdered->num_tuples, 2, 3, reOrderedSecStep, &curMax, &pSumSecStep);
-                pSumFinal[j] = pSumSecStep;
+                if((*pSum)[j] < rel->num_tuples){
+                    printf("IM HERE %d %d\n", (*pSum)[j], rel->num_tuples);
+                    Partition(*reOrdered, (*pSum)[j], reOrdered->num_tuples -1, 2, 3, reOrderedSecStep, &curMax, &pSumSecStep);
+                    pSumFinal[j] = pSumSecStep;
+                }else{
+                    pSumSecStep = calloc(pow(2,3), sizeof(int));
+                    pSumFinal[j] = pSumSecStep;
+                }
+                
 
 
                 printf("reOrdered\n");
@@ -56,7 +62,7 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
                 }
 
                 printf("pSum\n");
-                for(int i=0;i<pow(2,3)-1;i++){
+                for(int i=0;i<pow(2,3);i++){
                     for(int j = 0; j < pow(2,3); j++){
                         printf("%d\n",pSumFinal[i][j]);
                     }
