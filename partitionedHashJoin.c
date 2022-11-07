@@ -183,7 +183,7 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
     List* results, *final;
     int index = 0;
     // result* res_array = malloc(sizeof(result));
-    final = list_create();
+    final = NULL;
 
     if(stepR == 0){
         if(stepS == 0){
@@ -194,8 +194,10 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
                 list_print(results);
                 index++;
             }
+
+            destroy_hop(hopscotch);
         }else if(stepS == 1){
-            while(index < pow(2,3)){
+            while(index < pow(2,3) -1){
                 if(pSumS[index] != pSumS[index + 1]){
                     for(int j = pSumS[index]; j < pSumS[index + 1]; j++){
                         results = search(hopscotch, reOrderedS->tuples[j]);
@@ -212,10 +214,15 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
                 }
                 list_print(results);
             }
+
+            // for(int i = 0; i < pow(2,3); i++){
+            //     destroy_hop(hopscothArr[i]);
+            // }
+            destroy_hop(hopscotch);
         }else if(stepS == 2){
             for(int i = 0; i < pow(2,3); i++){
                 index = 0;
-                while(index < pow(2,3)){
+                while(index < pow(2,3) -1){
                     if(pSumFinalS[i][index] != pSumFinalS[i][index + 1]){
                         for(int j = pSumFinalS[i][index]; j < pSumFinalS[i][index + 1]; j++){
                             results = search(hopscotch, reOrderedSecStepS->tuples[j]);
@@ -225,6 +232,14 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
                     }
                     index++;
                 }
+                if(pSumFinalS[index][index] != relS->num_tuples){
+                    for(int j = pSumFinalS[i][index]; j < relS->num_tuples; j++){
+                        results = search(hopscotch, reOrderedSecStepS->tuples[j]);
+                        final = list_append(final, results);
+
+                    }
+                }
+                index++;
             }
         }
     }else if(stepR == 1){
@@ -238,6 +253,8 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
                 list_print(results);
                 index++;
             }
+
+            destroy_hop(hopscotch);
 
         }else if(stepS == 1){
             while(index < pow(2,3) -1){
@@ -259,11 +276,17 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
             }   
             // index++;
 
+            //free hash table 
+            for(int i = 0; i < pow(2,3); i++){
+                destroy_hop(hopscothArr[i]);
+            }
+            free(hopscothArr);
+
 
         }else if(stepS == 2){
             for(int i = 0; i < pow(2,3); i++){
                 index = 0;
-                while(index < pow(2,3)){
+                while(index < pow(2,3) -1){
                     if(pSumFinalS[i][index] != pSumFinalS[i][index + 1]){
                         for(int j = pSumFinalS[i][index]; j < pSumFinalS[i][index + 1]; j++){
                             results = search(hopscothArr[i], reOrderedSecStepS->tuples[j]);
@@ -274,13 +297,27 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
                     }
                     index++;
                 }
+
+                if(pSumFinalS[index][index] != relS->num_tuples){
+                    for(int j = pSumFinalS[index][index]; j < relS->num_tuples; j++){
+                        results = search(hopscothArr[index], reOrderedSecStepS->tuples[j]);
+                        final = list_append(final, results);
+
+                        list_print(results);
+                    }
+                }
             }
+
+            for(int i = 0; i < pow(2,3); i++){
+                destroy_hop(hopscothArr[i]);
+            }
+            free(hopscothArr);
         }
     }else if(stepR == 2){
         if(stepS == 0){
             for(int i = 0; i < pow(2,3); i++){
                 index = 0;
-                while(index < pow(2,3)){
+                while(index < pow(2,3) -1){
                     if(pSumFinalR[i][index] != pSumFinalR[i][index + 1]){
                         for(int j = pSumFinalR[i][index]; j < pSumFinalR[i][index + 1]; j++){
                             results = search(hopscotch, reOrderedSecStepR->tuples[j]);
@@ -289,6 +326,14 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
                     }
                     index++;
                 }
+                if(pSumFinalR[index][index] < relR->num_tuples){
+                    for(int j = pSumFinalR[i][index]; j < relR->num_tuples; j++){
+                        results = search(hopscotch, reOrderedSecStepR->tuples[j]);
+                        final = list_append(final, results);
+                    }
+                }
+                index++;
+
             }
         }else if(stepS == 1){
             for(int i = 0; i < pow(2,3); i++){
@@ -313,6 +358,10 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
                     }
                 } 
             }
+            for(int i = 0; i < pow(2,3); i++){
+                destroy_hop(hopscothArr[i]);
+            }
+            free(hopscothArr);
         }else if(stepS == 2){
             for(int i = 0; i < pow(2,3); i++){
                 index = 0;
@@ -338,22 +387,50 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
                     }
                 }
             }
+            for(int i = 0; i < pow(2,3); i++){
+                for(int j = 0; j < pow(2,3); j++){
+                    destroy_hop(hopscotchTwoSteps[i][j]);
+                }
+                free(hopscotchTwoSteps[i]);
+            }
+            free(hopscotchTwoSteps);
         }
     }
     list_print(final);
-
+    free(results);
+    // list_destroy(results);
     //frees
     free(reOrderedR->tuples);
     free(reOrderedR);
     free(reOrderedS->tuples);
     free(reOrderedS);
+    free(reOrderedSecStepR->tuples);
+    free(reOrderedSecStepR);
+    free(reOrderedSecStepS->tuples);
+    free(reOrderedSecStepS);
+    
+    if(stepR == 1){
+        free(pSumR);
+    }
+    if(stepS == 1)
+        free(pSumS);
 
+    if(stepR == 2)
+        for(int i = 0; i < pow(2,3); i++){
+           free(pSumFinalR[i]);
+        }
+        
     free(pSumFinalR);
+    if(stepS == 2)
+        for(int i = 0; i < pow(2,3); i++){
+            free(pSumFinalS[i]);
+        }
+
     free(pSumFinalS);
+    // free(results);
     
     return final;
 }
-
 // int main(void){
 //     struct relation r1, r2;
 //     r1.num_tuples=7;

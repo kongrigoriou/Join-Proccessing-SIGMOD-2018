@@ -41,14 +41,23 @@ void list_print(List* list){
 }
 
 List* list_append(List* list1, List* list2){
-    ListNode* node = list1->head;
-    if(list1->head == NULL){
+    list_print(list2);
+    if(list1 == NULL){
+        // list1 = list_create();
 
+        // list1->head = list2->head;
+        // list1->size += list2->size;
+        // list_print(list2);
+
+        return list2;
+    }
+    if(list1->size == 0){
         list1->head = list2->head;
         list1->size += list2->size;
 
         return list1;
     }
+    ListNode* node = list1->head;
 
     while(node->next != NULL){
         node = node->next;
@@ -56,6 +65,7 @@ List* list_append(List* list1, List* list2){
 
     node->next = list2->head;
     list1->size += list2->size;
+    // free(list2);
     return list1;
 
 }

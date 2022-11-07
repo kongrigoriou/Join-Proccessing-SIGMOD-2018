@@ -33,7 +33,7 @@ void print_bitmap(bitmap_t array){
 }
 
 bitmap_t create_bitmap(int n) {
-    return malloc((n + 7) / 8);
+    return malloc(((n + 7) / 8));
 }
 
 
@@ -42,5 +42,5 @@ void bitmap_main(){
     array=0;
     set_bit((unsigned char*)&array,0);
     set_bit((unsigned char*)&array,1);
-    printf("%u should be 3\n",array);
+    // printf("%u should be 3\n",array);
 }

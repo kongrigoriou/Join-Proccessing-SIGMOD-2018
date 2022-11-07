@@ -15,14 +15,14 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
             //firts partition
             Partition(*rel, 0, rel->num_tuples -1, 1, 3,reOrdered, &max, &(*pSum));
 
-            printf("reOrdered\n");
-            for(int i=0;i<rel->num_tuples;i++){
-                printf("%d\n",reOrdered->tuples[i].key);
-            }
-            printf("pSum\n");
-            for(int i=0;i<pow(2,3);i++){
-                printf("%d\n",(*pSum)[i]);
-            }       
+            // printf("reOrdered\n");
+            // for(int i=0;i<rel->num_tuples;i++){
+            //     printf("%d\n",reOrdered->tuples[i].key);
+            // }
+            // printf("pSum\n");
+            // for(int i=0;i<pow(2,3);i++){
+            //     printf("%d\n",(*pSum)[i]);
+            // }       
             step++;
             if(TableFitsCache(CACHE_SIZE, max, 5)){
                 printf("First partition was succesfull\n");
@@ -46,7 +46,7 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
                 }
 
                 if((*pSum)[j] < rel->num_tuples){
-                    printf("IM HERE %d %d\n", (*pSum)[j], rel->num_tuples);
+                    // printf("IM HERE %d %d\n", (*pSum)[j], rel->num_tuples);
                     Partition(*reOrdered, (*pSum)[j], reOrdered->num_tuples -1, 2, 3, reOrderedSecStep, &curMax, &pSumSecStep);
                     pSumFinal[j] = pSumSecStep;
                 }else{
@@ -56,18 +56,18 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
                 
 
 
-                printf("reOrdered\n");
-                for(int i=0;i<rel->num_tuples;i++){
-                    printf("%d\n",reOrderedSecStep->tuples[i].key);
-                }
+                // printf("reOrdered\n");
+                // for(int i=0;i<rel->num_tuples;i++){
+                //     printf("%d\n",reOrderedSecStep->tuples[i].key);
+                // }
 
-                printf("pSum\n");
-                for(int i=0;i<pow(2,3);i++){
-                    for(int j = 0; j < pow(2,3); j++){
-                        printf("%d\n",pSumFinal[i][j]);
-                    }
-                    printf("%d --------------\n", i);
-                }
+                // printf("pSum\n");
+                // for(int i=0;i<pow(2,3);i++){
+                //     for(int j = 0; j < pow(2,3); j++){
+                //         printf("%d\n",pSumFinal[i][j]);
+                //     }
+                //     printf("%d --------------\n", i);
+                // }
                 step++;
             }
     }
