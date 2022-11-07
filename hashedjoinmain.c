@@ -40,6 +40,7 @@ void get_array(tuple** array,uint32_t * f_size ,tuple** s_array, uint32_t * s_si
     }
     *s_array=firstarray;
     *s_size=(uint32_t)size;
+    fclose(myFile);
 };
 
 int main(int argc, char **argv){
@@ -52,10 +53,11 @@ int main(int argc, char **argv){
     //     printf("[%d]=%d\n\n",i,first_r.tuples[i].key);
     // }
     //printf("last element=%ld\n",sizeof(first_r.tuples)/sizeof(tuple) );
-    List* result=PartitionedHashJoin(&second_r ,  &first_r);
+    List* result=PartitionedHashJoin(&first_r ,  &second_r);
     printf("\nMain print:\n");
     list_print(result);
     
+    list_destroy(result);
     free(first_r.tuples);
     free(second_r.tuples);
 }
