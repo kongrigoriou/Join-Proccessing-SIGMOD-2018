@@ -50,7 +50,7 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
     
     //find relation with fewer partitions
 
-    int size;
+    // int size;
 
     //after partitioning
     //for each bucket use hopscotch hashing
@@ -62,7 +62,7 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
         hopscotch = create_array(HOP_SIZE, N);
 
         for(int i = 0; i < relR->num_tuples; i++){
-            size = insert(hopscotch, relR->tuples[i]);
+            insert(hopscotch, relR->tuples[i]);
         }
         // print_array(hopscotch->array, hopscotch->size);j
     }else if(stepR == 1){
@@ -71,7 +71,7 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
             hopscotch = create_array(HOP_SIZE, N);
 
             for(int i = 0; i < relS->num_tuples; i++){
-                size = insert(hopscotch, relS->tuples[i]);
+                insert(hopscotch, relS->tuples[i]);
             }
         }else{
             hopscothArr = malloc(pow(2,N) * sizeof(hop*));
@@ -83,14 +83,14 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
             while(counter < pow(2,N) -1){
                 if(pSumR[counter] != pSumR[counter + 1]){
                     for(int j = pSumR[counter]; j < pSumR[counter + 1]; j++){
-                        size = insert(hopscothArr[counter], reOrderedR->tuples[j]);
+                        insert(hopscothArr[counter], reOrderedR->tuples[j]);
                     }
                 }
                 counter++;
             }
             if(pSumR[counter] != relR->num_tuples){
                 for(int j = pSumR[counter]; j < relR->num_tuples; j++){
-                    size = insert(hopscothArr[counter], reOrderedR->tuples[j]);
+                    insert(hopscothArr[counter], reOrderedR->tuples[j]);
                 }
             }
         }
@@ -101,7 +101,7 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
             hopscotch = create_array(HOP_SIZE, N);
 
             for(int i = 0; i < relS->num_tuples; i++){
-                size = insert(hopscotch, relS->tuples[i]);
+                insert(hopscotch, relS->tuples[i]);
             }
         }else if(stepS == 1){
             hopscothArr = malloc(pow(2,N) * sizeof(hop*));
@@ -113,14 +113,14 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
             while(counter < pow(2,N) -1){
                 if(pSumS[counter] != pSumS[counter + 1]){
                     for(int j = pSumS[counter]; j < pSumS[counter + 1]; j++){
-                        size = insert(hopscothArr[counter], reOrderedS->tuples[j]);
+                        insert(hopscothArr[counter], reOrderedS->tuples[j]);
                     }
                 }
                 counter++;
             }
             if(pSumS[counter] != relS->num_tuples){
                 for(int j = pSumS[counter]; j < relS->num_tuples; j++){
-                    size = insert(hopscothArr[counter], reOrderedS->tuples[j]);
+                    insert(hopscothArr[counter], reOrderedS->tuples[j]);
                 }
             }
 
@@ -139,7 +139,7 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
                     if(pSumFinalR[i][j] < pSumFinalR[i][j+1]){
                         for(int k = pSumFinalR[i][j]; k < pSumFinalR[i][j + 1]; k++){
                             // printf("i: %d j:%d psumfinal:%d\n\n", i, j, k);
-                            size = insert(hopscotchTwoSteps[i][j], reOrderedSecStepR->tuples[k]);
+                            insert(hopscotchTwoSteps[i][j], reOrderedSecStepR->tuples[k]);
                         }
                     }
                 }
@@ -148,7 +148,7 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
                     for(int k = pSumFinalR[m][m]; k < relR->num_tuples; k++){
                         // printf("last insert\n");
 
-                        size = insert(hopscotchTwoSteps[m][m], reOrderedSecStepR->tuples[k]);
+                        insert(hopscotchTwoSteps[m][m], reOrderedSecStepR->tuples[k]);
                     }
                 }
                 

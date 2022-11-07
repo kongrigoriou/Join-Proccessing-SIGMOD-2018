@@ -4,6 +4,7 @@
 #include "structures.h"
 #include "list.h"
 #include "partitionedHashJoin.h"
+#include "functions.h"
 
 void get_array(tuple** array,uint32_t * f_size ,tuple** s_array, uint32_t * s_size,char* name){
     FILE *myFile;
