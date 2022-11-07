@@ -9,6 +9,18 @@ LFLAGS	 = -lm
 all: $(OBJS)
 	$(CC) -g $(OBJS) -o $(OUT) $(LFLAGS)
 
+hop_test: hopscotch.o list.o bitmap.o hopscotch_test.o
+	$(CC) -g hopscotch.o list.o bitmap.o hopscotch_test.o -o hop_test $(LFLAGS)
+
+partition_test: partition.o partition_test.o
+	$(CC) -g partition.o partition_test.o -o partition_test $(LFLAGS)
+
+partition_test.o: partition_test.c
+	$(CC) $(FLAGS) partition_test.c
+
+hopscotch_test.o: hopscotch_test.c
+	$(CC) $(FLAGS) hopscotch_test.c
+
 bitmap.o: bitmap.c
 	$(CC) $(FLAGS) bitmap.c 
 
