@@ -56,4 +56,6 @@ int main(int argc, char **argv){
     printf("\nMain print:\n");
     list_print(result);
     
+    free(first_r.tuples);
+    free(second_r.tuples);
 }
