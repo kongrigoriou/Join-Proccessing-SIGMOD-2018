@@ -9,12 +9,12 @@
 Partitiones Hash Join
 Δέχεται τα δυο relation και κάθε φορά επιλέγει αυτό με τα λιγότερα περάσματα στο partition ώστε να δημιουργηθεί το hash table. Σε περίπτωση που έχουν περάσει και τα δύο από δυο φορές τότε επιλέγει το πρώτο.
 
-##### Hopscotch στα relations
--0 pass
+#### Hopscotch στα relations
+- 0 pass
   ένας απλός πίνακας για το hash table
--1 pass
+- 1 pass
   πίνακας από δείκτες σε hopscoth hash table 
--2 
+- 2 pass 
   δισδιαστατος πίνακας από hash tables
 Hopscotch
 
