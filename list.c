@@ -46,6 +46,7 @@ List* list_append(List* list1, List* list2){
 
     if(list1 == NULL){
         new_list->head = list2->head;
+        new_list->size = list2->size;
 
         free(list2);
         return new_list;
@@ -57,6 +58,7 @@ List* list_append(List* list1, List* list2){
 
         free(list1);
         free(list2);
+        list_print(new_list);
         return new_list;
     }
 
