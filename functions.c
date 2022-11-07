@@ -13,7 +13,7 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
     if(!tableFits){
             
             //firts partition
-            Partition(*rel, 0, rel->num_tuples -1, 1, 3,reOrdered, &max, &(*pSum));
+            Partition(*rel, 0, rel->num_tuples -1, 1, N,reOrdered, &max, &(*pSum));
 
             // printf("reOrdered\n");
             // for(int i=0;i<rel->num_tuples;i++){
@@ -33,12 +33,12 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
                 int j = 0;
                 // int** pSumFinal = calloc(pow(2,3),sizeof(int*));
 
-                while(j < pow(2,3) -1){
+                while(j < pow(2,N) -1){
                     if((*pSum)[j] != (*pSum)[j + 1]){
-                        Partition(*reOrdered, (*pSum)[j], (*pSum)[j + 1] -1, 2, 3, reOrderedSecStep, &curMax, &pSumSecStep);
+                        Partition(*reOrdered, (*pSum)[j], (*pSum)[j + 1] -1, 2, N, reOrderedSecStep, &curMax, &pSumSecStep);
                         if(curMax > max) max = curMax;
                     }else{
-                        pSumSecStep = calloc(pow(3,3), sizeof(int));
+                        pSumSecStep = calloc(pow(2,N), sizeof(int));
                     }
                     pSumFinal[j] = pSumSecStep;
                     
@@ -47,10 +47,10 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
 
                 if((*pSum)[j] < rel->num_tuples){
                     // printf("IM HERE %d %d\n", (*pSum)[j], rel->num_tuples);
-                    Partition(*reOrdered, (*pSum)[j], reOrdered->num_tuples -1, 2, 3, reOrderedSecStep, &curMax, &pSumSecStep);
+                    Partition(*reOrdered, (*pSum)[j], reOrdered->num_tuples -1, 2, N, reOrderedSecStep, &curMax, &pSumSecStep);
                     pSumFinal[j] = pSumSecStep;
                 }else{
-                    pSumSecStep = calloc(pow(2,3), sizeof(int));
+                    pSumSecStep = calloc(pow(2,N), sizeof(int));
                     pSumFinal[j] = pSumSecStep;
                 }
                 
