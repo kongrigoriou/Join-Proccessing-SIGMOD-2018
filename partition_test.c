@@ -138,7 +138,7 @@ void pass2_test1(void){
     }
     free(pSum1);
     free(pSum);
-    free(pSumnew);
+    //free(pSumnew);
     free(reordered.tuples);
     free(r1.tuples);
     free(newreord.tuples);
@@ -150,5 +150,5 @@ TEST_LIST = {
     {"pass1_test1", pass1_test1},
     {"pass1_test2", pass1_test2},
     {"pass2_test1", pass2_test1},
-    {0,0}
+    {NULL,NULL}
 };

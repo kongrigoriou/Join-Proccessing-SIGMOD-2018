@@ -32,7 +32,7 @@ void test_create(void){
     TEST_ASSERT(array->size == 10);
     TEST_ASSERT(array->array != 0);
 
-    free(array);
+    destroy_hop(array);
 }
 
 void  test_hash(void){
@@ -79,6 +79,7 @@ void test_insert(void){
 
     size = insert(array, temp);
     TEST_ASSERT(size != 10);
+    destroy_hop(array);
 
 }
 
