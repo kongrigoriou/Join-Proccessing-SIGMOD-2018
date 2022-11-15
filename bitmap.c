@@ -38,7 +38,7 @@ bitmap_t create_bitmap(int n) {
 
 
 void bitmap_main(){
-    uint32_t array;
+    uint64_t array;
     array=0;
     set_bit((unsigned char*)&array,0);
     set_bit((unsigned char*)&array,1);

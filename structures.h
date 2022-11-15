@@ -17,7 +17,7 @@ typedef struct tuple {
 */
 struct relation {
     tuple *tuples;
-    uint32_t num_tuples;
+    uint64_t num_tuples;
 };
 /**
 * Type definition for a relation.
