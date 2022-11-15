@@ -6,7 +6,7 @@
 #include "partitionedHashJoin.h"
 #include "functions.h"
 
-void get_array(tuple** array,uint32_t * f_size ,tuple** s_array, uint32_t * s_size,char* name){
+void get_array(tuple** array,uint64_t * f_size ,tuple** s_array, uint64_t * s_size,char* name){
     FILE *myFile;
     int size;
     myFile = fopen(name, "r");
@@ -26,7 +26,7 @@ void get_array(tuple** array,uint32_t * f_size ,tuple** s_array, uint32_t * s_si
     }
 
     *array=firstarray;
-    *f_size=(uint32_t)size;
+    *f_size=(uint64_t)size;
     fgets(buff,sizeof(buff),myFile);
     p = strtok(buff," ");
     
@@ -40,7 +40,7 @@ void get_array(tuple** array,uint32_t * f_size ,tuple** s_array, uint32_t * s_si
         p=strtok(NULL, " ");
     }
     *s_array=firstarray;
-    *s_size=(uint32_t)size;
+    *s_size=(uint64_t)size;
     fclose(myFile);
 };
 

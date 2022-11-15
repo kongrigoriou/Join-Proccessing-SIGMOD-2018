@@ -6,25 +6,6 @@
 #include "math.h"
 #include "list.h"
 
-//test bitmap first
-// void test_bitmap(void){
-//     uint32_t array = 0;
-//     uint32_t result = 0;
-
-//     for(int i = 0; i < 8; i++){
-//         set_bit((unsigned char *)&array, i);
-//         result += pow(2, i);
-//         TEST_ASSERT(array == result);
-//     }
-
-//     for(int i = 7; i >= 0; i--){
-//         clear_bit((unsigned char *)&array, i);
-//         result -= pow(2, i);
-//         TEST_ASSERT(array == result);
-//     }
-
-// }
-
 void test_create(void){
     hop* array = create_array(10, 3);
     
@@ -48,7 +29,7 @@ void test_tuples(void){
     TEST_ASSERT(data->key ==279832);
     TEST_ASSERT(data->payload == 324983);
 
-    TEST_ASSERT(sizeof(tuple) == 2*sizeof(uint32_t));
+    TEST_ASSERT(sizeof(tuple) == 2*sizeof(uint64_t));
 
     free(data);
 }
@@ -63,6 +44,7 @@ void test_insert(void){
     temp.payload = 0;
 
     size = insert(array, temp);
+    TEST_ASSERT(get_H(array) == 3);
 
     hash_value = hash(temp.key, array->size);
     TEST_ASSERT(array->array[hash_value].info.key == temp.key);
@@ -81,14 +63,34 @@ void test_insert(void){
     TEST_ASSERT(size != 10);
     destroy_hop(array);
 
+    destroy_hop(array);
+}
+
+void test_search(void){
+    hop* array = create_array(10, 3);
+    List* results;
+
+    tuple* tuple_array = malloc(5 * sizeof(tuple));
+
+    for(int i = 0; i < 5; i++){
+        tuple_array[i].key = i;
+        tuple_array[i].payload = i;
+
+        insert(array, tuple_array[i]);
+    }
+
+    for(int i = 0; i < 5; i++){
+        results = search(array, tuple_array[i]);
+        TEST_ASSERT(results->head->data.payload == tuple_array[i].payload);
+    }
 }
 
 TEST_LIST = {
-    // {"test_bitmap", test_bitmap},
     {"test_create", test_create},
     {"test hash", test_hash},
     {"test_tuple", test_tuples},
     {"test insert", test_insert},
+    {"test_search", test_search},
     {0, 0}
 };
 

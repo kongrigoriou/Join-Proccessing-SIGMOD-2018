@@ -25,7 +25,7 @@ typedef struct result_node {
     int occupied;       //whether node is empty or not
 } result_node;
 
-uint32_t hash2(uint32_t key);
+uint64_t hash2(uint64_t key);
 int hash(int key,int size_of_array);
 node* create_array_of_hop(int n, int h);
 hop* create_array(int n, int i);

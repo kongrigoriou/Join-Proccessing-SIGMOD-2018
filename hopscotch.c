@@ -26,7 +26,7 @@
 // int insert(hop* new_array,tuple element);
 
 //found in https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key
-uint32_t hash2(uint32_t x){
+uint64_t hash2(uint64_t x){
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = (x >> 16) ^ x;
