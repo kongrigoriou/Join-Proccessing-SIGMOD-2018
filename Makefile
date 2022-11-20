@@ -1,6 +1,12 @@
+MY_PATH := $(dir $(lastword $(MAKEFILE_LIST)))
+MODULES := $(MY_PATH)source
+HEADERS := $(MY_PATH)headers
+TESTS	:= $(MY_PATH)tests
+LIB		:= $(MY_PATH)lib
+
 OBJS	= bitmap.o functions.o hashedjoinmain.o hopscotch.o list.o partition.o partitionedHashJoin.o utilities.o
-SOURCE	= bitmap.c functions.c hashedjoinmain.c hopscotch.c list.c partition.c partitionedHashJoin.c utilities.c
-HEADER	= bitmap.h functions.h list.h mainPartitionTest.h structures.h hopscotch.h
+SOURCE	= $(MODULES)/bitmap.c $(MODULES)/functions.c $(MODULES)/hashedjoinmain.c $(MODULES)/hopscotch.c $(MODULES)/list.c $(MODULES)/partition.c $(MODULES)/partitionedHashJoin.c $(MODULES)/utilities.c
+HEADER	= $(HEADERS)/bitmap.h $(HEADERS)/functions.h $(HEADERS)/list.h $(HEADERS)/mainPartitionTest.h $(HEADERS)/structures.h $(HEADERS)/hopscotch.h
 OUT	= exec
 CC	 = gcc
 FLAGS	 = -g -c -Wall
@@ -15,39 +21,39 @@ hop_test: hopscotch.o list.o bitmap.o hopscotch_test.o
 partition_test: partition.o partition_test.o
 	$(CC) -g partition.o partition_test.o -o partition_test $(LFLAGS)
 
-partition_test.o: partition_test.c
-	$(CC) $(FLAGS) partition_test.c
+partition_test.o: $(TESTS)/partition_test.c
+	$(CC) $(FLAGS) $(TESTS)/partition_test.c
 
-hopscotch_test.o: hopscotch_test.c
-	$(CC) $(FLAGS) hopscotch_test.c
+hopscotch_test.o: $(TESTS)/hopscotch_test.c
+	$(CC) $(FLAGS) $(TESTS)/hopscotch_test.c
 
-bitmap.o: bitmap.c
-	$(CC) $(FLAGS) bitmap.c 
+bitmap.o: $(MODULES)/bitmap.c
+	$(CC) $(FLAGS) $(MODULES)/bitmap.c 
 
-functions.o: functions.c
-	$(CC) $(FLAGS) functions.c 
+functions.o: $(MODULES)/functions.c
+	$(CC) $(FLAGS) $(MODULES)/functions.c 
 
 hashedjoinmain.o: hashedjoinmain.c
 	$(CC) $(FLAGS) hashedjoinmain.c 
 
-hopscotch.o: hopscotch.c
-	$(CC) $(FLAGS) hopscotch.c 
+hopscotch.o: $(MODULES)/hopscotch.c
+	$(CC) $(FLAGS) $(MODULES)/hopscotch.c 
 
-list.o: list.c
-	$(CC) $(FLAGS) list.c 
+list.o: $(MODULES)/list.c
+	$(CC) $(FLAGS) $(MODULES)/list.c 
 
-partition.o: partition.c
-	$(CC) $(FLAGS) partition.c 
+partition.o: $(MODULES)/partition.c
+	$(CC) $(FLAGS) $(MODULES)/partition.c 
 
-partitionedHashJoin.o: partitionedHashJoin.c
-	$(CC) $(FLAGS) partitionedHashJoin.c 
+partitionedHashJoin.o: $(MODULES)/partitionedHashJoin.c
+	$(CC) $(FLAGS) $(MODULES)/partitionedHashJoin.c 
 
-utilities.o: utilities.c
-	$(CC) $(FLAGS) utilities.c 
+utilities.o: $(MODULES)/utilities.c
+	$(CC) $(FLAGS) $(MODULES)/utilities.c 
 
 
 clean:
 	rm -f $(OBJS) $(OUT) partition_test hop_test partition_test.o hopscotch_test.o
 
 run: $(OUT)
-	./$(OUT) inputSmall.txt
+	./$(OUT) ./input/default.txt
