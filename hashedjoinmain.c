@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "structures.h"
-#include "list.h"
-#include "partitionedHashJoin.h"
-#include "functions.h"
+#include "./headers/structures.h"
+#include "./headers/list.h"
+#include "./headers/partitionedHashJoin.h"
+#include "./headers/functions.h"
 
 void get_array(tuple** array,uint64_t * f_size ,tuple** s_array, uint64_t * s_size,char* name){
     FILE *myFile;
