@@ -3,7 +3,7 @@
 #include "../headers/acutest.h"
 #include "../headers/hopscotch.h"
 #include "../headers/bitmap.h"
-#include "math.h"
+#include <math.h>
 #include "../headers/list.h"
 
 void test_create(void){
@@ -29,7 +29,7 @@ void test_tuples(void){
     TEST_ASSERT(data->key ==279832);
     TEST_ASSERT(data->payload == 324983);
 
-    TEST_ASSERT(sizeof(tuple) == 2*sizeof(uint64_t));
+    TEST_ASSERT(sizeof(tuple) == 2*sizeof(uint32_t));
 
     free(data);
 }
@@ -61,7 +61,6 @@ void test_insert(void){
 
     size = insert(array, temp);
     TEST_ASSERT(size != 10);
-    destroy_hop(array);
 
     destroy_hop(array);
 }
@@ -91,6 +90,6 @@ TEST_LIST = {
     {"test_tuple", test_tuples},
     {"test insert", test_insert},
     {"test_search", test_search},
-    {0, 0}
+    {NULL, NULL}
 };
 

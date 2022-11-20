@@ -57,3 +57,7 @@ clean:
 
 run: $(OUT)
 	./$(OUT) ./input/default.txt
+
+tests: hop_test partition_test
+	./hop_test 
+	./partition_test
