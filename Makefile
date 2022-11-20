@@ -61,3 +61,10 @@ run: $(OUT)
 tests: hop_test partition_test
 	./hop_test 
 	./partition_test
+
+valgrind_join:
+	valgrind --leak-check=full --show-leak-kinds=all ./exec ./input/default.txt
+
+valgrind_tests: hop_test partition_test
+	valgrind --leak-check=full --show-leak-kinds=all ./hop_test
+	valgrind --leak-check=full --show-leak-kinds=all ./partition_test
