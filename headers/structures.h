@@ -4,9 +4,6 @@
 
 #include <stdint.h>
 
-int TableFitsCache(int cacheSize, int tableSize, int offSet);
-
-
 typedef struct tuple {
     int32_t key;
     int32_t payload;
@@ -27,5 +24,14 @@ struct result {
     tuple* tuplesR;
     tuple* tuplesS;
 };
+
+struct Table{
+    uint64_t numColumns;
+    uint64_t numRows;
+    struct relation** relations;
+};
+
+int TableFitsCache(int cacheSize, int tableSize, int offSet);
+int LoadTable(char *fileName,struct Table *table);
 
 #endif
