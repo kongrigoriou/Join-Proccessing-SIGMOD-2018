@@ -42,11 +42,11 @@ int LoadTable(char *fileName,struct Table *table){
     address+=sizeof(size_t);
     table->relations=malloc(table->numColumns*sizeof(struct Relation*));
     for(int i=0;i<table->numColumns;i++){
-        table->relations[i]=malloc(sizeof(struct Relation));
-        table->relations[i]->size=table->numRows;
-        table->relations[i]->columns=malloc(table->numRows*sizeof(uint64_t));
+        table->relations[i]=malloc(sizeof(struct relation));
+        table->relations[i]->num_tuples=table->numRows;
+        table->relations[i]->tuples=malloc(table->numRows*sizeof(tuple));
         for(int j=0;j<table->numRows;j++){
-            table->relations[i]->columns[j]=*((uint64_t*)(address));
+            table->relations[i]->tuples[j].key=*((uint64_t*)(address));
             address+=sizeof(uint64_t);
         }
     }
