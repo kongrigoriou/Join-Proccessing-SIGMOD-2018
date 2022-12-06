@@ -19,7 +19,7 @@ int LoadTable(char *fileName,struct Table *table){
     struct stat sb;
     unsigned long fileSize;
     char* address;
-    size_t numColumns;
+    //size_t numColumns;
     
     if(fd==-1){
         printf("Can not open %s file\n",fileName);
@@ -50,4 +50,5 @@ int LoadTable(char *fileName,struct Table *table){
             address+=sizeof(uint64_t);
         }
     }
+    return 0;
 };
