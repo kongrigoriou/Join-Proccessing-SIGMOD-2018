@@ -14,12 +14,12 @@ int TableFitsCache(int cacheSize, int tableSize, int offSet){ //offSet se kb
         return 0;
 };
 
-int LoadTable(char *fileName,struct Table *table){
+int LoadTable(char *fileName,struct Table **table){
     int fd=open(fileName,O_RDONLY);
     struct stat sb;
     unsigned long fileSize;
     char* address;
-    //size_t numColumns;
+    size_t numColumns;
     
     if(fd==-1){
         printf("Can not open %s file\n",fileName);
@@ -35,20 +35,20 @@ int LoadTable(char *fileName,struct Table *table){
         printf("Can not mmap %s\n",fileName);
         return -1;
     }
-    table=malloc(sizeof(struct Table));
-    table->numRows=*((uint64_t*)(address));
+    (*table)=malloc(sizeof(struct Table));
+    (*table)->numRows=*((uint64_t*)(address));
     address+=sizeof(uint64_t);
-    table->numColumns=*((size_t*)(address));
+    (*table)->numColumns=*((size_t*)(address));
+    //printf("numcolumns %ld\n",(*table)->numColumns);
     address+=sizeof(size_t);
-    table->relations=malloc(table->numColumns*sizeof(struct Relation*));
-    for(int i=0;i<table->numColumns;i++){
-        table->relations[i]=malloc(sizeof(struct relation));
-        table->relations[i]->num_tuples=table->numRows;
-        table->relations[i]->tuples=malloc(table->numRows*sizeof(tuple));
-        for(int j=0;j<table->numRows;j++){
-            table->relations[i]->tuples[j].key=*((uint64_t*)(address));
+    (*table)->relations=malloc((*table)->numColumns*sizeof(struct relation*));
+    for(int i=0;i<(*table)->numColumns;i++){
+        (*table)->relations[i]=malloc(sizeof(struct relation));
+        (*table)->relations[i]->num_tuples=(*table)->numRows;
+        (*table)->relations[i]->tuples=malloc((*table)->numRows*sizeof(tuple));
+        for(int j=0;j<(*table)->numRows;j++){
+            (*table)->relations[i]->tuples[j].key=*((uint64_t*)(address));
             address+=sizeof(uint64_t);
         }
     }
-    return 0;
 };
