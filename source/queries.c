@@ -161,13 +161,24 @@ Batches* get_query_info(){
             buffcount++;
 
             if(buffer[buffcount -3] == '.'){
-                for(int j = 0; j < buffcount; j++){
-                    if(buffer[j] != '.'){
-                        batches->batches[batch_num]->array[query_num]->predicates[i] = buffer[j];
-                        i++;
+                if(buffer[0] == buffer[4]){
+                    //then its a filter
+                    for(int j = 0; j < buffcount; j++){
+                        if(buffer[j] != '.'){
+                            batches->batches[batch_num]->array[query_num]->filters[i_filters] = buffer[j];
+                            i_filters++;
+                        }
                     }
+                    batches->batches[batch_num]->array[query_num]->filtersCount = i_filters;
+                }else{
+                    for(int j = 0; j < buffcount; j++){
+                        if(buffer[j] != '.'){
+                            batches->batches[batch_num]->array[query_num]->predicates[i] = buffer[j];
+                            i++;
+                        }
+                    }
+                    batches->batches[batch_num]->array[query_num]->predicatesCount = i;
                 }
-                batches->batches[batch_num]->array[query_num]->predicatesCount = i;
                 // printf("BATCHES: %d\n", batch_num);
                 // printf("QUERY: %d\n", query_num);
             }else{
@@ -175,12 +186,12 @@ Batches* get_query_info(){
                 int num = 0;
 
                 for(int j = 0; j < buffcount; j++){
+                    if(buffer[j] != '.'){
+                        batches->batches[batch_num]->array[query_num]->filters[i_filters] = buffer[j];
+                        i_filters++;
 
-                    batches->batches[batch_num]->array[query_num]->filters[i_filters] = buffer[j];
-                    i_filters++;
-
-                    if(buffer[j] == '=' || buffer[j] == '<' || buffer[j] == '>') flag = 1;
-
+                        if(buffer[j] == '=' || buffer[j] == '<' || buffer[j] == '>') flag = 1;
+                    }
                 }
                 buffcount = 0;
                 batches->batches[batch_num]->array[query_num]->filtersCount = i_filters;
@@ -193,7 +204,7 @@ Batches* get_query_info(){
             if(c != '|')
                 scanf("%c", &c);
 
-            printf("\tC1: %c\n", c);
+            // printf("\tC1: %c\n", c);
         }
 
         //to take the sums 
@@ -201,7 +212,7 @@ Batches* get_query_info(){
 
         i = 0;    
         while(c != '\n'){
-            printf("\tC2: %c\n", c);
+            // printf("\tC2: %c\n", c);
 
             if(c != '.' && c != ' '){
                 batches->batches[batch_num]->array[query_num]->selections[i] = c;
@@ -213,7 +224,7 @@ Batches* get_query_info(){
         }
         batches->batches[batch_num]->array[query_num]->selectionsCount = i;
         query_num++;
-        printf("\tQUERY NUM: %d\n", query_num);
+        // printf("\tQUERY NUM: %d\n", query_num);
         batches->batches[batch_num]->size = query_num;
     }
 
