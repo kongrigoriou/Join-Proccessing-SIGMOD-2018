@@ -19,7 +19,7 @@ int LoadTable(char *fileName,struct Table *table){
     struct stat sb;
     unsigned long fileSize;
     char* address;
-    //size_t numColumns;
+    size_t numColumns;
     
     if(fd==-1){
         printf("Can not open %s file\n",fileName);
@@ -41,6 +41,7 @@ int LoadTable(char *fileName,struct Table *table){
     table->numRows=*((uint64_t*)(address));
     address+=sizeof(uint64_t);
     table->numColumns=*((size_t*)(address));
+    //printf("numcolumns %ld\n",(*table)->numColumns);
     address+=sizeof(size_t);
     table->relations=malloc(table->numColumns*sizeof(uint64_t*));
     //printf("here\n");
@@ -53,5 +54,4 @@ int LoadTable(char *fileName,struct Table *table){
             address+=sizeof(uint64_t);
         }
     }
-    return 0;
 };
