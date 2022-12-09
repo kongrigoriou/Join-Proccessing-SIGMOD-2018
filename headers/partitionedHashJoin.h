@@ -3,6 +3,6 @@
 #include "../headers/structures.h"
 #include "../headers/functions.h"
 
-List* PartitionedHashJoin(relation *relR, relation *relS);
+relation PartitionedHashJoin(relation *relR, relation *relS);
 
 #endif

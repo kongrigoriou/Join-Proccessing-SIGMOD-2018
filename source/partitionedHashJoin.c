@@ -11,7 +11,7 @@
 int TableFitsCache(int cacheSize, int tableSize, int offSet);
 
 
-List* PartitionedHashJoin(relation *relR, relation *relS){
+relation PartitionedHashJoin(relation *relR, relation *relS){
     //1. partitioning
     //2. building (hopschoch hashing)
     //3. probing 
@@ -41,7 +41,7 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
     int stepR, stepS;               //how many partiotions were needed
     int** pSumFinalR = calloc(pow(2,N),sizeof(int*));
     int** pSumFinalS = calloc(pow(2,N),sizeof(int*));
-
+    printf("before partitions\n");
     stepR = num_of_partitions(reOrderedR, relR, &pSumR, reOrderedSecStepR, pSumFinalR);
     stepS = num_of_partitions(reOrderedS, relS, &pSumS, reOrderedSecStepS, pSumFinalS);
 
@@ -57,19 +57,23 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
     hop* hopscotch = NULL;
     hop** hopscothArr = NULL;
     hop*** hopscotchTwoSteps = NULL;
-
+    int reverse=0;
     if(stepR == 0){
         hopscotch = create_array(HOP_SIZE, N);
-
+        printf("\nrelR->num_tuples=%ld\n",relR->num_tuples);
         for(int i = 0; i < relR->num_tuples; i++){
+            //relR->tuples[i];
             insert(hopscotch, relR->tuples[i]);
+            printf("wtf\n");
         }
-        // print_array(hopscotch->array, hopscotch->size);j
+        printf("end\n\n");
+        //return *relR;
+        //print_array(hopscotch->array, hopscotch->size);
     }else if(stepR == 1){
         //array of hopscotch hash tables
         if(stepS == 0){
             hopscotch = create_array(HOP_SIZE, N);
-
+            reverse=1;
             for(int i = 0; i < relS->num_tuples; i++){
                 insert(hopscotch, relS->tuples[i]);
             }
@@ -97,13 +101,15 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
 
     }else if(stepR == 2){
         //2d array of psums
+        
         if(stepS == 0){
             hopscotch = create_array(HOP_SIZE, N);
-
+            reverse=1;
             for(int i = 0; i < relS->num_tuples; i++){
                 insert(hopscotch, relS->tuples[i]);
             }
         }else if(stepS == 1){
+            reverse=1;
             hopscothArr = malloc(pow(2,N) * sizeof(hop*));
             for(int i = 0; i < pow(2,N); i++){
                 hopscothArr[i] = create_array(HOP_SIZE,N);
@@ -408,6 +414,20 @@ List* PartitionedHashJoin(relation *relR, relation *relS){
         }
 
     free(pSumFinalS);
-    
-    return final;
+    relation final_array;
+    final_array.num_tuples=final->size;
+    final_array.tuples=calloc(final->size,sizeof(tuple));
+    ListNode* node=final->head;
+    for(int i = 0; i < final->size; i++){
+        if(reverse){
+            final_array.tuples[i].key=node->data.payload;
+            final_array.tuples[i].payload=node->data.key;
+        }
+        else{
+            final_array.tuples[i].key=node->data.key;
+            final_array.tuples[i].payload=node->data.payload;
+        }
+    }
+    list_destroy(final);
+    return final_array;
 }

@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 typedef struct tuple {
-    int32_t key;
-    int32_t payload;
+    int64_t key;
+    int64_t payload;
 } tuple;
 /**
 * Type definition for a relation.
@@ -25,11 +25,18 @@ struct result {
     tuple* tuplesS;
 };
 
-struct Table{
+typedef struct Table{
     uint64_t numColumns;
     uint64_t numRows;
-    struct relation** relations;
-};
+    uint64_t** relations;
+} Table;
+
+typedef struct joined{
+    int rows;
+    int columns;
+    int* relations;    //which realtion is in each column
+    int** inter;       //the actual intermidate reuslt
+} joined;
 
 int TableFitsCache(int cacheSize, int tableSize, int offSet);
 int LoadTable(char *fileName,struct Table *table);

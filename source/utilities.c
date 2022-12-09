@@ -30,23 +30,26 @@ int LoadTable(char *fileName,struct Table *table){
         return -1;
     }
     fileSize=sb.st_size;
+    
     address=(char*)(mmap(NULL,fileSize,PROT_READ,MAP_PRIVATE,fd,0u));
     if(address==MAP_FAILED){
         printf("Can not mmap %s\n",fileName);
         return -1;
     }
-    table=malloc(sizeof(struct Table));
+    printf("here\n");
+    //table=malloc(sizeof(struct Table));
     table->numRows=*((uint64_t*)(address));
     address+=sizeof(uint64_t);
     table->numColumns=*((size_t*)(address));
     address+=sizeof(size_t);
-    table->relations=malloc(table->numColumns*sizeof(struct Relation*));
+    table->relations=malloc(table->numColumns*sizeof(uint64_t*));
+    //printf("here\n");
     for(int i=0;i<table->numColumns;i++){
-        table->relations[i]=malloc(sizeof(struct relation));
-        table->relations[i]->num_tuples=table->numRows;
-        table->relations[i]->tuples=malloc(table->numRows*sizeof(tuple));
+        table->relations[i]=malloc(sizeof(uint64_t)*table->numRows);
+        /*table->relations[i]->num_tuples=table->numRows;
+        table->relations[i]->tuples=malloc(table->numRows*sizeof(tuple));*/
         for(int j=0;j<table->numRows;j++){
-            table->relations[i]->tuples[j].key=*((uint64_t*)(address));
+            table->relations[i][j]=*((uint64_t*)(address));
             address+=sizeof(uint64_t);
         }
     }

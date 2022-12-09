@@ -1,6 +1,60 @@
 #include "../headers/list.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include<string.h>
+
+List_string* list_create_string(){
+    List_string * list = malloc(sizeof(List_string));
+
+    list->head = NULL;
+    list->size = 0;
+
+    return list;
+}
+
+void list_insert_string(List_string* list, char* data){
+    //create new node
+    ListNode_string* newNode = malloc(sizeof(ListNode_string));
+    
+    strcpy(newNode->data, data);
+    
+    if(list->size == 0){
+        list->head = newNode;
+        list->head->next = NULL;
+    }else{
+        newNode->next = list->head;
+        list->head = newNode;        
+    }
+
+    // printf("Inserted: %d\n", data.key);
+
+    //update size
+    list->size++;
+}
+
+void list_destroy_string(List_string* list){
+    ListNode_string* node = list->head;
+
+    while (node->next != NULL) {		
+		ListNode_string* next = node->next;
+        
+        //free(node->data);
+        free(node);
+		node = next;
+	}
+    //free(node->data);
+    free(node);
+	free(list);
+}
+void list_print_string(List_string* list){
+    ListNode_string* node;
+    node = list->head;
+    for(int i = 0; i < list->size; i++){
+        printf("%s\n", node->data);
+        node = node->next;
+    }
+}
+
 
 List* list_create(){
     List* list = malloc(sizeof(List));
@@ -35,7 +89,7 @@ void list_print(List* list){
     ListNode* node;
     node = list->head;
     for(int i = 0; i < list->size; i++){
-        printf("%d %d\n", node->data.key, node->data.payload);
+        printf("%ld %ld\n", node->data.key, node->data.payload);
         node = node->next;
     }
 }
