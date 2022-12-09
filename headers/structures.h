@@ -32,6 +32,6 @@ struct Table{
 };
 
 int TableFitsCache(int cacheSize, int tableSize, int offSet);
-int LoadTable(char *fileName,struct Table *table);
+int LoadTable(char *fileName,struct Table **table);
 
 #endif
