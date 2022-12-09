@@ -362,23 +362,8 @@ uint64_t get_sum(Table* T,int rel,int col, joined** interm){
 }
 
 int main(int argc, char **argv){
-   /* char *name = argv[1];
-    struct relation first_r; 
-    struct relation second_r;
-    
-    get_array(&first_r.tuples,&first_r.num_tuples, &second_r.tuples, &second_r.num_tuples , name);
-    // for(int i=0;i<first_r.num_tuples;i++ ){
-    //     printf("[%d]=%d\n\n",i,first_r.tuples[i].key);
-    // }
-    //printf("last element=%ld\n",sizeof(first_r.tuples)/sizeof(tuple) );
-    //List* result=PartitionedHashJoin(&first_r ,  &second_r);
-    printf("\nMain print:\n");
-    list_print(result);
-    
-    list_destroy(result);
-    free(first_r.tuples);
-    free(second_r.tuples);*/
-    /*char* buffer=malloc(64);
+   
+    char* buffer=malloc(64);
     char* buffer1=malloc(64);
     size_t bufsize = 64;
     //size_t characters;
@@ -407,7 +392,7 @@ int main(int argc, char **argv){
         printf("\nrow=%ld col=%ld i[0][0]=%ld\n",T[i].numRows, T[i].numColumns,T[i].relations[0][0]);
     }
     //end of load Table
-    
+
     int r[]={3,0,1};
     int size_r=sizeof(r)/sizeof(int);
     printf("sizeof(r)=%d\n",size_r);
@@ -426,8 +411,8 @@ int main(int argc, char **argv){
     filter(T,interm,rowid,rowid_s,0,2,'>',3499,0,r);
     printf("\nafter filter\n");
     join(T,interm,rowid,rowid_s,0,2,1,0,r);
-    join(T,interm,rowid,rowid_s,0,1,2,0,r);*/
-    relation r1;
+    join(T,interm,rowid,rowid_s,0,1,2,0,r);
+    /*relation r1;
     relation r2;
     r1.num_tuples=380;
     r1.tuples=malloc(r1.num_tuples*sizeof(tuple));
@@ -443,5 +428,5 @@ int main(int argc, char **argv){
     }
     PartitionedHashJoin(&r1,&r2);
     free(r1.tuples);
-    free(r2.tuples);
+    free(r2.tuples);*/
 }
