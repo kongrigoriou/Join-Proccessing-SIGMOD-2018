@@ -112,7 +112,7 @@ List* list_append(List* list1, List* list2){
 
         free(list1);
         free(list2);
-        list_print(new_list);
+        //list_print(new_list);
         return new_list;
     }
 

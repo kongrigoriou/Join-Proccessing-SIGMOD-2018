@@ -46,7 +46,7 @@ int get_H(hop* array){
 
 node* create_array_of_hop(int n, int h){
     
-    node* array=malloc(n*sizeof(node));
+    node* array=calloc(n,sizeof(node));
     int bitmap_size=h;//sizeof(int);
     int H=h;
     if(bitmap_size<H){
@@ -63,14 +63,14 @@ node* create_array_of_hop(int n, int h){
 //creates the array
 hop* create_array(int n, int h){
     //node * array=malloc(n*sizeof(node));
-     printf("let's create a hopscotch struct\n");
+    //printf("let's create a hopscotch struct\n");
     hop* hops=malloc(sizeof(hop));
     
     hops->H=h;
     hops->size=n;
     hops->array=create_array_of_hop(n,h);
     
-    printf("end of creation \n");
+    //printf("end of creation \n");
     return hops;
 }
 
@@ -152,7 +152,7 @@ int resize(hop** hops_, tuple element, int n, int h){
     
     hop* hops=*hops_;
     node* current_array=hops->array;
-    printf("RESIZE\n");
+    //printf("RESIZE\n");
     
     node* new_array=create_array_of_hop(2*n,2*h);
     hops->array=new_array;
@@ -192,7 +192,7 @@ int dist(int j, int hash,int n){
 // inserts the element into hopscotch array with H size of neighberhood and n size of array
 //retruns the size of the array after the insert
 int insert(hop* hops, tuple element){
-    printf("\n\nlet's insert this %ld\n\n",element.key);
+    //printf("\n\nlet's insert this %ld\n\n",element.key);
     node* array=hops->array;
     int n= hops->size;
     int H =get_H(hops);
@@ -202,11 +202,11 @@ int insert(hop* hops, tuple element){
     //printf("\n\nhash of key is %d\n\n",hash_of_key);
     bitmap_t bitmap=array[hash_of_key].bitmap;
     int size;
-    printf("\n\nH is %d in this insert and key=%ld\n\n",H,element.key);
+    //printf("\n\nH is %d in this insert and key=%ld\n\n",H,element.key);
     // if a neighborhood is full of elements with hash(element) we need a bigger array
     if(bitmapisfull(bitmap,H)){
-        print_bitmap(bitmap);
-        printf("\nYou should appear here at least once\n");
+        //print_bitmap(bitmap);
+        //printf("\nYou should appear here at least once\n");
         size=resize(&hops,element,n,H);
         //resize
         return size;
@@ -214,7 +214,7 @@ int insert(hop* hops, tuple element){
     
 
     int j=closest_empty_spot(array,hash_of_key,n);
-    printf("\n\nJ is %d in this insert\n\n",j);
+    //printf("\n\nJ is %d in this insert\n\n",j);
     //if there is no empty spot array is full
     if(j==-1){
         size=resize(&hops,element,n,H);
@@ -225,11 +225,13 @@ int insert(hop* hops, tuple element){
         
         int check_index=j-H+1;
         int element_to_be_moved=-1;
-        for(int i=0,j=H-1;i<H-1;i++,j--,check_index++){
+        int pos_in_bitmap=-1;
+        for(int i=0, k=H-1;i<H-1;i++,k--,check_index++){
             if(check_index<0){
                 check_index=check_index+n;
             }
-            element_to_be_moved= get_first_1((array[check_index].bitmap ),j)+check_index;
+            pos_in_bitmap=get_first_1((array[check_index].bitmap ),k);
+            element_to_be_moved= pos_in_bitmap+check_index;
             
             if(element_to_be_moved>=n){
                 element_to_be_moved=element_to_be_moved%n;
@@ -245,19 +247,21 @@ int insert(hop* hops, tuple element){
             
             return size;
         }
-        clear_bit((bitmap_t)(array[check_index].bitmap ),element_to_be_moved);
+    
+        clear_bit(array[check_index].bitmap ,pos_in_bitmap);
         array[element_to_be_moved].occupied=0;
         array[j].occupied=1;
         array[j].info=array[element_to_be_moved].info;
-        set_bit((bitmap_t)array[j].bitmap,0);
-        j=check_index;
+        
+        set_bit(array[check_index].bitmap,dist(j,check_index,n));
+        j=element_to_be_moved;
     }
     array[j].info=element;
-    printf("\nset bit with index %d\n",abs(j-hash_of_key));
-    set_bit((bitmap_t)(array[hash_of_key].bitmap),dist(j,hash_of_key,n));
+    //printf("\nset bit with index %d\n",abs(j-hash_of_key));
+    set_bit((array[hash_of_key].bitmap),dist(j,hash_of_key,n));
     array[j].occupied=1;
     //print_array(array,n);
-    printf("end of insert\n");
+    //printf("end of insert\n");
     return n;
 }
 
@@ -278,8 +282,9 @@ List* search(hop*  hops ,tuple element){
         if(i>=size){
             i=0;
         }
-        // printf("hello %d %d\n", element.key, (array[i].info).key);
-        int curr_bit=get_bit((bitmap_t)bitmap,bit_i);
+        //printf("hello %ld  bit_i=%d h=%d and size=%d i=%d %ld\n", element.key,bit_i,H,size,i,(array[i].info).key);
+        int curr_bit=get_bit(bitmap,bit_i);
+        //printf("after get bit\n");
         if(curr_bit==1&&(array[i].info).key==element.key){
             /*result[bit_i].occupied=1;
             result[bit_i].index=element.payload;
@@ -287,9 +292,10 @@ List* search(hop*  hops ,tuple element){
            tuple temp_t;
            temp_t.key=(array[i].info).payload;
            temp_t.payload=element.payload;
+           //printf("before insert\n");
            list_insert(result_list,temp_t);
         }
-        
+        //printf("after if\n");
         
     }
     return result_list;

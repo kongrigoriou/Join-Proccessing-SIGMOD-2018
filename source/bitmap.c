@@ -33,7 +33,9 @@ void print_bitmap(bitmap_t array){
 }
 
 bitmap_t create_bitmap(int n) {
-    return calloc(1,sizeof((n + 7) / 8));
+    bitmap_t temp= calloc(((n + 7) / 8),sizeof(char));
+    
+    return temp;
 }
 
 

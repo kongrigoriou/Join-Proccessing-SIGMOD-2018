@@ -64,9 +64,9 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
         for(int i = 0; i < relR->num_tuples; i++){
             //relR->tuples[i];
             insert(hopscotch, relR->tuples[i]);
-            printf("wtf\n");
+            //printf("wtf\n");
         }
-        printf("end\n\n");
+        //printf("end\n\n");
         //return *relR;
         //print_array(hopscotch->array, hopscotch->size);
     }else if(stepR == 1){
@@ -234,7 +234,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
             // int count = 0;
             while(index < relR->num_tuples){
                 results = search(hopscotch, relR->tuples[index]);
-                list_print(results);
+                //list_print(results);
 
                 final = list_append(final, results);
                 // list_print(results);
@@ -382,7 +382,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
             free(hopscotchTwoSteps);
         }
     }
-    // list_print(final);
+    //list_print(final);
     // free(results);
     // list_destroy(results);
     //frees
@@ -427,7 +427,9 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
             final_array.tuples[i].key=node->data.key;
             final_array.tuples[i].payload=node->data.payload;
         }
+        node=node->next;
     }
+    printf("reverse should be 0=%d",reverse);
     list_destroy(final);
     return final_array;
 }
