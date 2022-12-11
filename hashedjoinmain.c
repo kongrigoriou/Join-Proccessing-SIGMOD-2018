@@ -244,13 +244,13 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         uint64_t* data_right=T_right.relations[right_Col];                        //get relations
         relation right_relation= create_relation(right_ids,data_right,RowIdsize[right_rel],0);
         printf("Rowidsize=%d\n",RowIdsize[right_rel]);
-        //print_relation("left_rel",left_relation);
+        print_relation("left_rel",left_relation);
         //print_relation("right_rel",right_relation);
         //join them together
         relation res=PartitionedHashJoin(&left_relation ,  &right_relation);
         free(right_relation.tuples);
         free(left_relation.tuples);
-        //print_relation("res",res);
+        print_relation("res",res);
         
         //create new intermidiate
         int** new_result=calloc(4,sizeof(int*));
@@ -308,13 +308,14 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         relation right_relation= create_relation(right_ids,data_right,RowIdsize[right_rel],0);
         
         //join them together
-        //print_relation("left",left_relation);
+        print_relation("left0",left_relation);
+        print_relation("right0",right_relation);
         printf("left relation size is %d\n",RowIdsize[left_rel]);
-        //print_relation("right",right_relation);
+        //print_relation("right0",right_relation);
         //return 0;
         relation res=PartitionedHashJoin(&left_relation ,  &right_relation);
         printf("\nafter relation\n");
-        //print_relation("res",res);
+        print_relation("res0",res);
         free(right_relation.tuples);
         free(left_relation.tuples);
         
@@ -412,20 +413,25 @@ int main(int argc, char **argv){
     for(int i=0;i<table_size;i++){
         printf("\nrow=%ld col=%ld i[0][0]=%ld\n",T[i].numRows, T[i].numColumns,T[i].relations[0][0]);
     }
+    int r[]={3,0,1};
+    
     //end of load Table
     
     //small try
     /*Table* T;
     T=malloc(3*sizeof(Table));
     T[0].numColumns=2;
-    T[0].numRows=3;
+    T[0].numRows=100;
     T[0].relations=malloc(sizeof(uint64_t*)*T[0].numColumns);
     for(int i=0;i<T[0].numColumns;i++){
+        printf("in for T0\n");
         T[0].relations[i]=malloc(sizeof(uint64_t)*T[0].numRows);
-        T[0].relations[i][0]=1;
-        T[0].relations[i][1]=3;
-        T[0].relations[i][2]=5;
+        for(int j=0,l=0;j<T[0].numRows;j++){
+            T[0].relations[i][j]=l;
+            l=l+2;
+        }
     }
+    printf("after t0");
     T[1].numColumns=2;
     T[1].numRows=3;
     T[1].relations=malloc(sizeof(uint64_t*)*T[1].numColumns);
@@ -444,17 +450,18 @@ int main(int argc, char **argv){
         }
     }
     T[2].numColumns=2;
-    T[2].numRows=3;
+    T[2].numRows=100;
     T[2].relations=malloc(sizeof(uint64_t*)*T[2].numColumns);
     for(int i=0;i<T[1].numColumns;i++){
         T[2].relations[i]=malloc(sizeof(uint64_t)*T[2].numRows);
-        T[2].relations[i][0]=1;
-        T[2].relations[i][1]=1;
-        T[2].relations[i][2]=1;
+        for(int j=0,l=0;j<T[2].numRows;j++){
+            T[2].relations[i][j]=l;
+            l=l+2;
+        }
     }
+    int r[]={0,1,2};
     */
-
-    int r[]={3,0,1};
+    
     int size_r=sizeof(r)/sizeof(int);
     printf("sizeof(r)=%d\n",size_r);
     int** rowid=malloc(size_r*sizeof(int*));
@@ -473,7 +480,7 @@ int main(int argc, char **argv){
     }
     filter(T,interm,rowid,rowid_s,0,2,'>',3499,0,r);
     printf("\nafter filter\n");
-    
+    //join(T,interm,rowid,rowid_s,0,0,2,0,r); //for test
     join(T,interm,rowid,rowid_s,0,2,1,0,r);
     //printf("sum1=%ld and sum2=%ld\n",get_sum(T,0,1,interm),get_sum(T,1,1,interm));
     join(T,interm,rowid,rowid_s,0,1,2,0,r);

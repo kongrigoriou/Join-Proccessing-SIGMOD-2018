@@ -89,7 +89,7 @@ void list_print(List* list){
     ListNode* node;
     node = list->head;
     for(int i = 0; i < list->size; i++){
-        printf("%ld %ld\n", node->data.key, node->data.payload);
+        printf("[%d] =%ld %ld\n",i, node->data.key, node->data.payload);
         node = node->next;
     }
 }

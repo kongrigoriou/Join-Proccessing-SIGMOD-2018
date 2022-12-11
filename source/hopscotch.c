@@ -35,7 +35,7 @@ uint64_t hash2(uint64_t x){
 
 //makes sure your hash fits the array
 int hash(int key,int size_of_array){
-    return hash2(key)%size_of_array;
+    return key%size_of_array;//hash2(key)
 }
 
 //gets H
@@ -46,13 +46,15 @@ int get_H(hop* array){
 
 node* create_array_of_hop(int n, int h){
     
-    node* array=calloc(n,sizeof(node));
+    node* array=malloc(n*sizeof(node));
     int bitmap_size=h;//sizeof(int);
     int H=h;
     if(bitmap_size<H){
         bitmap_size=H;
     }
     for(int i=0;i<n;i++){
+        array[i].info.key=0;
+        array[i].info.payload=0;
         array[i].bitmap=create_bitmap(bitmap_size);
         //*(array[i].bitmap)=(char)0;
         array[i].occupied=0;
@@ -192,7 +194,10 @@ int dist(int j, int hash,int n){
 // inserts the element into hopscotch array with H size of neighberhood and n size of array
 //retruns the size of the array after the insert
 int insert(hop* hops, tuple element){
-    //printf("\n\nlet's insert this %ld\n\n",element.key);
+    if(element.payload==16646){
+        printf("\n\nlet's insert this %ld\n\n",element.key);
+    }
+    
     node* array=hops->array;
     int n= hops->size;
     int H =get_H(hops);
@@ -202,7 +207,9 @@ int insert(hop* hops, tuple element){
     //printf("\n\nhash of key is %d\n\n",hash_of_key);
     bitmap_t bitmap=array[hash_of_key].bitmap;
     int size;
-    //printf("\n\nH is %d in this insert and key=%ld\n\n",H,element.key);
+    if(element.payload==16646){
+        printf("\n\nH is %d in this insert and key=%ld\n\n",H,element.key);
+    }
     // if a neighborhood is full of elements with hash(element) we need a bigger array
     if(bitmapisfull(bitmap,H)){
         //print_bitmap(bitmap);
@@ -214,7 +221,10 @@ int insert(hop* hops, tuple element){
     
 
     int j=closest_empty_spot(array,hash_of_key,n);
-    //printf("\n\nJ is %d in this insert\n\n",j);
+     printf("\n\nJ is %d in this insert\n\n",j);
+    if(element.payload==16646){
+        printf("\n\nJ is %d in this insert\n\n",j);
+    }
     //if there is no empty spot array is full
     if(j==-1){
         size=resize(&hops,element,n,H);
@@ -230,31 +240,47 @@ int insert(hop* hops, tuple element){
             if(check_index<0){
                 check_index=check_index+n;
             }
+            if(check_index>=n){
+                check_index=check_index%n;
+            }
+            printf("before pos in bitmap %d\n",check_index);
             pos_in_bitmap=get_first_1((array[check_index].bitmap ),k);
+            
             element_to_be_moved= pos_in_bitmap+check_index;
             
             if(element_to_be_moved>=n){
                 element_to_be_moved=element_to_be_moved%n;
             }
 
-            if(element_to_be_moved!=-1){
+            if(pos_in_bitmap!=-1){
                 break;
             }
         }
-        if(element_to_be_moved==-1){
+        if(pos_in_bitmap==-1){
             size=resize(&hops,element,n,H);
             //resize
             
             return size;
         }
-    
+        printf("\nbefor if: i am to be moved here j=%d, before i was here %d and hash=%d and H=%d check=%d and n=%d\n",j, element_to_be_moved, hash(array[element_to_be_moved].info.key,n),H,check_index,n);
+        /*if(array[element_to_be_moved].info.payload==16646){
+            printf("\ni am to be moved here j=%d, before i was here %d and hash=%d and H=%d check=%d\n",j, element_to_be_moved, hash(array[element_to_be_moved].info.key,n),H,check_index);
+        }*/
+        printf("pos of bitmap is=%d\n",pos_in_bitmap);
         clear_bit(array[check_index].bitmap ,pos_in_bitmap);
+        printf("where\n");
         array[element_to_be_moved].occupied=0;
+        printf("still\n");
         array[j].occupied=1;
         array[j].info=array[element_to_be_moved].info;
-        
+        printf("at least here dist=%d\n",dist(element_to_be_moved,hash_of_key,n));
         set_bit(array[check_index].bitmap,dist(j,check_index,n));
+        printf("after set bit\n");
         j=element_to_be_moved;
+    }
+    printf("before if\n");
+    if(element.payload==16646){
+        printf("\n\nfinal J is %d in this insert\n\n",j);
     }
     array[j].info=element;
     //printf("\nset bit with index %d\n",abs(j-hash_of_key));
@@ -282,7 +308,10 @@ List* search(hop*  hops ,tuple element){
         if(i>=size){
             i=0;
         }
-        //printf("hello %ld  bit_i=%d h=%d and size=%d i=%d %ld\n", element.key,bit_i,H,size,i,(array[i].info).key);
+        /*if((array[i].info).key==3501){
+            //printf("hello %ld  bit_i=%d h=%d and size=%d i=%d key=%ld and payload=%ld\n", element.key,bit_i,H,size,i,(array[i].info).key,(array[i].info).payload );
+        }*/
+        
         int curr_bit=get_bit(bitmap,bit_i);
         //printf("after get bit\n");
         if(curr_bit==1&&(array[i].info).key==element.key&&array[i].occupied==1){//curr_bit==1&&

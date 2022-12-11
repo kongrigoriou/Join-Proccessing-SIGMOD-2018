@@ -382,7 +382,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
             free(hopscotchTwoSteps);
         }
     }
-    //list_print(final);
+    list_print(final);
     // free(results);
     // list_destroy(results);
     //frees
