@@ -314,7 +314,7 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         //return 0;
         relation res=PartitionedHashJoin(&left_relation ,  &right_relation);
         printf("\nafter relation\n");
-        print_relation("res",res);
+        //print_relation("res",res);
         free(right_relation.tuples);
         free(left_relation.tuples);
         
@@ -384,7 +384,7 @@ uint64_t get_sum(Table* T,int rel,int col, joined** interm,int* original_rel){
 
 int main(int argc, char **argv){
    
-    /*char* buffer=malloc(64);
+    char* buffer=malloc(64);
     char* buffer1=malloc(64);
     size_t bufsize = 64;
     //size_t characters;
@@ -413,9 +413,9 @@ int main(int argc, char **argv){
         printf("\nrow=%ld col=%ld i[0][0]=%ld\n",T[i].numRows, T[i].numColumns,T[i].relations[0][0]);
     }
     //end of load Table
-    */
+    
     //small try
-    Table* T;
+    /*Table* T;
     T=malloc(3*sizeof(Table));
     T[0].numColumns=2;
     T[0].numRows=3;
@@ -452,9 +452,9 @@ int main(int argc, char **argv){
         T[2].relations[i][1]=1;
         T[2].relations[i][2]=1;
     }
-    
+    */
 
-    int r[]={0,1,2};
+    int r[]={3,0,1};
     int size_r=sizeof(r)/sizeof(int);
     printf("sizeof(r)=%d\n",size_r);
     int** rowid=malloc(size_r*sizeof(int*));
@@ -471,14 +471,14 @@ int main(int argc, char **argv){
             rowid[i][j]=j;
         }
     }
-    filter(T,interm,rowid,rowid_s,0,1,'>',0,0,r);
+    filter(T,interm,rowid,rowid_s,0,2,'>',3499,0,r);
     printf("\nafter filter\n");
     
-    join(T,interm,rowid,rowid_s,0,1,1,0,r);
+    join(T,interm,rowid,rowid_s,0,2,1,0,r);
     //printf("sum1=%ld and sum2=%ld\n",get_sum(T,0,1,interm),get_sum(T,1,1,interm));
-    join(T,interm,rowid,rowid_s,0,1,1,0,r);
+    join(T,interm,rowid,rowid_s,0,1,2,0,r);
     
-    printf("sum1=%ld and sum2=%ld\n",get_sum(T,1,1,interm,r),get_sum(T,0,1,interm,r));
+    printf("sum1=%ld and sum2=%ld\n",get_sum(T,1,2,interm,r),get_sum(T,0,1,interm,r));
     /*relation r1;
     relation r2;
     r1.num_tuples=300;

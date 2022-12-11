@@ -152,7 +152,7 @@ int resize(hop** hops_, tuple element, int n, int h){
     
     hop* hops=*hops_;
     node* current_array=hops->array;
-    //printf("RESIZE\n");
+    printf("RESIZE\n");
     
     node* new_array=create_array_of_hop(2*n,2*h);
     hops->array=new_array;
@@ -221,7 +221,7 @@ int insert(hop* hops, tuple element){
         //resize
         return size;
     }
-    while(dist(j,hash_of_key,n)>=H){
+    while(dist(j,hash_of_key,n)>=H){//dist(j,hash_of_key,n)
         
         int check_index=j-H+1;
         int element_to_be_moved=-1;
@@ -285,7 +285,7 @@ List* search(hop*  hops ,tuple element){
         //printf("hello %ld  bit_i=%d h=%d and size=%d i=%d %ld\n", element.key,bit_i,H,size,i,(array[i].info).key);
         int curr_bit=get_bit(bitmap,bit_i);
         //printf("after get bit\n");
-        if(curr_bit==1&&(array[i].info).key==element.key){
+        if(curr_bit==1&&(array[i].info).key==element.key&&array[i].occupied==1){//curr_bit==1&&
             /*result[bit_i].occupied=1;
             result[bit_i].index=element.payload;
             */

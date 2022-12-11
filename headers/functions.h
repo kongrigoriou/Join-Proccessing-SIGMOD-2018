@@ -3,8 +3,9 @@
 #include <unistd.h>
 
 #define CACHE_SIZE sysconf(_SC_LEVEL2_CACHE_SIZE)
-#define HOP_SIZE 3
-#define N 1
+#define HOP_SIZE 100
+#define N 3
+#define H 8
 
 #include "list.h"
 #include "structures.h"

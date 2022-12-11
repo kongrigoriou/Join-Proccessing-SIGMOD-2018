@@ -59,7 +59,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
     hop*** hopscotchTwoSteps = NULL;
     int reverse=0;
     if(stepR == 0){
-        hopscotch = create_array(HOP_SIZE, N);
+        hopscotch = create_array(HOP_SIZE, H);
         printf("\nrelR->num_tuples=%ld\n",relR->num_tuples);
         for(int i = 0; i < relR->num_tuples; i++){
             //relR->tuples[i];
@@ -72,7 +72,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
     }else if(stepR == 1){
         //array of hopscotch hash tables
         if(stepS == 0){
-            hopscotch = create_array(HOP_SIZE, N);
+            hopscotch = create_array(HOP_SIZE, H);
             reverse=1;
             for(int i = 0; i < relS->num_tuples; i++){
                 insert(hopscotch, relS->tuples[i]);
@@ -80,7 +80,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
         }else{
             hopscothArr = malloc(pow(2,N) * sizeof(hop*));
             for(int i = 0; i < pow(2,N); i++){
-                hopscothArr[i] = create_array(HOP_SIZE,N);
+                hopscothArr[i] = create_array(HOP_SIZE,H);
             }
 
             int counter = 0;
@@ -103,7 +103,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
         //2d array of psums
         
         if(stepS == 0){
-            hopscotch = create_array(HOP_SIZE, N);
+            hopscotch = create_array(HOP_SIZE, H);
             reverse=1;
             for(int i = 0; i < relS->num_tuples; i++){
                 insert(hopscotch, relS->tuples[i]);
@@ -112,7 +112,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
             reverse=1;
             hopscothArr = malloc(pow(2,N) * sizeof(hop*));
             for(int i = 0; i < pow(2,N); i++){
-                hopscothArr[i] = create_array(HOP_SIZE,N);
+                hopscothArr[i] = create_array(HOP_SIZE,H);
             }
 
             int counter = 0;
@@ -136,7 +136,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
             for(int i = 0; i < pow(2,N); i++){
                 hopscotchTwoSteps[i] = malloc(pow(2,N) * sizeof(hop*));
                 for(int j = 0; j < pow(2,N); j++){
-                    hopscotchTwoSteps[i][j] = create_array(HOP_SIZE,N);
+                    hopscotchTwoSteps[i][j] = create_array(HOP_SIZE,H);
                 }
             }
 
