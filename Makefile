@@ -21,11 +21,18 @@ hop_test: hopscotch.o list.o bitmap.o hopscotch_test.o
 partition_test: partition.o partition_test.o
 	$(CC) -g partition.o partition_test.o -o partition_test $(LFLAGS)
 
+utilities_test: utilities.o utilities_test.o
+	$(CC) -g utilities.o utilities_test.o -o utilities_test $(LFLAGS)
+
 partition_test.o: $(TESTS)/partition_test.c
 	$(CC) $(FLAGS) $(TESTS)/partition_test.c
 
 hopscotch_test.o: $(TESTS)/hopscotch_test.c
 	$(CC) $(FLAGS) $(TESTS)/hopscotch_test.c
+
+utilities_test.o: $(TESTS)/utilities_test.c
+	$(CC) $(FLAGS) $(TESTS)/utilities_test.c
+
 
 bitmap.o: $(MODULES)/bitmap.c
 	$(CC) $(FLAGS) $(MODULES)/bitmap.c 
@@ -53,18 +60,20 @@ utilities.o: $(MODULES)/utilities.c
 
 
 clean:
-	rm -f $(OBJS) $(OUT) partition_test hop_test partition_test.o hopscotch_test.o
+	rm -f $(OBJS) $(OUT) partition_test hop_test utilities_test partition_test.o hopscotch_test.o utilities_test.o
 
 run: $(OUT)
 	./$(OUT) ./input/default.txt
 
-tests: hop_test partition_test
+tests: hop_test partition_test utilities_test
 	./hop_test 
 	./partition_test
+	./utilities_test
 
 valgrind_join:
 	valgrind --leak-check=full --show-leak-kinds=all ./exec ./input/default.txt
 
-valgrind_tests: hop_test partition_test
+valgrind_tests: hop_test partition_test utilities_test
 	valgrind --leak-check=full --show-leak-kinds=all ./hop_test
 	valgrind --leak-check=full --show-leak-kinds=all ./partition_test
+	valgrind --leak-check=full --show-leak-kinds=all ./utilities_test
