@@ -141,22 +141,37 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
             }
 
             for(int i = 0; i < pow(2,N); i++){
-                for(int j = 0; j < pow(2,N) -1; j++){
-                    if(pSumFinalR[i][j] < pSumFinalR[i][j+1]){
-                        for(int k = pSumFinalR[i][j]; k < pSumFinalR[i][j + 1]; k++){
+                int counter = 0;
+
+                while(counter < pow(2,N) -1){
+                    if(pSumFinalR[i][counter] < pSumFinalR[i][counter+1]){
+                        for(int k = pSumFinalR[i][counter]; k < pSumFinalR[i][counter + 1]; k++){
                             // printf("i: %d j:%d psumfinal:%d\n\n", i, j, k);
-                            insert(hopscotchTwoSteps[i][j], reOrderedSecStepR->tuples[k]);
+                            insert(hopscotchTwoSteps[i][counter], reOrderedSecStepR->tuples[k]);
                         }
                     }
+                    counter++;
                 }
-                int m = pow(2,N) -1;
-                if(pSumFinalR[m][m] < relR->num_tuples){
-                    for(int k = pSumFinalR[m][m]; k < relR->num_tuples; k++){
-                        // printf("last insert\n");
 
-                        insert(hopscotchTwoSteps[m][m], reOrderedSecStepR->tuples[k]);
+                if(i < pow(2, N) -1){
+                    if(pSumFinalR[i][counter -1] != pSumFinalR[i][counter]){
+                        for(int k = pSumFinalR[i][counter]; k < pSumFinalR[i+1][0]; k++){
+                            insert(hopscotchTwoSteps[i][counter], reOrderedSecStepR->tuples[k]);
+                        }
+                    }
+                }else{
+                    for(int k = pSumFinalR[i][counter]; k < relR->num_tuples; k++){
+                        insert(hopscotchTwoSteps[i][counter], reOrderedSecStepR->tuples[k]);
                     }
                 }
+                
+                // if(pSumFinalR[m][m] < relR->num_tuples){
+                //     for(int k = pSumFinalR[m][m]; k < relR->num_tuples; k++){
+                //         // printf("last insert\n");
+
+                //         insert(hopscotchTwoSteps[m][m], reOrderedSecStepR->tuples[k]);
+                //     }
+                // }
                 
             }
             
@@ -353,25 +368,57 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
                 index = 0;
                 while(index < pow(2,N) -1){
                     if(pSumFinalS[i][index] != pSumFinalS[i][index + 1]){
+                        printf("\n");
                         for(int j = pSumFinalS[i][index]; j < pSumFinalS[i][index + 1]; j++){
                             results = search(hopscotchTwoSteps[i][index], reOrderedSecStepS->tuples[j]);
                             final = list_append(final, results);
 
+                            printf("j:%d ", j);
+
+
                             // list_print(results);
                         }
+
                     }
                     index++;
                 }
                 // int n = pow(2,3) -1;
-                if(pSumFinalS[i][index] < relS->num_tuples){
+                    printf("\n");
+                // if(pSumFinalS[i][index] < relS->num_tuples){
                     // printf("psumfjhrf %d\n", pSumFinalS[i][index]);
-                    for(int k = pSumFinalS[i][index]; k < relS->num_tuples; k++){
-                        results = search(hopscotchTwoSteps[i][index], reOrderedSecStepS->tuples[k]);
-                        final = list_append(final, results);
-
-                        // list_print(results);
+                    // i--;
+                    for(int a= 0; a < pow(2,N); a++){
+                        for(int b = 0; b < pow(2,N); b++){
+                            printf("%d ", pSumFinalS[a][b]);
+                        }
+                        printf("\n");
                     }
-                }
+
+                    printf("I: %d\nindex: %d\n\n", i, index);
+                    if(pSumFinalS[i][index-1] != pSumFinalS[i][index]){
+                        if(i < pow(2,N) -1){
+                            printf("PSUM INDEX %d,\n psumnext %d\n", pSumFinalS[i][index], pSumFinalS[i+1][0]);
+                            for(int k = pSumFinalS[i][index]; k < pSumFinalS[i + 1][0]; k++){
+                                printf("%d\n", k);
+
+                                results = search(hopscotchTwoSteps[i][index], reOrderedSecStepS->tuples[k]);
+                                final = list_append(final, results);
+
+                                list_print(results);
+                            }
+
+                        }else{
+                            printf("PSUM INDEX %d,\n psumnext %d\n", pSumFinalS[i][index], relS->num_tuples);
+
+                            for(int k = pSumFinalS[i][index]; k < relS->num_tuples; k++){
+                                // printf("%d\n", k);
+                                results = search(hopscotchTwoSteps[i][index], reOrderedSecStepS->tuples[k]);
+                                final = list_append(final, results);
+                                // list_print(results);
+                            }
+                        }
+                    }
+                // }
             }
             for(int i = 0; i < pow(2,N); i++){
                 for(int j = 0; j < pow(2,N); j++){
