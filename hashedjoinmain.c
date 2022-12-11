@@ -5,6 +5,7 @@
 #include "./headers/list.h"
 #include "./headers/partitionedHashJoin.h"
 #include "./headers/functions.h"
+#include "./headers/queries.h"
 
 
 void get_array(tuple** array,uint64_t * f_size ,tuple** s_array, uint64_t * s_size,char* name){
@@ -392,11 +393,15 @@ int main(int argc, char **argv){
     printf("start\n");
     List_string* file_list=list_create_string();
     printf("\nwhat is happening\n");
-    while( -1!=getline(&buffer,&bufsize,stdin)){
+    getline(&buffer,&bufsize,stdin);
+
+    while(strcmp(buffer, "Done\n")){
         buffer[strlen(buffer)-1]='\0';
         printf("\nbuff=%s",buffer);
         snprintf(buffer1,64,"./input/small/%s",buffer);
         list_insert_string(file_list,buffer1);
+        getline(&buffer,&bufsize,stdin);
+
     }
     free(buffer);
     free(buffer1);
@@ -416,6 +421,10 @@ int main(int argc, char **argv){
     int r[]={3,0,1};
     
     //end of load Table
+    //get queries
+    Batches* queries;
+    queries = get_query_info();
+    print_queries(queries);
     
     //small try
     /*Table* T;

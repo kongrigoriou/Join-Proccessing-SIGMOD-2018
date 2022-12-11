@@ -100,11 +100,12 @@ Batches* get_query_info(){
 
         if(c == 'F'){
             scanf("%c", &c);
-            if(c == 'F'){
+            scanf("%c", &c);
+        
+            if(c == '\n'){
                 endOfFile = 1;
                 break;
             }
-            scanf("%c", &c);
         }
         i = 0;
         i_filters = 0;
@@ -182,15 +183,10 @@ Batches* get_query_info(){
                 // printf("BATCHES: %d\n", batch_num);
                 // printf("QUERY: %d\n", query_num);
             }else{
-                int flag = 0;
-                int num = 0;
-
                 for(int j = 0; j < buffcount; j++){
                     if(buffer[j] != '.'){
                         batches->batches[batch_num]->array[query_num]->filters[i_filters] = buffer[j];
                         i_filters++;
-
-                        if(buffer[j] == '=' || buffer[j] == '<' || buffer[j] == '>') flag = 1;
                     }
                 }
                 buffcount = 0;
@@ -231,7 +227,7 @@ Batches* get_query_info(){
     return batches;
 }
 
-void print(Batches* batches){
+void print_queries(Batches* batches){
 
     printf("Relations\n");
     for(int i = 0; i < batches->size; i++){
@@ -274,10 +270,10 @@ void print(Batches* batches){
     }
 }
 
-int main(void){
-    Batches* query;
-    query = get_query_info();
-    print(query);
+// int main(void){
+//     Batches* query;
+//     query = get_query_info();
+//     print(query);
 
-    destroy(query);
-}
+//     destroy(query);
+// }

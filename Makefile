@@ -4,9 +4,9 @@ HEADERS := $(MY_PATH)headers
 TESTS	:= $(MY_PATH)tests
 LIB		:= $(MY_PATH)lib
 
-OBJS	= bitmap.o functions.o hashedjoinmain.o hopscotch.o list.o partition.o partitionedHashJoin.o utilities.o
-SOURCE	= $(MODULES)/bitmap.c $(MODULES)/functions.c $(MODULES)/hashedjoinmain.c $(MODULES)/hopscotch.c $(MODULES)/list.c $(MODULES)/partition.c $(MODULES)/partitionedHashJoin.c $(MODULES)/utilities.c
-HEADER	= $(HEADERS)/bitmap.h $(HEADERS)/functions.h $(HEADERS)/list.h $(HEADERS)/mainPartitionTest.h $(HEADERS)/structures.h $(HEADERS)/hopscotch.h
+OBJS	= bitmap.o functions.o hashedjoinmain.o hopscotch.o list.o partition.o partitionedHashJoin.o utilities.o queries.o
+SOURCE	= $(MODULES)/bitmap.c $(MODULES)/functions.c $(MODULES)/hashedjoinmain.c $(MODULES)/hopscotch.c $(MODULES)/list.c $(MODULES)/partition.c $(MODULES)/partitionedHashJoin.c $(MODULES)/utilities.c $(MODULES)/queries.c
+HEADER	= $(HEADERS)/bitmap.h $(HEADERS)/functions.h $(HEADERS)/list.h $(HEADERS)/mainPartitionTest.h $(HEADERS)/structures.h $(HEADERS)/hopscotch.h $(HEADERS).queries.h
 OUT	= exec
 CC	 = gcc
 FLAGS	 = -g -c -Wall
@@ -33,7 +33,6 @@ hopscotch_test.o: $(TESTS)/hopscotch_test.c
 utilities_test.o: $(TESTS)/utilities_test.c
 	$(CC) $(FLAGS) $(TESTS)/utilities_test.c
 
-
 bitmap.o: $(MODULES)/bitmap.c
 	$(CC) $(FLAGS) $(MODULES)/bitmap.c 
 
@@ -58,6 +57,8 @@ partitionedHashJoin.o: $(MODULES)/partitionedHashJoin.c
 utilities.o: $(MODULES)/utilities.c
 	$(CC) $(FLAGS) $(MODULES)/utilities.c 
 
+queries.o: $(MODULES)/queries.c
+	$(CC) $(FLAGS) $(MODULES)/queries.c
 
 clean:
 	rm -f $(OBJS) $(OUT) partition_test hop_test utilities_test partition_test.o hopscotch_test.o utilities_test.o

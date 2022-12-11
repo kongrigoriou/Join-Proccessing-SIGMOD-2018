@@ -34,5 +34,6 @@ QueryInfo* info_create();
 QueryArray* array_create();
 Batches* batches_create();
 Batches* get_query_info();
+void print_queries(Batches*);
 void destroy(Batches*);
 
