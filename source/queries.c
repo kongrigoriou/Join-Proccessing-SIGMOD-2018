@@ -90,7 +90,7 @@ Batches* get_query_info(){
     while(endOfFile == 0){
 
         scanf("%c", &c);
-        printf("\t\tC: %c\n", c);
+        // printf("\t\tC: %c\n", c);
         if(c == 'F'){
             batch_num++;
             batches->size = batch_num;
@@ -129,7 +129,7 @@ Batches* get_query_info(){
                 rel_id *= 10;
                 rel_id += (int_buffer[j] - 48);
             }
-            printf("rel id: %d\n", rel_id);
+            // printf("rel id: %d\n", rel_id);
             batches->batches[batch_num]->array[query_num]->relationsId[i] = rel_id;
             rel_id = 0;
             
@@ -141,7 +141,7 @@ Batches* get_query_info(){
         }
 
         batches->batches[batch_num]->array[query_num]->relationsCount = i;
-        printf("relations count: %d\n", batches->batches[batch_num]->array[query_num]->relationsCount);
+        // printf("relations count: %d\n", batches->batches[batch_num]->array[query_num]->relationsCount);
 
         scanf("%c", &c);
         
@@ -191,7 +191,7 @@ Batches* get_query_info(){
                 }
                 buffcount = 0;
                 batches->batches[batch_num]->array[query_num]->filtersCount = i_filters;
-                printf("filter count: %d\n", batches->batches[batch_num]->array[query_num]->filtersCount);
+                // printf("filter count: %d\n", batches->batches[batch_num]->array[query_num]->filtersCount);
             }
 
             buffcount = 0;
