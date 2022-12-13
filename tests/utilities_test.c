@@ -16,10 +16,12 @@ void test2_tableFitsCache(void){
 }
 
 void testLoadTable(void){
-    struct Table *table;
-    int load=LoadTable("./input/r0",&table);
+    struct Table *table=malloc(sizeof(Table));
+    int load=LoadTable("./input/small/r0",&table[0]);
     
     TEST_ASSERT(load==0);
+    TEST_ASSERT(table[0].numColumns==3);
+    free(table);
 }
 
 TEST_LIST = {
