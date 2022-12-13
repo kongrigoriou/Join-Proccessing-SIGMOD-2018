@@ -15,6 +15,7 @@ FLAGS	 = -g -c -Wall
 LFLAGS	 = -lm
 
 all: $(OBJS)
+	@ mkdir -p ./build
 	$(CC) -g $(OBJS) -o $(BUILD)/$(OUT) $(LFLAGS)
 
 hop_test: $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/bitmap.o $(OBJ)/hopscotch_test.o
@@ -36,6 +37,7 @@ $(OBJ)/utilities_test.o: $(TESTS)/utilities_test.c
 	$(CC) $(FLAGS) $(TESTS)/utilities_test.c -o $(OBJ)/utilities_test.o
 
 $(OBJ)/bitmap.o: $(MODULES)/bitmap.c
+	@ mkdir -p ./objec
 	$(CC) $(FLAGS) $(MODULES)/bitmap.c -o $(OBJ)/bitmap.o
 
 $(OBJ)/functions.o: $(MODULES)/functions.c
@@ -63,7 +65,7 @@ $(OBJ)/queries.o: $(MODULES)/queries.c
 	$(CC) $(FLAGS) $(MODULES)/queries.c -o $(OBJ)/queries.o
 
 clean:
-	rm -f $(BUILD)/$(OBJS) $(OUT) partition_test hop_test utilities_test partition_test.o hopscotch_test.o utilities_test.o
+	rm -f $(OBJS) $(BUILD)/$(OUT) partition_test hop_test utilities_test $(OBJ)/partition_test.o $(OBJ)/hopscotch_test.o $(OBJ)/utilities_test.o
 
 run: $(BUILD)/$(OUT)
 	cat input/small/small.init input/small/small.work | $(BUILD)/$(OUT)
@@ -74,7 +76,7 @@ tests: hop_test partition_test utilities_test
 	./utilities_test
 
 valgrind_join:
-	valgrind --leak-check=full --show-leak-kinds=all ./exec ./input/default.txt
+	cat input/small/small.init input/small/small.work | valgrind --leak-check=full --show-leak-kinds=all $(BUILD)/$(OUT)
 
 valgrind_tests: hop_test partition_test utilities_test
 	valgrind --leak-check=full --show-leak-kinds=all ./hop_test
