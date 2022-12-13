@@ -60,6 +60,7 @@ List* list_create(){
     List* list = malloc(sizeof(List));
 
     list->head = NULL;
+    list->last = NULL;
     list->size = 0;
 
     return list;
@@ -73,6 +74,7 @@ void list_insert(List* list, tuple data){
     
     if(list->size == 0){
         list->head = newNode;
+        list->last = newNode;
         list->head->next = NULL;
     }else{
         newNode->next = list->head;
@@ -100,6 +102,7 @@ List* list_append(List* list1, List* list2){
 
     if(list1 == NULL){
         new_list->head = list2->head;
+        new_list->last = list2->last;
         new_list->size = list2->size;
 
         free(list2);
@@ -108,6 +111,7 @@ List* list_append(List* list1, List* list2){
 
     if(list1->size == 0){
         new_list->head = list2->head;
+        new_list->last = list2->last;
         new_list->size += list2->size;
 
         free(list1);
@@ -116,17 +120,24 @@ List* list_append(List* list1, List* list2){
         return new_list;
     }
 
-    ListNode* node = list1->head;
+    // ListNode* node = list1->head;
 
-    while(node->next != NULL){
-        node = node->next;
+    // while(node->next != NULL){
+    //     node = node->next;
+    // }
+
+    // node->next = list2->head;
+    // list1->size += list2->size;
+    if(list2->size > 0){
+        list1->last->next = list2->head;
+        new_list->last = list2->last;
+
+    }else{
+        new_list->last = list1->last;
     }
-
-    node->next = list2->head;
-    list1->size += list2->size;
-
     new_list->head = list1->head;
-    new_list->size = list1->size;
+    new_list->size = list1->size + list2->size;
+
     free(list2);
     free(list1);
 

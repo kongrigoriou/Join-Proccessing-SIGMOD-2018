@@ -10,6 +10,7 @@ typedef struct listnode{
 
 typedef struct list{
     ListNode* head;
+    ListNode* last;
     int size;
 }List;
 
