@@ -181,8 +181,6 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
             while(index < relS->num_tuples){
                 results = search(hopscotch, relS->tuples[index]);
                 // list_print(results);
-
-                // printf("main print %d\n", relS->tuples[index]);
                 final = list_append(final, results);
                 index++;
             }
@@ -314,7 +312,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
                     index++;
                 }
 
-                if(i < pow(2, N -1)){
+                if(i < pow(2, N) -1){
                     for(int j = pSumFinalR[i][index]; j < pSumFinalR[i + 1][0]; j++){
                         results = search(hopscotch, reOrderedSecStepR->tuples[j]);
                         final = list_append(final, results);
@@ -342,7 +340,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
                     }
                     index++;
                 }
-                if(i < pow(2, N -1)){
+                if(i < pow(2, N) -1){
                     for(int j = pSumFinalR[i][index]; j < pSumFinalR[i + 1][0]; j++){
                         results = search(hopscothArr[i], reOrderedSecStepR->tuples[j]);
                         final = list_append(final, results);
