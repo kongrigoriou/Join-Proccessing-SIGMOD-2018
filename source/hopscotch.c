@@ -35,7 +35,7 @@ uint64_t hash2(uint64_t x){
 
 //makes sure your hash fits the array
 int hash(int key,int size_of_array){
-    return key%size_of_array;//hash2(key)
+    return hash2(key)%size_of_array;//hash2(key)
 }
 
 //gets H
@@ -156,11 +156,12 @@ int resize(hop** hops_, tuple element, int n, int h){
     node* current_array=hops->array;
     //printf("RESIZE\n");
     
-    node* new_array=create_array_of_hop(2*n,2*h);
+    hops->size=2*n;
+    hops->H=2*h;//log((double)hops->size);
+    node* new_array=create_array_of_hop(hops->size,hops->H);
     hops->array=new_array;
     //int size=hops->size;
-    hops->H=2*h;
-    hops->size=2*n;
+    
     //node* new_array=hops->array;
     for(int i=0;i<n;i++){
         if(current_array[i].occupied!=0){
@@ -194,9 +195,7 @@ int dist(int j, int hash,int n){
 // inserts the element into hopscotch array with H size of neighberhood and n size of array
 //retruns the size of the array after the insert
 int insert(hop* hops, tuple element){
-    /*if(element.payload==16646){
-        printf("\n\nlet's insert this %ld\n\n",element.key);
-    }*/
+    
     
     node* array=hops->array;
     int n= hops->size;
@@ -279,9 +278,7 @@ int insert(hop* hops, tuple element){
         j=element_to_be_moved;
     }
     //printf("before if\n");
-    if(element.payload==16646){
-        //printf("\n\nfinal J is %d in this insert\n\n",j);
-    }
+
     array[j].info=element;
     //printf("\nset bit with index %d\n",abs(j-hash_of_key));
     set_bit((array[hash_of_key].bitmap),dist(j,hash_of_key,n));
@@ -302,15 +299,15 @@ List* search(hop*  hops ,tuple element){
     int hash_of_key=hash( element.key,size);
     bitmap_t bitmap=array[hash_of_key].bitmap;
     int H=get_H(hops);
+
     //result_node* result=malloc(sizeof(tuple)*H);
+    //printf("Search me\n");
     List * result_list=list_create();
     for(int i=hash_of_key, bit_i=0;bit_i<H;i++,bit_i++){
         if(i>=size){
             i=0;
         }
-        /*if((array[i].info).key==3501){
-            //printf("hello %ld  bit_i=%d h=%d and size=%d i=%d key=%ld and payload=%ld\n", element.key,bit_i,H,size,i,(array[i].info).key,(array[i].info).payload );
-        }*/
+       
         
         int curr_bit=get_bit(bitmap,bit_i);
         //printf("after get bit\n");
@@ -318,15 +315,17 @@ List* search(hop*  hops ,tuple element){
             /*result[bit_i].occupied=1;
             result[bit_i].index=element.payload;
             */
+            
            tuple temp_t;
            temp_t.key=(array[i].info).payload;
            temp_t.payload=element.payload;
-           //printf("before insert\n");
+
            list_insert(result_list,temp_t);
         }
         //printf("after if\n");
         
     }
+    //list_print(result_list);
     return result_list;
 }
 

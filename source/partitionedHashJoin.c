@@ -41,12 +41,12 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
     int stepR, stepS;               //how many partiotions were needed
     int** pSumFinalR = calloc(pow(2,N),sizeof(int*));
     int** pSumFinalS = calloc(pow(2,N),sizeof(int*));
-    printf("before partitions\n");
+    //printf("before partitions\n");
     stepR = num_of_partitions(reOrderedR, relR, &pSumR, reOrderedSecStepR, pSumFinalR);
     stepS = num_of_partitions(reOrderedS, relS, &pSumS, reOrderedSecStepS, pSumFinalS);
 
-    printf("steps for R %d\n", stepR);
-    printf("steps for S %d\n", stepS);
+    //printf("steps for R %d\n", stepR);
+    //printf("steps for S %d\n", stepS);
     
     //find relation with fewer partitions
 
@@ -60,7 +60,6 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
     int reverse=0;
     if(stepR == 0){
         hopscotch = create_array(HOP_SIZE, H);
-        printf("\nrelR->num_tuples=%ld\n",relR->num_tuples);
         for(int i = 0; i < relR->num_tuples; i++){
             //relR->tuples[i];
             insert(hopscotch, relR->tuples[i]);
@@ -446,7 +445,8 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
     final_array.num_tuples=final->size;
     final_array.tuples=calloc(final->size,sizeof(tuple));
     ListNode* node=final->head;
-    printf("reverse should be 0=%d",reverse);
+    
+    //reverse the tuples if the realtions where reversed
     for(int i = 0; i < final->size; i++){
         if(reverse){
             final_array.tuples[i].key=node->data.payload;

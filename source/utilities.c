@@ -36,7 +36,6 @@ int LoadTable(char *fileName,struct Table *table){
         printf("Can not mmap %s\n",fileName);
         return -1;
     }
-    printf("here\n");
     //table=malloc(sizeof(struct Table));
     table->numRows=*((uint64_t*)(address));
     address+=sizeof(uint64_t);
