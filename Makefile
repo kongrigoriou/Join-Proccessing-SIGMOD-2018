@@ -26,6 +26,9 @@ partition_test: $(OBJ)/partition.o $(OBJ)/partition_test.o
 
 utilities_test: $(OBJ)/utilities.o $(OBJ)/utilities_test.o
 	$(CC) -g $(OBJ)/utilities.o $(OBJ)/utilities_test.o -o utilities_test $(LFLAGS)
+	
+list_test: $(OBJ)/list.o $(OBJ)/list_test.o
+	$(CC) -g $(OBJ)/list.o $(OBJ)/list_test.o -o list_test $(LFLAGS)	
 
 $(OBJ)/partition_test.o: $(TESTS)/partition_test.c
 	$(CC) $(FLAGS) $(TESTS)/partition_test.c -o $(OBJ)/partition_test.o
@@ -35,6 +38,9 @@ $(OBJ)/hopscotch_test.o: $(TESTS)/hopscotch_test.c
 
 $(OBJ)/utilities_test.o: $(TESTS)/utilities_test.c
 	$(CC) $(FLAGS) $(TESTS)/utilities_test.c -o $(OBJ)/utilities_test.o
+	
+$(OBJ)/list_test.o: $(TESTS)/list_test.c
+	$(CC) $(FLAGS) $(TESTS)/list_test.c -o $(OBJ)/list_test.o
 
 $(OBJ)/bitmap.o: $(MODULES)/bitmap.c
 	@ mkdir -p ./objec
@@ -65,20 +71,22 @@ $(OBJ)/queries.o: $(MODULES)/queries.c
 	$(CC) $(FLAGS) $(MODULES)/queries.c -o $(OBJ)/queries.o
 
 clean:
-	rm -f $(OBJS) $(BUILD)/$(OUT) partition_test hop_test utilities_test $(OBJ)/partition_test.o $(OBJ)/hopscotch_test.o $(OBJ)/utilities_test.o
+	rm -f $(OBJS) $(BUILD)/$(OUT) partition_test hop_test utilities_test list_test $(OBJ)/partition_test.o $(OBJ)/hopscotch_test.o $(OBJ)/utilities_test.o $(OBJ)/list_test.o
 
 run: $(BUILD)/$(OUT)
 	cat input/small/small.init input/small/small.work | $(BUILD)/$(OUT)
 
-tests: hop_test partition_test utilities_test
+tests: hop_test partition_test utilities_test list_test
 	./hop_test
 	./partition_test
 	./utilities_test
+	./list_test
 
 valgrind_join:
 	cat input/small/small.init input/small/small.work | valgrind --leak-check=full --show-leak-kinds=all $(BUILD)/$(OUT)
 
-valgrind_tests: hop_test partition_test utilities_test
+valgrind_tests: hop_test partition_test utilities_test list_test
 	valgrind --leak-check=full --show-leak-kinds=all ./hop_test
 	valgrind --leak-check=full --show-leak-kinds=all ./partition_test
 	valgrind --leak-check=full --show-leak-kinds=all ./utilities_test
+	valgrind --leak-check=full --show-leak-kinds=all ./list_test
