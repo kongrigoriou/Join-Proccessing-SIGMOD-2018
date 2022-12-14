@@ -8,4 +8,4 @@ cd $WORKLOAD_DIR
 
 WORKLOAD=$(basename "$PWD")
 echo execute $WORKLOAD ...
-$DIR/harness *.init *.work *.result ../../run.sh
+$DIR/objec/harness *.init *.work *.result ../../run.sh

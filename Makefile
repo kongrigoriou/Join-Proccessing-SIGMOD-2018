@@ -7,7 +7,7 @@ OBJ		:= $(MY_PATH)objec
 BUILD	:= $(MY_PATH)build
 
 OBJS	= $(OBJ)/bitmap.o $(OBJ)/functions.o $(OBJ)/hashedjoinmain.o $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/partition.o $(OBJ)/partitionedHashJoin.o $(OBJ)/utilities.o $(OBJ)/queries.o
-SOURCE	= $(MODULES)/bitmap.c $(MODULES)/functions.c $(MODULES)/hashedjoinmain.c $(MODULES)/hopscotch.c $(MODULES)/list.c $(MODULES)/partition.c $(MODULES)/partitionedHashJoin.c $(MODULES)/utilities.c $(MODULES)/queries.c
+SOURCE	= $(MODULES)/bitmap.c $(MODULES)/functions.c $(MODULES)/hashedjoinmain.c $(MODULES)/hopscotch.c $(MODULES)/list.c $(MODULES)/partition.c $(MODULES)/partitionedHashJoin.c $(MODULES)/utilities.c $(MODULES)/queries.c harness.cpp
 HEADER	= $(HEADERS)/bitmap.h $(HEADERS)/functions.h $(HEADERS)/list.h $(HEADERS)/mainPartitionTest.h $(HEADERS)/structures.h $(HEADERS)/hopscotch.h $(HEADERS).queries.h
 OUT	= exec
 CC	 = gcc
@@ -17,6 +17,8 @@ LFLAGS	 = -lm
 all: $(OBJS)
 	@ mkdir -p ./build
 	$(CC) -g $(OBJS) -o $(BUILD)/$(OUT) $(LFLAGS)
+	g++ -o $(OBJ)/harness harness.cpp
+
 
 hop_test: $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/bitmap.o $(OBJ)/hopscotch_test.o
 	$(CC) -g $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/bitmap.o $(OBJ)/hopscotch_test.o -o hop_test $(LFLAGS)
@@ -28,8 +30,9 @@ utilities_test: $(OBJ)/utilities.o $(OBJ)/utilities_test.o
 	$(CC) -g $(OBJ)/utilities.o $(OBJ)/utilities_test.o -o utilities_test $(LFLAGS)
 	
 list_test: $(OBJ)/list.o $(OBJ)/list_test.o
-	$(CC) -g $(OBJ)/list.o $(OBJ)/list_test.o -o list_test $(LFLAGS)	
+	$(CC) -g $(OBJ)/list.o $(OBJ)/list_test.o -o list_test $(LFLAGS)
 
+	
 $(OBJ)/partition_test.o: $(TESTS)/partition_test.c
 	$(CC) $(FLAGS) $(TESTS)/partition_test.c -o $(OBJ)/partition_test.o
 
@@ -42,6 +45,9 @@ $(OBJ)/utilities_test.o: $(TESTS)/utilities_test.c
 $(OBJ)/list_test.o: $(TESTS)/list_test.c
 	$(CC) $(FLAGS) $(TESTS)/list_test.c -o $(OBJ)/list_test.o
 
+# $(OBJ)/harness.o: harness.cpp
+# 	@ mkdir -p ./objec
+
 $(OBJ)/bitmap.o: $(MODULES)/bitmap.c
 	@ mkdir -p ./objec
 	$(CC) $(FLAGS) $(MODULES)/bitmap.c -o $(OBJ)/bitmap.o
@@ -53,6 +59,7 @@ $(OBJ)/hashedjoinmain.o: hashedjoinmain.c
 	$(CC) $(FLAGS) hashedjoinmain.c -o $(OBJ)/hashedjoinmain.o
 
 $(OBJ)/hopscotch.o: $(MODULES)/hopscotch.c
+	@ mkdir -p ./objec
 	$(CC) $(FLAGS) $(MODULES)/hopscotch.c -o $(OBJ)/hopscotch.o
 
 $(OBJ)/list.o: $(MODULES)/list.c
