@@ -25,7 +25,7 @@ QueryArray* array_create(){
     QueryArray* array;
 
     array = malloc(sizeof(QueryArray));
-    array->capacity = 20;
+    array->capacity = 55;
 
     array->array = malloc(array->capacity * sizeof(QueryInfo*));
 
@@ -71,10 +71,129 @@ void destroy(Batches* array){
     free(array);
 }
 
-// void resize(void* array){
+QueryArray* get_batch(){
+    char c;
+    int query_num = 0;
+    QueryArray* batch = array_create();
 
-// }
+    fflush(stdout);
+    scanf("%c", &c);
+    // printf("initial c %c\t", c);
+    if(c != '1' && c != '2' && c != '3' &&c != '4' &&c != '5' &&c != '6' &&c != '7' &&c != '8' &&c != '9' &&c != '0'){
+        // printf("\tinseide null\n");
+        return NULL;
+    }
 
+    while(c != 'F'){
+
+        int i = 0;
+        int i_filters = 0;
+        char int_buffer[5];
+        int rel_id = 0;
+        int int_buffer_count = 0;
+
+        while(c != '|'){
+            while(c != ' ' && c != '|'){
+                int_buffer[int_buffer_count] = c;     
+                int_buffer_count++;
+
+                scanf("%c", &c);
+            }
+            
+            for(int j = 0; j < int_buffer_count; j++){
+                rel_id *= 10;
+                rel_id += (int_buffer[j] - 48);
+            }
+            batch->array[query_num]->relationsId[i] = rel_id;
+            rel_id = 0;
+            
+            int_buffer_count = 0;
+            i++;
+
+            if(c != '|')
+                scanf("%c", &c);
+        }
+
+        batch->array[query_num]->relationsCount = i;
+        scanf("%c", &c);
+        
+        i = 0;
+        char buffer[10];
+        int buffcount = 0;
+    
+        while(c != '|'){
+            // printf("c inside while %c\n", c);
+            while(c != '&' && c!= '|'){
+                buffer[buffcount] = c;
+                buffcount++;
+
+                scanf("%c", &c);
+            }
+
+            buffer[buffcount] = '|';
+            buffcount++;
+
+            if(buffer[buffcount -3] == '.'){
+                if(buffer[0] == buffer[4]){
+                    //then its a filter
+                    for(int j = 0; j < buffcount; j++){
+                        if(buffer[j] != '.'){
+                            batch->array[query_num]->filters[i_filters] = buffer[j];
+                            i_filters++;
+                        }
+                    }
+                    batch->array[query_num]->filtersCount = i_filters;
+                }else{
+                    for(int j = 0; j < buffcount; j++){
+                        if(buffer[j] != '.'){
+                            batch->array[query_num]->predicates[i] = buffer[j];
+                            i++;
+                        }
+                    }
+                    batch->array[query_num]->predicatesCount = i;
+                    // printf("Predicates count: %d\n", batch->array[query_num]->predicatesCount);
+                }
+                // printf("BATCHES: %d\n", batch_num);
+                // printf("QUERY: %d\n", query_num);
+            }else{
+                for(int j = 0; j < buffcount; j++){
+                    if(buffer[j] != '.'){
+                        batch->array[query_num]->filters[i_filters] = buffer[j];
+                        i_filters++;
+                    }
+                }
+                buffcount = 0;
+                batch->array[query_num]->filtersCount = i_filters;
+                // printf("filter count: %d\n", batch->array[query_num]->filtersCount);
+            }
+
+            buffcount = 0;
+            
+            // break;
+            if(c != '|')
+                scanf("%c", &c);
+        }
+        //to take the sums 
+        scanf("%c", &c);
+
+        i = 0;    
+        while(c != '\n'){
+            if(c != '.' && c != ' '){
+                batch->array[query_num]->selections[i] = c;
+                i++;
+            }
+            scanf("%c", &c);
+        }
+        batch->array[query_num]->selectionsCount = i;
+        query_num++;
+
+        scanf("%c", &c);
+        // printf("the last %c\n", c);
+    }
+
+    batch->size = query_num;
+    return batch;
+}
 Batches* get_query_info(){
 
     Batches* batches;
@@ -90,12 +209,10 @@ Batches* get_query_info(){
     while(endOfFile == 0){
 
         scanf("%c", &c);
-        // printf("\t\tC: %c\n", c);
         if(c == 'F'){
             batch_num++;
             batches->size = batch_num;
             query_num = 0;
-            // printf("Batch size: %d\n", batches->size);
         }
 
         if(c == 'F'){
@@ -114,11 +231,7 @@ Batches* get_query_info(){
         int int_buffer_count = 0;
 
         while(c != '|'){
-
-            // printf("c: %c\n", c);
             while(c != ' ' && c != '|'){
-                // batches->batches[batch_num]->array[query_num]->relationsId[i] = atoi(&c);
-                // printf("inside if\n\tc is: %c\n", c);
                 int_buffer[int_buffer_count] = c;     
                 int_buffer_count++;
 
@@ -129,7 +242,6 @@ Batches* get_query_info(){
                 rel_id *= 10;
                 rel_id += (int_buffer[j] - 48);
             }
-            // printf("rel id: %d\n", rel_id);
             batches->batches[batch_num]->array[query_num]->relationsId[i] = rel_id;
             rel_id = 0;
             
@@ -141,8 +253,6 @@ Batches* get_query_info(){
         }
 
         batches->batches[batch_num]->array[query_num]->relationsCount = i;
-        // printf("relations count: %d\n", batches->batches[batch_num]->array[query_num]->relationsCount);
-
         scanf("%c", &c);
         
         i = 0;
@@ -150,7 +260,7 @@ Batches* get_query_info(){
         int buffcount = 0;
     
         while(c != '|'){
-            // printf("c inside while %c\n", c);
+            printf("c inside while %c\n", c);
             while(c != '&' && c!= '|'){
                 buffer[buffcount] = c;
                 buffcount++;
@@ -199,8 +309,6 @@ Batches* get_query_info(){
             // break;
             if(c != '|')
                 scanf("%c", &c);
-
-            // printf("\tC1: %c\n", c);
         }
 
         //to take the sums 
@@ -208,19 +316,14 @@ Batches* get_query_info(){
 
         i = 0;    
         while(c != '\n'){
-            // printf("\tC2: %c\n", c);
-
             if(c != '.' && c != ' '){
                 batches->batches[batch_num]->array[query_num]->selections[i] = c;
                 i++;
             }
-
             scanf("%c", &c);
-
         }
         batches->batches[batch_num]->array[query_num]->selectionsCount = i;
         query_num++;
-        // printf("\tQUERY NUM: %d\n", query_num);
         batches->batches[batch_num]->size = query_num;
     }
 
@@ -268,6 +371,44 @@ void print_queries(Batches* batches){
             printf("\n");
         }
     }
+}
+
+void print_batch(QueryArray* batch){
+
+    printf("Batch Size: %d", batch->size);
+    printf("Relations\n");
+    for(int i = 0; i < batch->size; i++){
+        for(int j = 0; j < batch->array[i]->relationsCount; j++){
+            printf("%d ", batch->array[i]->relationsId[j]);
+        }
+    }
+    printf("\n");
+
+    printf("fiters\n");
+    for(int i = 0; i < batch->size; i++){
+        for(int j = 0; j < batch->array[i]->filtersCount; j++){
+            printf("%c ", batch->array[i]->filters[j]);
+        }
+    }
+    printf("\n");
+
+    printf("predicates\n");
+    for(int i = 0; i < batch->size; i++){
+        // printf("Predicates count %d\n", batch->array[i]->predicatesCount);
+
+        for(int j = 0; j < batch->array[i]->predicatesCount; j++){
+            printf("%c ", batch->array[i]->predicates[j]);
+        }
+    }
+    printf("\n");
+
+    printf("sums\n");
+    for(int i = 0; i < batch->size; i++){
+        for(int j = 0; j < batch->array[i]->selectionsCount; j++){
+            printf("%c ", batch->array[i]->selections[j]);
+        }
+    }
+    printf("\n");
 }
 
 // int main(void){

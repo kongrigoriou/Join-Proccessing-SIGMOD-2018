@@ -33,7 +33,9 @@ typedef struct Batches Batches;
 QueryInfo* info_create();
 QueryArray* array_create();
 Batches* batches_create();
+QueryArray* get_batch();
 Batches* get_query_info();
 void print_queries(Batches*);
+void print_batch(QueryArray*);
 void destroy(Batches*);
 
