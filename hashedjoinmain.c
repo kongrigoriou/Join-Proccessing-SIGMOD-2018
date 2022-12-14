@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "./headers/structures.h"
 #include "./headers/list.h"
 #include "./headers/partitionedHashJoin.h"
@@ -579,7 +580,7 @@ int get_sum(Table* T,int rel,int col, joined** interm,int* original_rel){
     int size =interm[interm_i]->rows;
     //printf("size is %d\n",size);
     if(size==0){
-        printf("NULL");
+        fprintf(stdout, "%s", "NULL");
         return 0;
     }
     //printf("where  is the problem rowid_i=%d\n",rowid_i);
@@ -591,7 +592,7 @@ int get_sum(Table* T,int rel,int col, joined** interm,int* original_rel){
         sum=T[original_rel[rel]].relations[col][index]+sum;
     }
     //printf("after loop sum:\n\n");
-    printf("%ld",sum);
+    fprintf(stdout, "%ld",sum);
     //printf("\n\n sum\n");
     return 0;
 }
@@ -611,7 +612,7 @@ int main(int argc, char **argv){
     while(strcmp(buffer, "Done\n")){
         buffer[strlen(buffer)-1]='\0';
         //printf("\nbuff=%s",buffer);
-        snprintf(buffer1,64,"./input/small/%s",buffer);
+        snprintf(buffer1,64,"%s",buffer);
         list_insert_string(file_list,buffer1);
         getline(&buffer,&bufsize,stdin);
 
@@ -635,17 +636,22 @@ int main(int argc, char **argv){
     //end of load Table
     //get queries
     
-    Batches* queries;
-    queries = get_query_info();
-    //print_queries(queries);
-    for(int i=0;i<queries->size;i++){
-        QueryArray* Batch_i= queries->batches[i];
-        for(int j=0;j<Batch_i->size;j++){
-            QueryInfo* Q=Batch_i->array[j];
-            int count_of_filters=0;
+    sleep(1);
 
+    QueryArray* batch;
+    char c;
+
+    batch = get_batch();
+    //print_queries(queries);
+     while(batch != NULL){
+        // QueryArray* Batch_i= queries->batches[i];
+        // print_batch(batch);
+        for(int j=0;j<batch->size;j++){
+            QueryInfo* Q=batch->array[j];
+            int count_of_filters=0;
+            // printf("J: ")
             int size_r=Q->relationsCount;
-            //printf("sizeof(r)=%d\n",size_r);
+            // printf("sizeof(r)=%d\n",size_r);
 
             //initialize these arrays to run the filter and the join
             int** rowid=malloc(size_r*sizeof(int*));
@@ -657,7 +663,7 @@ int main(int argc, char **argv){
             for(int i=0;i<size_r;i++){
                 rowid_s[i]=T[Q->relationsId[i]].numRows;
                 rowid[i]=calloc(T[Q->relationsId[i]].numRows,sizeof(int));
-                //printf("Rowid of rel=%d has %ld size\n",i, T[Q->relationsId[i]].numRows);
+                // printf("Rowid of rel=%d has %ld size\n",i, T[Q->relationsId[i]].numRows);
                 for(int j=0;j<T[Q->relationsId[i]].numRows;j++){
                     rowid[i][j]=j;
                 }
@@ -678,7 +684,7 @@ int main(int argc, char **argv){
                     count_of_filters++;
                 }
                 count_of_filters++;
-                //printf("Filter:rel=%d col=%d comp=%c num=%d\n",rel,col,comp,num);
+                // printf("Filter:rel=%d col=%d comp=%c num=%d\n",rel,col,comp,num);
                 filter(T,interm,rowid,rowid_s,rel,col,comp,num,0,Q->relationsId);
             }
             int count_of_pred=0;
@@ -690,11 +696,11 @@ int main(int argc, char **argv){
                 int right_col=Q->predicates[count_of_pred+4]-48;
                 count_of_pred+=6;
                 //join
-                //printf("Join:left_rel=%d left_col=%d right_rel=%d right_col=%d\n",left_rel,left_col,right_rel,right_col);
+                // printf("Join:left_rel=%d left_col=%d right_rel=%d right_col=%d\n",left_rel,left_col,right_rel,right_col);
                 join(T,interm,rowid,rowid_s,left_rel,left_col,right_rel,right_col,Q->relationsId);
             }
             int count_of_sel=0;
-            //printf("\n");
+            // printf("\n");
             //get the sums
             while(count_of_sel< Q->selectionsCount ){
                 if(count_of_sel!=0){
@@ -704,14 +710,15 @@ int main(int argc, char **argv){
                 int col=Q->selections[count_of_sel+1]-48;
                 count_of_sel+=2;
                 //sum
-                //printf("Sum:rel=%d col=%d\n",rel,col);
+                // printf("Sum:rel=%d col=%d\n",rel,col);
                 //printf("[%d]=%d",count_of_sel,Q->selections[count_of_sel]);
                 
                 get_sum(T,rel,col,interm,Q->relationsId);
             }
+
             printf("\n");
 
-            //free all the arrays you used for the query
+
             for(int i=0;i<size_r;i++){
                 if(rowid[i]!=NULL){
                     free(rowid[i]);
@@ -722,7 +729,7 @@ int main(int argc, char **argv){
             }
             
             free(rowid_s);
-            //printf("after rowid's freed\n");
+            // printf("after rowid's freed\n");
             if(interm[0]!=NULL){
                 if(interm[0]->inter!=NULL){
                     for(int i=0;i< 4;i++ ){
@@ -731,9 +738,11 @@ int main(int argc, char **argv){
                         }
                     }
                     free(interm[0]->inter);
+                    // printf("please\n");
                 }
                 
                 free(interm[0]->relations);
+                // printf("relesed everything\n");
                 free(interm[0]);
             }
             if(interm[1]!=NULL){
@@ -744,22 +753,34 @@ int main(int argc, char **argv){
                         }
                     }
                     free(interm[1]->inter);
+                    // printf("please\n");
                 }
+                
                 free(interm[1]->relations);
+                // printf("relesed everything\n");
                 free(interm[1]);
             }
-            /*free(Q->filters);
-            free(Q->predicates);
-            free(Q->selections);
-            free(Q->relationsId);
-            free(Q);*/
+            // free(Q->filters);
+            // free(Q->predicates);
+            // free(Q->selections);
+            // free(Q->relationsId);
+            // free(Q);
+
         }
-        /*free(Batch_i->array);
-        free(Batch_i);*/
+        // free(batch->array);
+        // free(batch);
+        // fflush(stdout);
+
+        scanf("%c", &c);
+        // printf("C in main: %c", c);
+        fflush(stdout);
+
+        batch = get_batch();
     }
+    free(batch);
     /*free(queries->batches);
     free(queries);*/
-    destroy(queries);
+    // destroy(queries);
     for(int i=0;i<table_size;i++){
         for(int j=0;j<T[i].numColumns;j++){
             free(T[i].relations[j]);
