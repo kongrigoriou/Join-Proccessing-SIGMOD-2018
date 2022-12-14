@@ -96,7 +96,7 @@ valgrind_join:
 	cat input/default.txt| valgrind --leak-check=full --show-leak-kinds=all $(BUILD)/$(OUT)
 
 valgrind_tests: hop_test partition_test utilities_test list_test
-	valgrind --leak-check=full --show-leak-kinds=all ./hop_test
-	valgrind --leak-check=full --show-leak-kinds=all ./partition_test
-	valgrind --leak-check=full --show-leak-kinds=all ./utilities_test
-	valgrind --leak-check=full --show-leak-kinds=all ./list_test
+	valgrind --leak-check=full --show-leak-kinds=all ./$(BUILD)/hop_test
+	valgrind --leak-check=full --show-leak-kinds=all ./$(BUILD)/partition_test
+	valgrind --leak-check=full --show-leak-kinds=all ./$(BUILD)/utilities_test
+	valgrind --leak-check=full --show-leak-kinds=all ./$(BUILD)/list_test
