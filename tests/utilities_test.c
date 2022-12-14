@@ -21,6 +21,10 @@ void testLoadTable(void){
     
     TEST_ASSERT(load==0);
     TEST_ASSERT(table[0].numColumns==3);
+    for(int i=0;i<table[0].numColumns;i++){
+        free(table[0].relations[i]);
+    }
+    free(table[0].relations);
     free(table);
 }
 
