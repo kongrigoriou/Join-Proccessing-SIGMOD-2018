@@ -81,7 +81,10 @@ void test_search(void){
     for(int i = 0; i < 5; i++){
         results = search(array, tuple_array[i]);
         TEST_ASSERT(results->head->data.payload == tuple_array[i].payload);
+        list_destroy(results);
     }
+    free(tuple_array);
+    destroy_hop(array);
 }
 
 TEST_LIST = {

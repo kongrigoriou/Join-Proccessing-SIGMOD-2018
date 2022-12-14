@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include<string.h>
 
+
 List_string* list_create_string(){
     List_string * list = malloc(sizeof(List_string));
 
@@ -145,6 +146,10 @@ List* list_append(List* list1, List* list2){
 }
 
 void list_destroy(List* list){
+    if(list->size==0){
+        free(list);
+        return;
+    }
     ListNode* node = list->head;
 
     while (node->next != NULL) {		
