@@ -29,7 +29,7 @@ void test_tuples(void){
     TEST_ASSERT(data->key ==279832);
     TEST_ASSERT(data->payload == 324983);
 
-    TEST_ASSERT(sizeof(tuple) == 2*sizeof(uint32_t));
+    TEST_ASSERT(sizeof(tuple) == 2*sizeof(uint64_t));
 
     free(data);
 }

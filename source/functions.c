@@ -25,7 +25,7 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
             // }       
             step++;
             if(TableFitsCache(CACHE_SIZE, max, 5)){
-                printf("First partition was succesfull\n");
+                //printf("First partition was succesfull\n");
             }else{
                 //begin second partition
 
