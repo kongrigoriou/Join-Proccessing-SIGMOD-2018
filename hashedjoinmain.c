@@ -768,16 +768,16 @@ int main(int argc, char **argv){
 
         }
         // free(batch->array);
-        // free(batch);
         // fflush(stdout);
 
         scanf("%c", &c);
         // printf("C in main: %c", c);
         fflush(stdout);
 
+        destroy(batch);
         batch = get_batch();
     }
-    free(batch);
+    // destroy(batch);
     /*free(queries->batches);
     free(queries);*/
     // destroy(queries);

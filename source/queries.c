@@ -54,35 +54,34 @@ Batches* batches_create(){
     return batches;
 }
 
-void destroy(Batches* array){
+void destroy(QueryArray* array){
     for(int i = 0; i < array->capacity; i++){
-        for(int j = 0; j < array->batches[i]->capacity; j++){
-            free(array->batches[i]->array[j]->relationsId);
-            free(array->batches[i]->array[j]->filters);
-            free(array->batches[i]->array[j]->selections);
-            free(array->batches[i]->array[j]->predicates);
+        // for(int j = 0; j < array->array[i]; j++){
+        free(array->array[i]->relationsId);
+        free(array->array[i]->filters);
+        free(array->array[i]->selections);
+        free(array->array[i]->predicates);
 
-            free(array->batches[i]->array[j]);
-        }
-        free(array->batches[i]->array);
-        free(array->batches[i]);
+            // free(array->array[i]);
+        free(array->array[i]);
     }
-    free(array->batches);
+    // free(array->array);
+    free(array->array);
     free(array);
 }
 
 QueryArray* get_batch(){
-    char c;
+    char c = 0;
     int query_num = 0;
-    QueryArray* batch = array_create();
 
-    fflush(stdout);
+    // fflush(stdout);
     scanf("%c", &c);
     // printf("initial c %c\t", c);
-    if(c != '1' && c != '2' && c != '3' &&c != '4' &&c != '5' &&c != '6' &&c != '7' &&c != '8' &&c != '9' &&c != '0'){
+    if(c == 0){
         // printf("\tinseide null\n");
         return NULL;
     }
+    QueryArray* batch = array_create();
 
     while(c != 'F'){
 

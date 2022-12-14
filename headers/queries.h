@@ -37,5 +37,5 @@ QueryArray* get_batch();
 Batches* get_query_info();
 void print_queries(Batches*);
 void print_batch(QueryArray*);
-void destroy(Batches*);
+void destroy(QueryArray*);
 
