@@ -18,19 +18,22 @@ all: $(OBJS)
 	@ mkdir -p ./build
 	$(CC) -g $(OBJS) -o $(BUILD)/$(OUT) $(LFLAGS)
 	g++ -o $(OBJ)/harness harness.cpp
+	chmod +x runTestharness.sh
+	chmod +x run.sh
 
 
 hop_test: $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/bitmap.o $(OBJ)/hopscotch_test.o
-	$(CC) -g $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/bitmap.o $(OBJ)/hopscotch_test.o -o hop_test $(LFLAGS)
+	@ mkdir -p ./$(BUILD)
+	$(CC) -g $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/bitmap.o $(OBJ)/hopscotch_test.o -o $(BUILD)/hop_test $(LFLAGS)
 
 partition_test: $(OBJ)/partition.o $(OBJ)/partition_test.o
-	$(CC) -g $(OBJ)/partition.o $(OBJ)/partition_test.o -o partition_test $(LFLAGS)
+	$(CC) -g $(OBJ)/partition.o $(OBJ)/partition_test.o -o $(BUILD)/partition_test $(LFLAGS)
 
 utilities_test: $(OBJ)/utilities.o $(OBJ)/utilities_test.o
-	$(CC) -g $(OBJ)/utilities.o $(OBJ)/utilities_test.o -o utilities_test $(LFLAGS)
+	$(CC) -g $(OBJ)/utilities.o $(OBJ)/utilities_test.o -o $(BUILD)/utilities_test $(LFLAGS)
 	
 list_test: $(OBJ)/list.o $(OBJ)/list_test.o
-	$(CC) -g $(OBJ)/list.o $(OBJ)/list_test.o -o list_test $(LFLAGS)
+	$(CC) -g $(OBJ)/list.o $(OBJ)/list_test.o -o $(BUILD)/list_test $(LFLAGS)
 
 	
 $(OBJ)/partition_test.o: $(TESTS)/partition_test.c
@@ -78,19 +81,19 @@ $(OBJ)/queries.o: $(MODULES)/queries.c
 	$(CC) $(FLAGS) $(MODULES)/queries.c -o $(OBJ)/queries.o
 
 clean:
-	rm -f $(OBJS) $(BUILD)/$(OUT) partition_test hop_test utilities_test list_test $(OBJ)/partition_test.o $(OBJ)/hopscotch_test.o $(OBJ)/utilities_test.o $(OBJ)/list_test.o
+	rm -f $(OBJS) $(BUILD)/$(OUT) $(BUILD)/partition_test $(BUILD)/hop_test $(BUILD)/utilities_test $(BUILD)/list_test $(OBJ)/partition_test.o $(OBJ)/hopscotch_test.o $(OBJ)/utilities_test.o $(OBJ)/list_test.o
 
 run: $(BUILD)/$(OUT)
-	cat input/small/small.init input/small/small.work | $(BUILD)/$(OUT)
+	cat input/default.txt| $(BUILD)/$(OUT)
 
 tests: hop_test partition_test utilities_test list_test
-	./hop_test
-	./partition_test
-	./utilities_test
-	./list_test
+	./$(BUILD)/hop_test
+	./$(BUILD)/partition_test
+	./$(BUILD)/utilities_test
+	./$(BUILD)/list_test
 
 valgrind_join:
-	cat input/small/small.init input/small/small.work | valgrind --leak-check=full --show-leak-kinds=all $(BUILD)/$(OUT)
+	cat input/default.txt| valgrind --leak-check=full --show-leak-kinds=all $(BUILD)/$(OUT)
 
 valgrind_tests: hop_test partition_test utilities_test list_test
 	valgrind --leak-check=full --show-leak-kinds=all ./hop_test
