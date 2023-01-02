@@ -11,7 +11,7 @@ SOURCE	= $(MODULES)/bitmap.c $(MODULES)/functions.c $(MODULES)/hashedjoinmain.c 
 HEADER	= $(HEADERS)/bitmap.h $(HEADERS)/functions.h $(HEADERS)/list.h $(HEADERS)/mainPartitionTest.h $(HEADERS)/structures.h $(HEADERS)/hopscotch.h $(HEADERS).queries.h
 OUT	= exec
 CC	 = gcc
-FLAGS	 = -g -c -Wall
+FLAGS	 = -g -c -Wall 
 LFLAGS	 = -lm
 
 all: $(OBJS)
@@ -29,8 +29,8 @@ hop_test: $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/bitmap.o $(OBJ)/hopscotch_test
 partition_test: $(OBJ)/partition.o $(OBJ)/partition_test.o
 	$(CC) -g $(OBJ)/partition.o $(OBJ)/partition_test.o -o $(BUILD)/partition_test $(LFLAGS)
 
-utilities_test: $(OBJ)/utilities.o $(OBJ)/utilities_test.o
-	$(CC) -g $(OBJ)/utilities.o $(OBJ)/utilities_test.o -o $(BUILD)/utilities_test $(LFLAGS)
+utilities_test: $(OBJ)/utilities.o $(OBJ)/utilities_test.o $(OBJ)/bitmap.o
+	$(CC) -g $(OBJ)/utilities.o $(OBJ)/utilities_test.o $(OBJ)/bitmap.o -o $(BUILD)/utilities_test $(LFLAGS)
 	
 list_test: $(OBJ)/list.o $(OBJ)/list_test.o
 	$(CC) -g $(OBJ)/list.o $(OBJ)/list_test.o -o $(BUILD)/list_test $(LFLAGS)
