@@ -7,6 +7,7 @@
 #include "./headers/partitionedHashJoin.h"
 #include "./headers/functions.h"
 #include "./headers/queries.h"
+#include "./headers/bitmap.h"
 
 
 
@@ -600,7 +601,7 @@ int get_sum(Table* T,int rel,int col, joined** interm,int* original_rel){
 
 
 int main(int argc, char **argv){
-   
+    int q_op=1;
     char* buffer=malloc(64);
     char* buffer1=malloc(64);
     size_t bufsize = 64;
@@ -632,7 +633,9 @@ int main(int argc, char **argv){
     /*for(int i=0;i<table_size;i++){
         printf("\nrow=%ld col=%ld i[0][0]=%ld\n",T[i].numRows, T[i].numColumns,T[i].relations[0][0]);
     }*/
-
+    if(q_op){
+        fill_distinct_count(T,table_size);
+    }
     //end of load Table
     //get queries
     

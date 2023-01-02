@@ -38,6 +38,16 @@ bitmap_t create_bitmap(int n) {
     return temp;
 }
 
+int get_count(bitmap_t b,int size){
+    int count=0;
+    for(int i=0;i<size;i++){
+        int bit =get_bit(b,i);
+        if(bit==1){
+            count++;
+        }
+    }
+    return count;
+}
 
 void bitmap_main(){
     uint64_t array;
