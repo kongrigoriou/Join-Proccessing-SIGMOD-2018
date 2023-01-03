@@ -56,3 +56,11 @@ void DestroyJobList(JobList* jobList){
     sem_destroy(jobList->jobsCount);
     free(jobList);
 }
+
+void JobExecute(Job* job){
+    /*if (job->type == ++++++++){
+        function(job->parameters)
+    }*/
+    free(job->parameters);
+    free(job);
+}

@@ -3,7 +3,7 @@
 #include <semaphore.h>
 
 typedef enum JobType{
-    
+    terminate //++++ gia tis douleies
 }JobType;
 
 typedef struct Job{
@@ -23,5 +23,15 @@ typedef struct JobList{
     sem_t *editSem;
     sem_t *jobsCount;            //counting semaphore
 }JobList;
+
+void InitializeJobList(JobList** jobList);
+
+void PushJob(JobList* jobList, Job* job);
+
+Job* PullJob(JobList* jobList);
+
+void DestroyJobList(JobList* jobList);
+
+void JobExecute(Job* job);
 
 #endif /* jobs_h */
