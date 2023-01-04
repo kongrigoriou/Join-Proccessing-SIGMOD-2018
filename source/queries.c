@@ -133,25 +133,14 @@ QueryArray* get_batch(){
             buffcount++;
 
             if(buffer[buffcount -3] == '.'){
-                if(buffer[0] == buffer[4]){
-                    //then its a filter
-                    for(int j = 0; j < buffcount; j++){
-                        if(buffer[j] != '.'){
-                            batch->array[query_num]->filters[i_filters] = buffer[j];
-                            i_filters++;
-                        }
+                for(int j = 0; j < buffcount; j++){
+                    if(buffer[j] != '.'){
+                        batch->array[query_num]->predicates[i] = buffer[j];
+                        i++;
                     }
-                    batch->array[query_num]->filtersCount = i_filters;
-                }else{
-                    for(int j = 0; j < buffcount; j++){
-                        if(buffer[j] != '.'){
-                            batch->array[query_num]->predicates[i] = buffer[j];
-                            i++;
-                        }
-                    }
-                    batch->array[query_num]->predicatesCount = i;
-                    // printf("Predicates count: %d\n", batch->array[query_num]->predicatesCount);
                 }
+                batch->array[query_num]->predicatesCount = i;
+                    // printf("Predicates count: %d\n", batch->array[query_num]->predicatesCount);
                 // printf("BATCHES: %d\n", batch_num);
                 // printf("QUERY: %d\n", query_num);
             }else{
@@ -408,6 +397,8 @@ void print_batch(QueryArray* batch){
         }
     }
     printf("\n");
+
+    printf("Done\n");
 }
 
 // int main(void){
