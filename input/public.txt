@@ -1,0 +1,12 @@
+./input/public/r0
+./input/public/r1
+./input/public/r2
+./input/public/r3
+./input/public/r4
+./input/public/r5
+./input/public/r6
+./input/public/r7
+./input/public/r8
+Done
+3 0 8|0.2=1.0&1.0=2.1&0.3<9381&2.3=7628|1.1 0.2
+F
