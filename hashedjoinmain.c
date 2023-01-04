@@ -601,7 +601,7 @@ int get_sum(Table* T,int rel,int col, joined** interm,int* original_rel){
 
 
 int main(int argc, char **argv){
-    int q_op=1;
+    int q_op=0;
     char* buffer=malloc(64);
     char* buffer1=malloc(64);
     size_t bufsize = 64;
@@ -643,8 +643,9 @@ int main(int argc, char **argv){
 
     QueryArray* batch;
     char c;
-
+    printf("\n before batch\n");
     batch = get_batch();
+    printf("\n after batch\n");
     //print_queries(queries);
      while(batch != NULL){
         // QueryArray* Batch_i= queries->batches[i];

@@ -84,7 +84,7 @@ clean:
 	rm -f $(OBJS) $(BUILD)/$(OUT) $(BUILD)/partition_test $(BUILD)/hop_test $(BUILD)/utilities_test $(BUILD)/list_test $(OBJ)/partition_test.o $(OBJ)/hopscotch_test.o $(OBJ)/utilities_test.o $(OBJ)/list_test.o
 
 run: $(BUILD)/$(OUT)
-	cat input/default.txt| $(BUILD)/$(OUT)
+	cat input/public.txt| $(BUILD)/$(OUT)
 
 tests: hop_test partition_test utilities_test list_test
 	./$(BUILD)/hop_test
