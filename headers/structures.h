@@ -25,10 +25,19 @@ struct result {
     tuple* tuplesS;
 };
 
+typedef struct statistics {
+    uint64_t min;
+    uint64_t max;
+    int count;
+    int distinct_count;
+    unsigned int number;
+}stats;
+
 typedef struct Table{
     uint64_t numColumns;
     uint64_t numRows;
     uint64_t** relations;
+    stats* stats;
 } Table;
 
 typedef struct joined{
@@ -40,5 +49,6 @@ typedef struct joined{
 
 int TableFitsCache(int cacheSize, int tableSize, int offSet);
 int LoadTable(char *fileName,struct Table *table);
+int fill_distinct_count(Table  *T, int table_size);
 
 #endif

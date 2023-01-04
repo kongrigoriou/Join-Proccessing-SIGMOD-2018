@@ -1,4 +1,5 @@
 #include "../headers/structures.h"
+#include "../headers/bitmap.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -43,15 +44,59 @@ int LoadTable(char *fileName,struct Table *table){
     //printf("numcolumns %ld\n",(*table)->numColumns);
     address+=sizeof(size_t);
     table->relations=malloc(table->numColumns*sizeof(uint64_t*));
+    table->stats=malloc(table->numColumns*sizeof(stats));
     //printf("here\n");
     for(int i=0;i<table->numColumns;i++){
         table->relations[i]=malloc(sizeof(uint64_t)*table->numRows);
-        /*table->relations[i]->num_tuples=table->numRows;
-        table->relations[i]->tuples=malloc(table->numRows*sizeof(tuple));*/
+        table->stats[i].count=0;
         for(int j=0;j<table->numRows;j++){
             table->relations[i][j]=*((uint64_t*)(address));
+            table->stats[i].count++;
+            if(j==0){
+                table->stats[i].max=table->relations[i][j];
+                table->stats[i].min=table->relations[i][j];
+            }
+            if(table->stats[i].max < table->relations[i][j]){
+                table->stats[i].max=table->relations[i][j];
+            }
+            if(table->stats[i].min > table->relations[i][j]){
+                table->stats[i].min=table->relations[i][j];
+            }
             address+=sizeof(uint64_t);
+        }
+        int number=table->stats[i].max-table->stats[i].min+1;
+        if(number >50000000){
+            table->stats[i].number=50000000;
+        }
+        else{
+            table->stats[i].number=number;
         }
     }
     return 0;
 };
+
+int hash_dist(bitmap_t b, unsigned int number, uint64_t max, uint64_t min, uint64_t index){
+    if(number==max-min+1){
+        set_bit(b,index-min);
+    }
+    else{
+        set_bit(b,index-min%number);
+    }
+    return 0;
+}
+
+int fill_distinct_count(Table  *T, int table_size){
+
+    for(int i=0;i<table_size;i++){
+        for(int j=0;j<T[i].numColumns;j++){
+            int number=T[i].stats[j].number;
+            bitmap_t hash_of_col=create_bitmap(number);
+            for(int k=0;k<T[i].numRows;k++){
+                hash_dist(hash_of_col,T[i].stats[j].number,T[i].stats[j].max,T[i].stats[j].min, T[i].relations[j][k]);
+            }
+            T[i].stats[j].distinct_count=get_count(hash_of_col,number);
+            free(hash_of_col);
+        }
+    }
+    return 0;
+}
