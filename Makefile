@@ -6,7 +6,7 @@ LIB		:= $(MY_PATH)lib
 OBJ		:= $(MY_PATH)objec
 BUILD	:= $(MY_PATH)build
 
-OBJS	= $(OBJ)/bitmap.o $(OBJ)/functions.o $(OBJ)/hashedjoinmain.o $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/partition.o $(OBJ)/partitionedHashJoin.o $(OBJ)/utilities.o $(OBJ)/queries.o
+OBJS	= $(OBJ)/bitmap.o $(OBJ)/functions.o $(OBJ)/hashedjoinmain.o $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/partition.o $(OBJ)/partitionedHashJoin.o $(OBJ)/utilities.o $(OBJ)/queries.o $(OBJ)/queries_optimization.o
 SOURCE	= $(MODULES)/bitmap.c $(MODULES)/functions.c $(MODULES)/hashedjoinmain.c $(MODULES)/hopscotch.c $(MODULES)/list.c $(MODULES)/partition.c $(MODULES)/partitionedHashJoin.c $(MODULES)/utilities.c $(MODULES)/queries.c harness.cpp
 HEADER	= $(HEADERS)/bitmap.h $(HEADERS)/functions.h $(HEADERS)/list.h $(HEADERS)/mainPartitionTest.h $(HEADERS)/structures.h $(HEADERS)/hopscotch.h $(HEADERS).queries.h
 OUT	= exec
@@ -79,6 +79,10 @@ $(OBJ)/utilities.o: $(MODULES)/utilities.c
 
 $(OBJ)/queries.o: $(MODULES)/queries.c
 	$(CC) $(FLAGS) $(MODULES)/queries.c -o $(OBJ)/queries.o
+
+$(OBJ)/queries_optimization.o: $(MODULES)/queries_optimization.c
+	$(CC) $(FLAGS) $(MODULES)/queries_optimization.c -o $(OBJ)/queries_optimization.o
+
 
 clean:
 	rm -f $(OBJS) $(BUILD)/$(OUT) $(BUILD)/partition_test $(BUILD)/hop_test $(BUILD)/utilities_test $(BUILD)/list_test $(OBJ)/partition_test.o $(OBJ)/hopscotch_test.o $(OBJ)/utilities_test.o $(OBJ)/list_test.o

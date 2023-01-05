@@ -75,6 +75,7 @@ int LoadTable(char *fileName,struct Table *table){
     return 0;
 };
 
+//add index to hash array
 int hash_dist(bitmap_t b, unsigned int number, uint64_t max, uint64_t min, uint64_t index){
     if(number==max-min+1){
         set_bit(b,index-min);
@@ -84,6 +85,18 @@ int hash_dist(bitmap_t b, unsigned int number, uint64_t max, uint64_t min, uint6
     }
     return 0;
 }
+
+int index_is_in_hash(bitmap_t b, unsigned int number, uint64_t max, uint64_t min, uint64_t index){
+    int bit;
+    if(number==max-min+1){
+        bit=get_bit(b,index-min);
+    }
+    else{
+        bit=get_bit(b,index-min%number);
+    }
+    return bit;
+}
+
 
 int fill_distinct_count(Table  *T, int table_size){
 
@@ -95,6 +108,7 @@ int fill_distinct_count(Table  *T, int table_size){
                 hash_dist(hash_of_col,T[i].stats[j].number,T[i].stats[j].max,T[i].stats[j].min, T[i].relations[j][k]);
             }
             T[i].stats[j].distinct_count=get_count(hash_of_col,number);
+            //T[i].stats[j].distinct_hash=hash_of_col;
             free(hash_of_col);
         }
     }

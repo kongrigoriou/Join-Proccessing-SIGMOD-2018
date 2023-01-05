@@ -49,6 +49,7 @@ int get_count(bitmap_t b,int size){
     return count;
 }
 
+
 void bitmap_main(){
     uint64_t array;
     array=0;

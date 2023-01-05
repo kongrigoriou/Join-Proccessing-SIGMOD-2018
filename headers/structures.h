@@ -3,6 +3,7 @@
 /** Type definition for a tuple */
 
 #include <stdint.h>
+#include "../headers/bitmap.h"
 
 typedef struct tuple {
     int64_t key;
@@ -50,5 +51,5 @@ typedef struct joined{
 int TableFitsCache(int cacheSize, int tableSize, int offSet);
 int LoadTable(char *fileName,struct Table *table);
 int fill_distinct_count(Table  *T, int table_size);
-
+int index_is_in_hash(bitmap_t b, unsigned int number, uint64_t max, uint64_t min, uint64_t index);
 #endif
