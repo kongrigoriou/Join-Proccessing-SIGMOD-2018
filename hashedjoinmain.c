@@ -428,7 +428,7 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
 
     //left is not in interm and right is not
     else if(left_inter==-1&&right_inter==-1){
-        //printf("No one in intermidiate yet\n");
+        printf("No one in intermidiate yet\n");
 
         //get left
         int* left_ids=RowIds[left_rel];                                   //current Rowids
@@ -468,7 +468,9 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         //join them together
         relation left_relation= create_relation(left_ids,data_left,RowIdsize[left_rel],0);
         relation right_relation= create_relation(right_ids,data_right,RowIdsize[right_rel],0);
+        printf("\nBefore join\n");
         relation res=PartitionedHashJoin(&left_relation ,  &right_relation);
+        printf("\nAfter join\n");
 
         free(right_relation.tuples);
         free(left_relation.tuples);
@@ -601,7 +603,7 @@ int get_sum(Table* T,int rel,int col, joined** interm,int* original_rel){
 
 
 int main(int argc, char **argv){
-    int q_op=0;
+    int q_op=1;
     char* buffer=malloc(64);
     char* buffer1=malloc(64);
     size_t bufsize = 64;
