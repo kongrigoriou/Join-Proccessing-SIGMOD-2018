@@ -117,7 +117,7 @@ QueryArray* get_batch(){
         scanf("%c", &c);
         
         i = 0;
-        char buffer[10];
+        char buffer[100];
         int buffcount = 0;
     
         while(c != '|'){
@@ -182,6 +182,7 @@ QueryArray* get_batch(){
     batch->size = query_num;
     return batch;
 }
+
 Batches* get_query_info(){
 
     Batches* batches;
