@@ -35,6 +35,8 @@ utilities_test: $(OBJ)/utilities.o $(OBJ)/utilities_test.o $(OBJ)/bitmap.o
 list_test: $(OBJ)/list.o $(OBJ)/list_test.o
 	$(CC) -g $(OBJ)/list.o $(OBJ)/list_test.o -o $(BUILD)/list_test $(LFLAGS)
 
+q_test: $(OBJ)/queries_optimization.o $(OBJ)/queries_optimization_test.o
+	$(CC) -g $(OBJ)/queries_optimization.o $(OBJ)/queries_optimization_test.o -o $(BUILD)/q_test $(LFLAGS)
 	
 $(OBJ)/partition_test.o: $(TESTS)/partition_test.c
 	$(CC) $(FLAGS) $(TESTS)/partition_test.c -o $(OBJ)/partition_test.o
@@ -47,6 +49,9 @@ $(OBJ)/utilities_test.o: $(TESTS)/utilities_test.c
 	
 $(OBJ)/list_test.o: $(TESTS)/list_test.c
 	$(CC) $(FLAGS) $(TESTS)/list_test.c -o $(OBJ)/list_test.o
+
+$(OBJ)/queries_optimization_test.o: $(TESTS)/queries_optimization_test.c
+	$(CC) $(FLAGS) $(TESTS)/queries_optimization_test.c -o $(OBJ)/queries_optimization_test.o
 
 # $(OBJ)/harness.o: harness.cpp
 # 	@ mkdir -p ./objec
@@ -90,11 +95,12 @@ clean:
 run: $(BUILD)/$(OUT)
 	cat input/public.txt| $(BUILD)/$(OUT)
 
-tests: hop_test partition_test utilities_test list_test
+tests: hop_test partition_test utilities_test list_test q_test
 	./$(BUILD)/hop_test
 	./$(BUILD)/partition_test
 	./$(BUILD)/utilities_test
 	./$(BUILD)/list_test
+	./$(BUILD)/q_test
 
 valgrind_join:
 	cat input/default.txt| valgrind --leak-check=full --show-leak-kinds=all $(BUILD)/$(OUT)

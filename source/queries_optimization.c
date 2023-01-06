@@ -162,3 +162,126 @@ int update_join(Table* T,joined** interm,int left_rel, int left_Col, int right_r
     return 0;
 }
 
+//produce next set of size n (maximum size of set is 4)
+int* produce_next_set(int* set,int n, int size){
+    if(n==1){
+        int first_1=-1;
+        for(int i=0;i<4;i++){
+            if(set[i]==1){
+                first_1=i;
+                break;
+            }
+        }
+        if(first_1==-1){
+            set[0]=1;
+            return set;
+        }
+        if(first_1==size-1){
+            return NULL;
+        }
+        set[first_1]=0;
+        set[first_1+1]=1;
+        return set;
+    }
+
+    if(n==2){
+        int first_1=-1;
+        int second_1=-1;
+        for(int i=0;i<4;i++){
+            if(set[i]==1){
+                first_1=i;
+                break;
+            }
+        }
+        if(first_1==-1){
+            set[0]=1;
+            set[1]=1;
+            return set;
+        }
+        for(int i=first_1+1;i<4;i++){
+            if(set[i]==1){
+                second_1=i;
+                break;
+            }
+        }
+        if(second_1==size-1){
+            if(first_1==size-2){
+                return NULL;
+            }
+            else{
+                set[second_1]=0;
+                set[first_1]=0;
+                set[first_1+1]=1;
+                set[first_1+2]=1;
+            }
+        }
+        else{
+            set[second_1]=0;
+            set[second_1+1]=1;
+        }
+        return set;
+    }
+    if(n==3){
+        int first_1=-1;
+        int second_1=-1;
+        int third_1=-1;
+        for(int i=0;i<4;i++){
+            if(set[i]==1){
+                first_1=i;
+                break;
+            }
+        }
+        if(first_1==-1){
+            set[0]=1;
+            set[1]=1;
+            set[2]=1;
+            return set;
+        }
+        for(int i=first_1+1;i<4;i++){
+            if(set[i]==1){
+                second_1=i;
+                break;
+            }
+        }
+        for(int i=second_1+1;i<4;i++){
+            if(set[i]==1){
+                third_1=i;
+                break;
+            }
+        }
+        if(third_1==size-1){
+            if(second_1==size-2&&first_1==size-3){
+                return NULL;
+            }
+            if(second_1==size-2){
+                set[third_1]=0;
+                set[second_1]=0;
+                set[first_1]=0;
+                set[first_1+1]=1;
+                set[first_1+2]=1;
+                set[first_1+3]=1;
+            }
+            else{
+                set[third_1]=0;
+                set[second_1]=0;
+                set[second_1+1]=1;
+                set[second_1+2]=1;
+            }
+            return set;
+        }
+        else{
+            set[third_1]=0;
+            set[third_1+1]=1;
+            return set;
+        }
+    }
+    return NULL;
+}
+
+int get_number(int* array,int size){
+    int sum=0;
+    for(int i=0;i<size;i++){
+        sum=sum+array[i]*pow(2,i);
+    }
+    return sum;
+}
