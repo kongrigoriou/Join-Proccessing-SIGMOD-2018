@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include "../headers/structures.h"
 #include "../headers/functions.h"
+#include "../headers/queries_optimization.h"
 #include <math.h>
 
 int exists_in_array(uint64_t* array,int size,int element){
@@ -284,4 +285,49 @@ int get_number(int* array,int size){
         sum=sum+array[i]*pow(2,i);
     }
     return sum;
+}
+
+int connected(int j,int* set,pred* join_array,int size_of_array){
+    for(int i=0;i<size_of_array;i++){
+        if(join_array[i].left_rel==j){
+            if(set[join_array[i].right_rel]){
+                return 1;
+            }
+        }
+        if(join_array[i].right_rel==j){
+            if(set[join_array[i].left_rel]){
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+besttree* CreateJoinTree(besttree* tree,int j){
+    besttree* CurrTree=malloc(sizeof(besttree));
+    for(int i=0;i<tree->size;i++){
+        CurrTree->relations[i]=tree->relations[i];
+    }
+    CurrTree->relations[tree->size]=j;
+    CurrTree->size= tree->size+1;
+    return CurrTree;
+}
+
+void copy_stats(Table* T,int count,int* original_relations, stats** stat){
+    for(int i=0;i<count;i++){
+        int T_i=original_relations[i];
+        stat[i]=malloc(T[T_i].numColumns*sizeof(stats));
+        for(int j=0;j<T[T_i].numColumns;j++){
+            stat[i][j].count =T[T_i].stats[j].count;
+            stat[i][j].distinct_count =T[T_i].stats[j].distinct_count;
+            stat[i][j].max =T[T_i].stats[j].max;
+            stat[i][j].min =T[T_i].stats[j].min;
+            stat[i][j].number =T[T_i].stats[j].number;
+        }
+    }
+}
+
+int cost(besttree tree,stats** stat){
+
+    retrun 0;
 }

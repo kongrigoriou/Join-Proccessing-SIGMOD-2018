@@ -8,7 +8,8 @@
 #include "./headers/functions.h"
 #include "./headers/queries.h"
 #include "./headers/bitmap.h"
-
+#include "./headers/queries_optimization.h"
+#include <math.h>
 
 
 
@@ -649,9 +650,111 @@ int main(int argc, char **argv){
     batch = get_batch();
     printf("\n after batch\n");
     //print_queries(queries);
-     while(batch != NULL){
+
+    while(batch != NULL){
         // QueryArray* Batch_i= queries->batches[i];
         // print_batch(batch);
+
+        //query optimization
+        if(q_op){
+            for(int j=0;j<batch->size;j++){
+                QueryInfo* Q=batch->array[j];
+                int count_of_filters=0;
+                // printf("J: ")
+                int size_r=Q->relationsCount;
+                stats* stat[4];
+                
+                copy_stats(T,Q->relationsCount,Q->relationsId,stat);
+                
+                while(count_of_filters<Q->filtersCount){
+                
+                    int rel=Q->filters[count_of_filters]-48;        //-48
+                    int col=Q->filters[count_of_filters+1]-48;
+                    char comp=Q->filters[count_of_filters+2];
+                    int num=0;
+                    count_of_filters+=3;
+                    while(Q->filters[count_of_filters]!='|'){
+                        num=num*10;
+                        num=num+Q->filters[count_of_filters]-48;
+                        count_of_filters++;
+                    }
+                    count_of_filters++;
+                    // printf("Filter:rel=%d col=%d comp=%c num=%d\n",rel,col,comp,num);
+                    //update stats
+                    
+                }
+                int count_of_pred=0;
+                //get the joins
+                pred* join_array=malloc(Q->predicatesCount*sizeof(pred));
+                int step=0;
+                while(count_of_pred<Q->predicatesCount){
+                    int left_rel=Q->predicates[count_of_pred]-48;
+                    int left_col=Q->predicates[count_of_pred+1]-48;
+                    int right_rel=Q->predicates[count_of_pred+3]-48;
+                    int right_col=Q->predicates[count_of_pred+4]-48;
+                    count_of_pred+=6;
+                    //join
+                    //printf("Join:left_rel=%d left_col=%d right_rel=%d right_col=%d\n",left_rel,left_col,right_rel,right_col);
+                    //get predicates
+                    join_array[step].left_rel=left_rel;
+                    join_array[step].left_col=left_col;
+                    join_array[step].right_rel=right_rel;
+                    join_array[step].right_col=right_col;
+                    step++; 
+                }
+
+                //start of algorithm
+                printf("Before the algorithm size_R=%d\n",size_r);
+                besttree** best_tree=malloc(sizeof(besttree*)*pow(2,size_r));
+                for(int i=0;i<pow(2,size_r);i++){
+                    best_tree[i]=NULL;
+                }
+                int set1[]={0,0,0,0};
+                for(int i=0;i<size_r;i++){
+                    produce_next_set(set1,1,size_r);
+                    besttree* node=malloc(sizeof(besttree));
+                    node->relations[0]=i;
+                    node->size=1;
+                    printf("before best_tree d=%d\n",get_number(set1,size_r));
+                    best_tree[get_number(set1,size_r)]=node;
+                }
+                printf("after first loop\n");
+                for(int i=1;i<size_r;i++){
+                    int set[]={0,0,0,0};
+                    //produce all sets of size i
+                    while(NULL!=produce_next_set(set,i,size_r)){
+                        for(int j=0;j<size_r;j++){
+                            //if j exists in the set ignore it
+                            if(set[j]==1){
+                                continue;
+                            }
+                            //if j isn't connected with a relation in the set ignore it
+                            if(!connected(j,set,join_array,Q->predicatesCount)){
+                                continue;
+                            }
+                            besttree* CurrTree=CreateJoinTree(best_tree[get_number(set,size_r)],j);
+                            
+                            //create S'
+                            int newset[4];
+                            for(int i=0;i<4;i++){
+                                newset[i]=set[i];
+                            }
+                            newset[j]=1;
+
+                            //update bestTree if needed
+                            if(best_tree[get_number(newset,size_r)]==NULL||0/*cost*/){
+                                best_tree[get_number(newset,size_r)]=CurrTree;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
+
+
+
         for(int j=0;j<batch->size;j++){
             QueryInfo* Q=batch->array[j];
             int count_of_filters=0;
@@ -693,6 +796,10 @@ int main(int argc, char **argv){
                 // printf("Filter:rel=%d col=%d comp=%c num=%d\n",rel,col,comp,num);
                 filter(T,interm,rowid,rowid_s,rel,col,comp,num,0,Q->relationsId);
             }
+
+            
+
+
             int count_of_pred=0;
             //get the joins
             while(count_of_pred<Q->predicatesCount){
