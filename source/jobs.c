@@ -62,6 +62,9 @@ void JobExecute(Job* job){
         function(job->parameters)
         LoadTable((char*)job->parameters,(Table*)(job->parameters+sizeof(char*)));
     }
+    else if (job->type == barrier){
+        pthread_barrier_wait(&((pthread_barrier_t)job->parameters));
+    }
     free(job->parameters);
     free(job);
 }

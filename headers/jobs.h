@@ -3,7 +3,7 @@
 #include <semaphore.h>
 
 typedef enum JobType{
-    terminate,loadTable //++++ gia tis douleies
+    terminate,loadTable,barrier 
 }JobType;
 
 typedef struct Job{

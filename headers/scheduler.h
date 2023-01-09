@@ -1,10 +1,10 @@
 #ifndef scheduler_h
 #define scheduler_h
 
-void InitializeMultiThread(JobList** jobList, pthread_t*** threads);
+void InitializeMultiThread(JobList** jobList, pthread_t*** threads, int numOfThreads);
 
 void ThreadStart(JobList* jobList);
 
-void DestroyMultiThread(JobList* jobList, pthread_t** threads);
+void DestroyMultiThread(JobList* jobList, pthread_t** threads, int numOfThreads);
 
 #endif /* scheduler_h */

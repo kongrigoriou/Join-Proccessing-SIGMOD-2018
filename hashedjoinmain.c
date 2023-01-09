@@ -10,6 +10,7 @@
 #include "./headers/bitmap.h"
 #include "./headers/queries_optimization.h"
 #include <math.h>
+#define NUM_OF_THREADS 3
 
 
 
@@ -610,12 +611,12 @@ int main(int argc, char **argv){
     size_t bufsize = 64;
     JobList* jobList;
     pthread_t** threads;
+    pthread_barrier_t barrier_id;
     //size_t characters;
     //printf("start\n");
     List_string* file_list=list_create_string();
     getline(&buffer,&bufsize,stdin);
-    InitializeMultithread(&jobList, &threads);
-
+    InitializeMultithread(&jobList, &threads, NUM_OF_THREADS);
 
     while(strcmp(buffer, "Done\n")){
         buffer[strlen(buffer)-1]='\0';
@@ -640,6 +641,16 @@ int main(int argc, char **argv){
         PushJob(jobList, job);
         node=node->next;
     }
+    pthread_barrier_init(&barrier_id, NULL, NUM_OF_THREADS+1);
+    for(i=0 ; i<NUM_OF_THREADS ; i++){
+        Job* job=malloc(sizeof(Job));
+        job->type=barrier;
+        job->parameters=malloc(sizeof(pthread_barrier_t));
+        memcpy(job->parameters, &barrier_id, sizeof(pthread_barrier_t));
+        PushJob(jobList, job);
+    }
+    pthread_barrier_wait(&barrier_id);
+    pthread_barrier_destroy(&barrier_id);
     list_destroy_string(file_list);
     /*for(int i=0;i<table_size;i++){
         printf("\nrow=%ld col=%ld i[0][0]=%ld\n",T[i].numRows, T[i].numColumns,T[i].relations[0][0]);
