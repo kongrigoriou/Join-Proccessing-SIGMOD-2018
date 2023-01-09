@@ -58,9 +58,10 @@ void DestroyJobList(JobList* jobList){
 }
 
 void JobExecute(Job* job){
-    /*if (job->type == ++++++++){
+    if (job->type == loadTable){
         function(job->parameters)
-    }*/
+        LoadTable((char*)job->parameters,(Table*)(job->parameters+sizeof(char*)));
+    }
     free(job->parameters);
     free(job);
 }

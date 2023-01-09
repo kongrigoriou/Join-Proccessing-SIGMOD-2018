@@ -608,10 +608,14 @@ int main(int argc, char **argv){
     char* buffer=malloc(64);
     char* buffer1=malloc(64);
     size_t bufsize = 64;
+    JobList* jobList;
+    pthread_t** threads;
     //size_t characters;
     //printf("start\n");
     List_string* file_list=list_create_string();
     getline(&buffer,&bufsize,stdin);
+    InitializeMultithread(&jobList, &threads);
+
 
     while(strcmp(buffer, "Done\n")){
         buffer[strlen(buffer)-1]='\0';
@@ -628,8 +632,12 @@ int main(int argc, char **argv){
     ListNode_string* node=file_list->head;
     int table_size=file_list->size;
     for(int i=table_size-1;i>=0;i--){
-        //printf("\ni=%d\n",i);
-        LoadTable(node->data,&T[i]);
+        Job* job=malloc(sizeof(Job));
+        job->type=loadTable;
+        job->parameters=malloc(sizeof(char*) + sizeof(struct Table*));
+        memcpy(job->parameters,&(node->data),sizeof(node->data));
+        memcpy(job->parameters+sizeof(node->data),&(&T[i]),sizeof(&T[i]));
+        PushJob(jobList, job);
         node=node->next;
     }
     list_destroy_string(file_list);
