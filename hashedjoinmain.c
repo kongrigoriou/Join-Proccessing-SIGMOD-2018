@@ -430,7 +430,7 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
 
     //left is not in interm and right is not
     else if(left_inter==-1&&right_inter==-1){
-        printf("No one in intermidiate yet\n");
+        //printf("No one in intermidiate yet\n");
 
         //get left
         int* left_ids=RowIds[left_rel];                                   //current Rowids
@@ -470,9 +470,9 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         //join them together
         relation left_relation= create_relation(left_ids,data_left,RowIdsize[left_rel],0);
         relation right_relation= create_relation(right_ids,data_right,RowIdsize[right_rel],0);
-        printf("\nBefore join\n");
+        //printf("\nBefore join\n");
         relation res=PartitionedHashJoin(&left_relation ,  &right_relation);
-        printf("\nAfter join\n");
+        //printf("\nAfter join\n");
 
         free(right_relation.tuples);
         free(left_relation.tuples);
@@ -605,18 +605,15 @@ int get_sum(Table* T,int rel,int col, joined** interm,int* original_rel){
 
 
 int main(int argc, char **argv){
-    int q_op=1;
+    int q_op=0;
     char* buffer=malloc(64);
     char* buffer1=malloc(64);
     size_t bufsize = 64;
-    JobList* jobList;
-    pthread_t** threads;
-    pthread_barrier_t barrier_id;
     //size_t characters;
     //printf("start\n");
     List_string* file_list=list_create_string();
     getline(&buffer,&bufsize,stdin);
-    InitializeMultithread(&jobList, &threads, NUM_OF_THREADS);
+    
 
     while(strcmp(buffer, "Done\n")){
         buffer[strlen(buffer)-1]='\0';
@@ -632,6 +629,18 @@ int main(int argc, char **argv){
     Table* T=malloc(file_list->size*sizeof(Table));
     ListNode_string* node=file_list->head;
     int table_size=file_list->size;
+
+    //fill the table
+    for(int i=table_size-1;i>=0;i--){
+        //printf("\ni=%d\n",i);
+        LoadTable(node->data,&T[i]);
+        node=node->next;
+    }
+    /*
+    JobList* jobList;
+    pthread_t** threads;
+    pthread_barrier_t barrier_id;
+    InitializeMultithread(&jobList, &threads, NUM_OF_THREADS);
     for(int i=table_size-1;i>=0;i--){
         Job* job=malloc(sizeof(Job));
         job->type=loadTable;
@@ -650,7 +659,8 @@ int main(int argc, char **argv){
         PushJob(jobList, job);
     }
     pthread_barrier_wait(&barrier_id);
-    pthread_barrier_destroy(&barrier_id);
+    pthread_barrier_destroy(&barrier_id);*/
+    
     list_destroy_string(file_list);
     /*for(int i=0;i<table_size;i++){
         printf("\nrow=%ld col=%ld i[0][0]=%ld\n",T[i].numRows, T[i].numColumns,T[i].relations[0][0]);
@@ -665,9 +675,9 @@ int main(int argc, char **argv){
 
     QueryArray* batch;
     char c;
-    printf("\n before batch\n");
+    //printf("\n before batch\n");
     batch = get_batch();
-    printf("\n after batch\n");
+    //printf("\n after batch\n");
     //print_queries(queries);
 
     while(batch != NULL){
@@ -675,103 +685,10 @@ int main(int argc, char **argv){
         // print_batch(batch);
 
         //query optimization
+
         if(q_op){
-            for(int j=0;j<batch->size;j++){
-                QueryInfo* Q=batch->array[j];
-                int count_of_filters=0;
-                // printf("J: ")
-                int size_r=Q->relationsCount;
-                stats* stat[4];
-                
-                copy_stats(T,Q->relationsCount,Q->relationsId,stat);
-                
-                while(count_of_filters<Q->filtersCount){
-                
-                    int rel=Q->filters[count_of_filters]-48;        //-48
-                    int col=Q->filters[count_of_filters+1]-48;
-                    char comp=Q->filters[count_of_filters+2];
-                    int num=0;
-                    count_of_filters+=3;
-                    while(Q->filters[count_of_filters]!='|'){
-                        num=num*10;
-                        num=num+Q->filters[count_of_filters]-48;
-                        count_of_filters++;
-                    }
-                    count_of_filters++;
-                    // printf("Filter:rel=%d col=%d comp=%c num=%d\n",rel,col,comp,num);
-                    //update stats
-                    
-                }
-                int count_of_pred=0;
-                //get the joins
-                pred* join_array=malloc(Q->predicatesCount*sizeof(pred));
-                int step=0;
-                while(count_of_pred<Q->predicatesCount){
-                    int left_rel=Q->predicates[count_of_pred]-48;
-                    int left_col=Q->predicates[count_of_pred+1]-48;
-                    int right_rel=Q->predicates[count_of_pred+3]-48;
-                    int right_col=Q->predicates[count_of_pred+4]-48;
-                    count_of_pred+=6;
-                    //join
-                    //printf("Join:left_rel=%d left_col=%d right_rel=%d right_col=%d\n",left_rel,left_col,right_rel,right_col);
-                    //get predicates
-                    join_array[step].left_rel=left_rel;
-                    join_array[step].left_col=left_col;
-                    join_array[step].right_rel=right_rel;
-                    join_array[step].right_col=right_col;
-                    step++; 
-                }
-
-                //start of algorithm
-                printf("Before the algorithm size_R=%d\n",size_r);
-                besttree** best_tree=malloc(sizeof(besttree*)*pow(2,size_r));
-                for(int i=0;i<pow(2,size_r);i++){
-                    best_tree[i]=NULL;
-                }
-                int set1[]={0,0,0,0};
-                for(int i=0;i<size_r;i++){
-                    produce_next_set(set1,1,size_r);
-                    besttree* node=malloc(sizeof(besttree));
-                    node->relations[0]=i;
-                    node->size=1;
-                    printf("before best_tree d=%d\n",get_number(set1,size_r));
-                    best_tree[get_number(set1,size_r)]=node;
-                }
-                printf("after first loop\n");
-                for(int i=1;i<size_r;i++){
-                    int set[]={0,0,0,0};
-                    //produce all sets of size i
-                    while(NULL!=produce_next_set(set,i,size_r)){
-                        for(int j=0;j<size_r;j++){
-                            //if j exists in the set ignore it
-                            if(set[j]==1){
-                                continue;
-                            }
-                            //if j isn't connected with a relation in the set ignore it
-                            if(!connected(j,set,join_array,Q->predicatesCount)){
-                                continue;
-                            }
-                            besttree* CurrTree=CreateJoinTree(best_tree[get_number(set,size_r)],j);
-                            
-                            //create S'
-                            int newset[4];
-                            for(int i=0;i<4;i++){
-                                newset[i]=set[i];
-                            }
-                            newset[j]=1;
-
-                            //update bestTree if needed
-                            if(best_tree[get_number(newset,size_r)]==NULL||0/*cost*/){
-                                best_tree[get_number(newset,size_r)]=CurrTree;
-                            }
-                        }
-                    }
-                }
-
-            }
+            Q_op(batch,T);
         }
-
-
 
 
         for(int j=0;j<batch->size;j++){

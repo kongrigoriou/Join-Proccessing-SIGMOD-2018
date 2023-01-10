@@ -29,8 +29,8 @@ struct result {
 typedef struct statistics {
     uint64_t min;
     uint64_t max;
-    int count;
-    int distinct_count;
+    uint64_t count;
+    uint64_t distinct_count;
     unsigned int number;
 }stats;
 

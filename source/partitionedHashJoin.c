@@ -360,7 +360,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
                 index = 0;
                 while(index < pow(2,N) -1){
                     if(pSumFinalS[i][index] != pSumFinalS[i][index + 1]){
-                        printf("\n");
+                        //printf("\n");
                         for(int j = pSumFinalS[i][index]; j < pSumFinalS[i][index + 1]; j++){
                             results = search(hopscotchTwoSteps[i][index], reOrderedSecStepS->tuples[j]);
                             final = list_append(final, results);
