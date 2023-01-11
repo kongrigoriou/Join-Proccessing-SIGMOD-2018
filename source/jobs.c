@@ -1,11 +1,17 @@
 #include "../headers/jobs.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 void InitializeJobList(JobList** jobList){
     *jobList=malloc(sizeof(JobList));
-    sem_init(jobList->editSem, 0, 1);
-    sem_init(jobList->jobsCount, 0, 0);
-    jobList->Head=NULL;
-    jobList->Last=NULL;
+    (*jobList)->editSem = malloc(sizeof(sem_t));
+    (*jobList)->jobsCount = malloc(sizeof(sem_t));
+    sem_init((*jobList)->editSem, 0, 1);
+    sem_init((*jobList)->jobsCount, 0, 1);
+    (*jobList)->Head = malloc(sizeof(JobListElement));
+    (*jobList)->Last = malloc(sizeof(JobListElement));
+    (*jobList)->Head=NULL;
+    (*jobList)->Last=NULL;
 }
 
 void PushJob(JobList* jobList, Job* job){
@@ -17,8 +23,8 @@ void PushJob(JobList* jobList, Job* job){
     if (jobList->Head==NULL){
         jobList->Head=jobListElement;
         jobList->Last=jobListElement;
-        jobListElement->prev=NULL;
-        jobListElement->next=NULL;
+        jobList->Head->prev=NULL;
+        jobList->Head->next=NULL;
     }
     else{
         jobList->Last->next=jobListElement;
@@ -59,11 +65,11 @@ void DestroyJobList(JobList* jobList){
 
 void JobExecute(Job* job){
     if (job->type == loadTable){
-        function(job->parameters)
-        LoadTable((char*)job->parameters,(Table*)(job->parameters+sizeof(char*)));
+        // function(job->parameters);
+        LoadTable((char*)job->parameters->arg1,(Table*)(job->parameters->arg2));
     }
     else if (job->type == barrier){
-        pthread_barrier_wait(&((pthread_barrier_t)job->parameters));
+        pthread_barrier_wait(((pthread_barrier_t *)job->parameters));
     }
     free(job->parameters);
     free(job);

@@ -4,19 +4,23 @@
 void InitializeMultiThread(JobList** jobList, pthread_t*** threads, int numOfThreads){
     *threads=malloc(numOfThreads*sizeof(pthread_t*));
     InitializeJobList(jobList);
-    for(i=0;i<numOfThreads;i++){
-        pthread_create(threads[i], NULL, ThreadStart, (void*)(*jobList));
+    for(int i=0;i<numOfThreads;i++){
+        (*threads)[i] = malloc(sizeof(pthread_t));
+        pthread_create((*threads)[i], NULL, ThreadStart, (void*)(*jobList));
     }
 }
 
-void ThreadStart(JobList* jobList){
+void* ThreadStart(void* jobL){
+    JobList* jobList = jobL;
     Job* job;
     while(1){
-        job=PullJob(jobList);
-        if(job->type==terminate)
-            pthread_exit(NULL);
-        else
-            JobExecute(job);
+        if(jobList->Head != NULL){
+            job=PullJob(jobList);
+            if(job->type==terminate)
+                pthread_exit(NULL);
+            else
+                JobExecute(job);
+        }
     }
 }
 
@@ -28,7 +32,7 @@ void DestroyMultiThread(JobList* jobList, pthread_t** threads, int numOfThreads)
         job->parameters=NULL;
         PushJob(jobList, job);
     }
-    for(i=0;i<numOfThreads;i++){
+    for(int i=0;i<numOfThreads;i++){
         pthread_join(*(threads[i]), (void**)NULL);
     }
     free(threads);

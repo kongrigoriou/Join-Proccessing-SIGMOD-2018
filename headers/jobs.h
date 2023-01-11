@@ -1,14 +1,23 @@
 #ifndef jobs_h
 #define jobs_h
 #include <semaphore.h>
+#include "../headers/structures.h"
+#include <pthread.h>
+
+// #include
 
 typedef enum JobType{
     terminate,loadTable,barrier 
 }JobType;
 
+typedef struct args{
+    void* arg1;
+    void* arg2;
+}args;
+
 typedef struct Job{
     JobType type;
-    void* parameters;
+    args* parameters;
 }Job;
 
 typedef struct JobListElement{
@@ -23,6 +32,7 @@ typedef struct JobList{
     sem_t *editSem;
     sem_t *jobsCount;            //counting semaphore
 }JobList;
+
 
 void InitializeJobList(JobList** jobList);
 
