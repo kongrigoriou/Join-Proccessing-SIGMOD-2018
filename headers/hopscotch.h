@@ -11,12 +11,14 @@ typedef struct node {
     struct tuple info;  //the tuple
     bitmap_t  bitmap;   //the bitmap
     int occupied;        //whether node is empty or not
+    //List* duplicate;
+    List* overflow;
 } node;
 
 typedef struct hopscotch_array {
     node* array;
-    int H;
-    int size;
+    uint64_t H;
+    uint64_t size;
 } hop;
 
 typedef struct result_node {

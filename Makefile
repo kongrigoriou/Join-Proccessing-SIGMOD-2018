@@ -90,9 +90,12 @@ $(OBJ)/queries_optimization.o: $(MODULES)/queries_optimization.c
 
 
 clean:
-	rm -f $(OBJS) $(BUILD)/$(OUT) $(BUILD)/partition_test $(BUILD)/hop_test $(BUILD)/utilities_test $(BUILD)/list_test $(OBJ)/partition_test.o $(OBJ)/hopscotch_test.o $(OBJ)/utilities_test.o $(OBJ)/list_test.o
+	rm -f $(OBJS) $(BUILD)/$(OUT) $(BUILD)/partition_test $(BUILD)/hop_test $(BUILD)/utilities_test $(BUILD)/list_test $(OBJ)/partition_test.o $(OBJ)/hopscotch_test.o $(OBJ)/utilities_test.o $(OBJ)/list_test.o $(BUILD)/q_test $(OBJ)/queries_optimization_test.o
 
 run: $(BUILD)/$(OUT)
+	cat input/default.txt| $(BUILD)/$(OUT)
+
+public: $(BUILD)/$(OUT)
 	cat input/public.txt| $(BUILD)/$(OUT)
 
 tests: hop_test partition_test utilities_test list_test q_test
@@ -103,7 +106,7 @@ tests: hop_test partition_test utilities_test list_test q_test
 	./$(BUILD)/q_test
 
 valgrind_join:
-	cat input/default.txt| valgrind --leak-check=full --show-leak-kinds=all $(BUILD)/$(OUT)
+	cat input/default.txt| valgrind --track-origins=yes $(BUILD)/$(OUT)
 
 valgrind_tests: hop_test partition_test utilities_test list_test
 	valgrind --leak-check=full --show-leak-kinds=all ./$(BUILD)/hop_test

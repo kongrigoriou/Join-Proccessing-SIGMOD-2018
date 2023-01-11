@@ -58,6 +58,8 @@ node* create_array_of_hop(int n, int h){
         array[i].bitmap=create_bitmap(bitmap_size);
         //*(array[i].bitmap)=(char)0;
         array[i].occupied=0;
+        //array[i].duplicate=list_create();
+        //array[i].overflow=list_create();
     }
     return array;
 }
@@ -65,12 +67,13 @@ node* create_array_of_hop(int n, int h){
 //creates the array
 hop* create_array(int n, int h){
     //node * array=malloc(n*sizeof(node));
-    //printf("let's create a hopscotch struct\n");
+    printf("let's create a hopscotch struct\n");
     hop* hops=malloc(sizeof(hop));
     
     hops->H=h;
     hops->size=n;
     hops->array=create_array_of_hop(n,h);
+    
     
     //printf("end of creation \n");
     return hops;
@@ -149,15 +152,30 @@ void print_array(node* array, int size){
         }
     }
 }
-
+int blah=1;
 int resize(hop** hops_, tuple element, int n, int h){
     
     hop* hops=*hops_;
     node* current_array=hops->array;
-    //printf("RESIZE\n");
+    printf("RESIZE\n");
+    if(h<10000&&blah==1){
+        hops->H=2*h;//log((double)hops->size);
+        //blah=0;
+    }
+    else{
+        hops->H=h+h/2;
+        blah=1;
+    }
     
-    hops->size=2*n;
-    hops->H=2*h;//log((double)hops->size);
+    if(n<1000000){
+        hops->size=2*n;
+    }
+    else{
+        hops->size=n+n/2;
+    }
+    
+    
+    
     node* new_array=create_array_of_hop(hops->size,hops->H);
     hops->array=new_array;
     //int size=hops->size;
@@ -167,6 +185,13 @@ int resize(hop** hops_, tuple element, int n, int h){
         if(current_array[i].occupied!=0){
             insert(hops,current_array[i].info);
         }
+        //ListNode* node;
+        //node = current_array[i].overflow->head;
+        /*for(int j=0;j<current_array[i].overflow->size;j++){
+            printf("Inserting things\n");
+            insert(hops,node->data);
+            node = node->next;
+        }*/
     }
     destroy_array(current_array,n);
 
@@ -198,8 +223,8 @@ int insert(hop* hops, tuple element){
     
     
     node* array=hops->array;
-    int n= hops->size;
-    int H =get_H(hops);
+    uint64_t n= hops->size;
+    uint64_t H =get_H(hops);
     int key=element.key;
     //printf("\n\nsize of array is %d\n\n",n);
     int hash_of_key=hash(key,n);
@@ -209,12 +234,28 @@ int insert(hop* hops, tuple element){
     /*if(element.payload==16646){
         printf("\n\nH is %d in this insert and key=%ld\n\n",H,element.key);
     }*/
+    /*for(int i=0;i<H;i++){
+        if(get_bit(bitmap,i)){
+            if(array[hash_of_key+i].info.key==element.key){
+                list_insert(array[hash_of_key+i].duplicate,element);
+                return n; 
+            }
+        }
+    }*/
     // if a neighborhood is full of elements with hash(element) we need a bigger array
     if(bitmapisfull(bitmap,H)){
         //print_bitmap(bitmap);
         //printf("\nYou should appear here at least once\n");
-        size=resize(&hops,element,n,H);
+        size =n;
+        /*if(hash_of_key==hash(key,2*n)){
+            printf("things are entering the overflow list hash_of_key=%d\n",hash_of_key);
+            list_insert( array[hash_of_key].overflow,element);
+        }
+        else{
+            size=resize(&hops,element,n,H);
+        }*/
         //resize
+        size=resize(&hops,element,n,H);
         return size;
     }
     
@@ -226,8 +267,17 @@ int insert(hop* hops, tuple element){
     }*/
     //if there is no empty spot array is full
     if(j==-1){
-        size=resize(&hops,element,n,H);
+        size =n;
+        /*if(hash_of_key==hash(key,2*n)){
+            printf("things are entering the overflow list h=%d\n",hash_of_key);
+            list_insert( array[hash_of_key].overflow,element);
+            printf("things are entering the overflow list h=%d overflow size=%d\n",hash_of_key,array[hash_of_key].overflow->size);
+        }
+        else{
+            size=resize(&hops,element,n,H);
+        }*/
         //resize
+        size=resize(&hops,element,n,H);
         return size;
     }
     while(dist(j,hash_of_key,n)>=H){//dist(j,hash_of_key,n)
@@ -256,9 +306,16 @@ int insert(hop* hops, tuple element){
             }
         }
         if(pos_in_bitmap==-1){
-            size=resize(&hops,element,n,H);
-            //resize
+            size =n;
+            /*if(hash_of_key==hash(key,2*n)){
+                list_insert( array[hash_of_key].overflow,element);
+            }
+            else{
+                size=resize(&hops,element,n,H);
+            }*/
             
+            //resize
+            size=resize(&hops,element,n,H);
             return size;
         }
         //printf("\nbefore if: i am to be moved here j=%d, before i was here %d and hash=%d and H=%d check=%d and n=%d\n",j, element_to_be_moved, hash(array[element_to_be_moved].info.key,n),H,check_index,n);
@@ -321,10 +378,24 @@ List* search(hop*  hops ,tuple element){
            temp_t.payload=element.payload;
 
            list_insert(result_list,temp_t);
+           //result_list=list_append(result_list,array[i].duplicate);
         }
         //printf("after if\n");
         
     }
+    //ListNode* node;
+    /*node = array[hash_of_key].overflow->head;
+    for(int i=0;i<array[hash_of_key].overflow->size;i++){
+        printf("In the overflow list\n");
+        if(node->data.key==element.key){
+            printf("Insert in result_list\n");
+            tuple temp_t;
+            temp_t.key=node->data.payload;
+            temp_t.payload=element.payload;
+            list_insert(result_list,temp_t);
+        }
+        node = node->next;
+    }*/
     //list_print(result_list);
     return result_list;
 }

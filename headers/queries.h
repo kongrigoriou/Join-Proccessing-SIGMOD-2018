@@ -1,3 +1,5 @@
+#ifndef QUER
+#define QUER
 #include "structures.h"
 
 struct QueryInfo{
@@ -39,3 +41,4 @@ void print_queries(Batches*);
 void print_batch(QueryArray*);
 void destroy(QueryArray*);
 
+#endif
