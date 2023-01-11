@@ -605,7 +605,7 @@ int get_sum(Table* T,int rel,int col, joined** interm,int* original_rel){
 
 
 int main(int argc, char **argv){
-    int q_op=0;
+    int q_op=1;
     char* buffer=malloc(64);
     char* buffer1=malloc(64);
     size_t bufsize = 64;
@@ -835,6 +835,7 @@ int main(int argc, char **argv){
             free(T[i].relations[j]);
         }
         free(T[i].relations);
+        free(T[i].stats);
     }
     free(T);
     

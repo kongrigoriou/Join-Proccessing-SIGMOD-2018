@@ -704,12 +704,12 @@ int Q_op(QueryArray* batch,Table* T){
         //start of algorithm
         //printf("Before the algorithm size_R=%d\n",size_r);
         besttree** best_tree=malloc(sizeof(besttree*)*pow(2,size_r));
-        int* nocrossproduct=calloc(pow(2,size_r),sizeof(int));
+        //int* nocrossproduct=calloc(pow(2,size_r),sizeof(int));
         for(int i=0;i<pow(2,size_r);i++){
             best_tree[i]=NULL;
         }
         //printf("after malloc loop\n");
-        int temp[]={0,0,0,0};
+        /*int temp[]={0,0,0,0};
         for(int i=0;i<size_r;i++){
                     
             temp[i]=1;
@@ -718,7 +718,7 @@ int Q_op(QueryArray* batch,Table* T){
             best_tree[j]->relations[0]=i;
             best_tree[j]->size=1;
             temp[i]=0;
-        }
+        }*/
         int set1[]={0,0,0,0};
         for(int i=0;i<size_r;i++){
             produce_next_set(set1,1,size_r);
@@ -745,20 +745,20 @@ int Q_op(QueryArray* batch,Table* T){
                             
                     //if j isn't connected with a relation in the set ignore it
                     if(!connected(j,set,join_array,size_of_join_array)){
-                        int temp[4];
+                        /*int temp[4];
                         for(int i=0;i<4;i++){
                             temp[i]=set[i];
                         }
                         temp[j]=1;
-                        nocrossproduct[get_number(temp,size_r)]=1;
+                        nocrossproduct[get_number(temp,size_r)]=1;*/
                         continue;
                     }
                     if(!set_is_connected(set,size_r,join_array,size_of_join_array)){
                         continue;
                     }
-                    if(nocrossproduct[get_number(set,size_r)]){
+                    /*if(nocrossproduct[get_number(set,size_r)]){
                         break;
-                    }
+                    }*/
                     //printf("After connected number %d\n",get_number(set,size_r));
                     besttree* CurrTree=CreateJoinTree(best_tree[get_number(set,size_r)],j);
                     //printf("after join tree\n");
@@ -781,7 +781,13 @@ int Q_op(QueryArray* batch,Table* T){
                     //int check=;
                     if(best_tree[get_number(newset,size_r)]==NULL||cost(T,best_tree[get_number(newset,size_r)],stat,join_array,size_of_join_array,Q->relationsId)>cost(T,CurrTree,stat,join_array,size_of_join_array,Q->relationsId) /*cost*/){
                         //printf("must enter here get_number=%d\n",get_number(newset,size_r));
+                        if(best_tree[get_number(newset,size_r)]!=NULL){
+                            free(best_tree[get_number(newset,size_r)]);
+                        }
                         best_tree[get_number(newset,size_r)]=CurrTree;
+                    }
+                    else{
+                        free(CurrTree);
                     }
                 }
             }
@@ -797,6 +803,16 @@ int Q_op(QueryArray* batch,Table* T){
         /*for(int i=0;i<best_tree[get_number(result_set,size_r)]->size;i++){
             printf("tree[%d]=%d\n",i,best_tree[get_number(result_set,size_r)]->relations[i]);
         }*/
+        free(join_array);
+        for(int i=0;i<pow(2,size_r);i++){
+            if(best_tree[i]!=NULL){
+                free(best_tree[i]);
+            }
+        }
+        free(best_tree);
+        for(int i=0;i<size_r;i++){
+            free(stat[i]);
+        }
     }
     return 0;
 }
