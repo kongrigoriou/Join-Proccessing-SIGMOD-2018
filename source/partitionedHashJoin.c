@@ -85,9 +85,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
             countProcesses++;
         }
         pthread_mutex_unlock(&condVarMutex);
-
-        pthread_cond_destroy(&condVarMutex);
-        pthread_mutex_destroy(&condVarMutex);
+        pthread_cond_destroy(&condVar);
     }
     else {
         num_of_partitions(reOrderedR, relR, pSumRPtr, reOrderedSecStepR, pSumFinalR, stepRPtr);
@@ -144,7 +142,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
             }
             pthread_mutex_unlock(&condVarMutex);
 
-            pthread_cond_destroy(&condVarMutex);
+            pthread_cond_destroy(&condVar);
             pthread_mutex_destroy(&condVarMutex);
             pthread_mutex_destroy(hopMutexRead);
             pthread_mutex_destroy(hopMutexWrite);
@@ -186,8 +184,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
                     countProcesses++;
                 }
                 pthread_mutex_unlock(&condVarMutex);
-
-                pthread_cond_destroy(&condVarMutex);
+                pthread_cond_destroy(&condVar);
                 pthread_mutex_destroy(&condVarMutex);
                 pthread_mutex_destroy(hopMutexRead);
                 pthread_mutex_destroy(hopMutexWrite);
@@ -234,7 +231,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
                         }
                         pthread_mutex_unlock(&condVarMutex);
 
-                        pthread_cond_destroy(&condVarMutex);
+                        pthread_cond_destroy(&condVar);
                         pthread_mutex_destroy(&condVarMutex);
                         pthread_mutex_destroy(hopMutexRead);
                         pthread_mutex_destroy(hopMutexWrite);
@@ -276,7 +273,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
                 }
                 pthread_mutex_unlock(&condVarMutex);
 
-                pthread_cond_destroy(&condVarMutex);
+                pthread_cond_destroy(&condVar);
                 pthread_mutex_destroy(&condVarMutex);
                 pthread_mutex_destroy(hopMutexRead);
                 pthread_mutex_destroy(hopMutexWrite);
@@ -323,7 +320,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
                 }
                 pthread_mutex_unlock(&condVarMutex);
 
-                pthread_cond_destroy(&condVarMutex);
+                pthread_cond_destroy(&condVar);
                 pthread_mutex_destroy(&condVarMutex);
                 pthread_mutex_destroy(hopMutexRead);
                 pthread_mutex_destroy(hopMutexWrite);
@@ -371,7 +368,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
                         }
                         pthread_mutex_unlock(&condVarMutex);
 
-                        pthread_cond_destroy(&condVarMutex);
+                        pthread_cond_destroy(&condVar);
                         pthread_mutex_destroy(&condVarMutex);
                         pthread_mutex_destroy(hopMutexRead);
                         pthread_mutex_destroy(hopMutexWrite);
@@ -413,7 +410,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
                     }
                     pthread_mutex_unlock(&condVarMutex);
 
-                    pthread_cond_destroy(&condVarMutex);
+                    pthread_cond_destroy(&condVar);
                     pthread_mutex_destroy(&condVarMutex);
                     pthread_mutex_destroy(hopMutexRead);
                     pthread_mutex_destroy(hopMutexWrite);
@@ -468,7 +465,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
                             }
                             pthread_mutex_unlock(&condVarMutex);
 
-                            pthread_cond_destroy(&condVarMutex);
+                            pthread_cond_destroy(&condVar);
                             pthread_mutex_destroy(&condVarMutex);
                             pthread_mutex_destroy(hopMutexRead);
                             pthread_mutex_destroy(hopMutexWrite);
@@ -512,7 +509,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
                             }
                             pthread_mutex_unlock(&condVarMutex);
 
-                            pthread_cond_destroy(&condVarMutex);
+                            pthread_cond_destroy(&condVar);
                             pthread_mutex_destroy(&condVarMutex);
                             pthread_mutex_destroy(hopMutexRead);
                             pthread_mutex_destroy(hopMutexWrite);
@@ -552,7 +549,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
                         }
                         pthread_mutex_unlock(&condVarMutex);
 
-                        pthread_cond_destroy(&condVarMutex);
+                        pthread_cond_destroy(&condVar);
                         pthread_mutex_destroy(&condVarMutex);
                         pthread_mutex_destroy(hopMutexRead);
                         pthread_mutex_destroy(hopMutexWrite);
