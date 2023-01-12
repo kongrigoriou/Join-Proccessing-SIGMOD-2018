@@ -1,6 +1,7 @@
 #ifndef FUNCTIONS
 #define FUNCTIONS
 #include <unistd.h>
+#include "jobs.h"
 
 #define CACHE_SIZE 256000//sysconf(_SC_LEVEL2_CACHE_SIZE)
 #define HOP_SIZE 100000
@@ -13,7 +14,7 @@
 typedef struct relation relation;
 typedef struct result result;
 
-int num_of_partitions(relation*,relation*, int**,relation*,int**);
-relation PartitionedHashJoin(relation *relR, relation *relS);
+void num_of_partitions(relation*,relation*, int**,relation*,int**,int*);
+relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList);
 
 #endif

@@ -7,12 +7,17 @@
 // #include
 
 typedef enum JobType{
-    terminate,loadTable,barrier 
+    terminate,loadTable,barrier,numOfPartitions,insertHopScotch
 }JobType;
 
 typedef struct args{
     void* arg1;
     void* arg2;
+    void* arg3;
+    void* arg4;
+    void* arg5;
+    void* arg6;
+    void* arg7;
 }args;
 
 typedef struct Job{

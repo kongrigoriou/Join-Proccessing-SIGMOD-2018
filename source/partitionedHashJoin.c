@@ -1,22 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include "../headers/mainPartitionTest.h"
 #include "../headers/hopscotch.h"
 #include "../headers/functions.h"
+#include "../headers/jobs.h"
 // #include "structures.h"
-
-
 
 int TableFitsCache(int cacheSize, int tableSize, int offSet);
 
-
-relation PartitionedHashJoin(relation *relR, relation *relS){
+relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
     //1. partitioning
     //2. building (hopschoch hashing)
     //3. probing 
     relation* reOrderedR, *reOrderedS;
     relation* reOrderedSecStepR, *reOrderedSecStepS;
+    int countProcesses;
+    pthread_mutex_t condVarMutex, *hopMutexWrite, *hopMutexRead;
+    pthread_cond_t condVar;
+    int* noOfReaders = malloc(sizeof(int));
 
     //for R relation
     reOrderedR = malloc(sizeof(relation));
@@ -38,13 +42,58 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
 
     // int max = 0;                //max bucket size after partition
     int *pSumR, *pSumS;
+    int **pSumRPtr = &pSumR, **pSumSPtr = &pSumS;
     int stepR, stepS;               //how many partiotions were needed
+    int *stepRPtr = &stepR, *stepSPtr = &stepS;               //how many partiotions were needed
     int** pSumFinalR = calloc(pow(2,N),sizeof(int*));
     int** pSumFinalS = calloc(pow(2,N),sizeof(int*));
     //printf("before partitions\n");
-    stepR = num_of_partitions(reOrderedR, relR, &pSumR, reOrderedSecStepR, pSumFinalR);
-    stepS = num_of_partitions(reOrderedS, relS, &pSumS, reOrderedSecStepS, pSumFinalS);
 
+    if (jobList != NULL) {
+        pthread_mutex_init(&condVarMutex, NULL);
+        pthread_cond_init(&condVar, NULL);
+
+        countProcesses = 0;
+        pthread_mutex_lock(&condVarMutex);
+
+        Job* job = malloc(sizeof(Job));
+        job->type = numOfPartitions;
+        job->parameters = malloc(sizeof(args));
+        job->parameters->arg1 = reOrderedR;
+        job->parameters->arg2 = relR;
+        job->parameters->arg3 = pSumRPtr;
+        job->parameters->arg4 = reOrderedSecStepR;
+        job->parameters->arg5 = pSumFinalR;
+        job->parameters->arg6 = stepRPtr;
+        job->parameters->arg7 = &condVarMutex;
+        PushJob(jobList, job);
+
+        job = malloc(sizeof(Job));
+        job->type = numOfPartitions;
+        job->parameters = malloc(sizeof(args));
+        job->parameters->arg1 = reOrderedS;
+        job->parameters->arg2 = relS;
+        job->parameters->arg3 = pSumSPtr;
+        job->parameters->arg4 = reOrderedSecStepS;
+        job->parameters->arg5 = pSumFinalS;
+        job->parameters->arg6 = stepSPtr;
+        job->parameters->arg7 = &condVarMutex;
+        PushJob(jobList, job);
+
+        while (countProcesses < 2) {
+            pthread_cond_wait(&condVar, &condVarMutex);
+            countProcesses++;
+        }
+        pthread_mutex_unlock(&condVarMutex);
+
+        pthread_cond_destroy(&condVarMutex);
+        pthread_mutex_destroy(&condVarMutex);
+    }
+    else {
+        num_of_partitions(reOrderedR, relR, pSumRPtr, reOrderedSecStepR, pSumFinalR, stepRPtr);
+        num_of_partitions(reOrderedS, relS, pSumSPtr, reOrderedSecStepS, pSumFinalS, stepSPtr);
+    }
+    
     //printf("steps for R %d\n", stepR);
     //printf("steps for S %d\n", stepS);
     
@@ -60,21 +109,88 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
     int reverse=0;
     if(stepR == 0){
         hopscotch = create_array(HOP_SIZE, H);
+        if (jobList != NULL) {
+            *noOfReaders = 0;
+            pthread_mutex_init(hopMutexRead, NULL);
+            pthread_mutex_init(hopMutexWrite, NULL);
+            pthread_mutex_init(&condVarMutex, NULL);
+            pthread_cond_init(&condVar, NULL);
+
+            countProcesses = 0;
+            pthread_mutex_lock(&condVarMutex);
+        }
         for(int i = 0; i < relR->num_tuples; i++){
             //relR->tuples[i];
-            insert(hopscotch, relR->tuples[i]);
-            //printf("wtf\n");
+            if (jobList != NULL) {
+                tuple* tuplePtr = &(relR->tuples[i]);
+                Job* job = malloc(sizeof(Job));
+                job->type = insertHopScotch;
+                job->parameters = malloc(sizeof(args));
+                job->parameters->arg1 = hopscotch;
+                job->parameters->arg2 = tuplePtr;
+                job->parameters->arg3 = &condVarMutex;
+                job->parameters->arg4 = hopMutexRead;
+                job->parameters->arg5 = hopMutexWrite;
+                job->parameters->arg6 = noOfReaders;
+                PushJob(jobList, job);
+            }
+            else
+                insert(hopscotch, relR->tuples[i], NULL, NULL, NULL);
         }
-        //printf("end\n\n");
-        //return *relR;
-        //print_array(hopscotch->array, hopscotch->size);
+        if (jobList != NULL) {
+            while (countProcesses < relR->num_tuples) {
+                pthread_cond_wait(&condVar, &condVarMutex);
+                countProcesses++;
+            }
+            pthread_mutex_unlock(&condVarMutex);
+
+            pthread_cond_destroy(&condVarMutex);
+            pthread_mutex_destroy(&condVarMutex);
+            pthread_mutex_destroy(hopMutexRead);
+            pthread_mutex_destroy(hopMutexWrite);
+        }
     }else if(stepR == 1){
         //array of hopscotch hash tables
         if(stepS == 0){
             hopscotch = create_array(HOP_SIZE, H);
             reverse=1;
+            if (jobList != NULL) {
+                pthread_mutex_init(hopMutexWrite, NULL);
+                pthread_mutex_init(hopMutexRead, NULL);
+                pthread_mutex_init(&condVarMutex, NULL);
+                pthread_cond_init(&condVar, NULL);
+
+                countProcesses = 0;
+                pthread_mutex_lock(&condVarMutex);
+            }
             for(int i = 0; i < relS->num_tuples; i++){
-                insert(hopscotch, relS->tuples[i]);
+                if (jobList != NULL) {
+                    tuple* tuplePtr = &(relS->tuples[i]);
+                    Job* job = malloc(sizeof(Job));
+                    job->type = insertHopScotch;
+                    job->parameters = malloc(sizeof(args));
+                    job->parameters->arg1 = hopscotch;
+                    job->parameters->arg2 = tuplePtr;
+                    job->parameters->arg3 = &condVarMutex;
+                    job->parameters->arg4 = hopMutexRead;
+                    job->parameters->arg5 = hopMutexWrite;
+                    job->parameters->arg6 = noOfReaders;
+                    PushJob(jobList, job);
+                }
+                else
+                    insert(hopscotch, relS->tuples[i], NULL, NULL, NULL);
+            }
+            if (jobList != NULL) {
+                while (countProcesses < relS->num_tuples) {
+                    pthread_cond_wait(&condVar, &condVarMutex);
+                    countProcesses++;
+                }
+                pthread_mutex_unlock(&condVarMutex);
+
+                pthread_cond_destroy(&condVarMutex);
+                pthread_mutex_destroy(&condVarMutex);
+                pthread_mutex_destroy(hopMutexRead);
+                pthread_mutex_destroy(hopMutexWrite);
             }
         }else{
             hopscothArr = malloc(pow(2,N) * sizeof(hop*));
@@ -85,15 +201,85 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
             int counter = 0;
             while(counter < pow(2,N) -1){
                 if(pSumR[counter] != pSumR[counter + 1]){
+                    if (jobList != NULL) {
+                        pthread_mutex_init(hopMutexRead, NULL);
+                        pthread_mutex_init(hopMutexWrite, NULL);
+                        pthread_mutex_init(&condVarMutex, NULL);
+                        pthread_cond_init(&condVar, NULL);
+
+                        countProcesses = 0;
+                        pthread_mutex_lock(&condVarMutex);
+                    }
                     for(int j = pSumR[counter]; j < pSumR[counter + 1]; j++){
-                        insert(hopscothArr[counter], reOrderedR->tuples[j]);
+                        if (jobList != NULL) {
+                            tuple* tuplePtr = &(reOrderedR->tuples[j]);
+                            Job* job = malloc(sizeof(Job));
+                            job->type = insertHopScotch;
+                            job->parameters = malloc(sizeof(args));
+                            job->parameters->arg1 = hopscothArr[counter];
+                            job->parameters->arg2 = tuplePtr;
+                            job->parameters->arg3 = &condVarMutex;
+                            job->parameters->arg4 = hopMutexRead;
+                            job->parameters->arg5 = hopMutexWrite;
+                            job->parameters->arg6 = noOfReaders;
+                            PushJob(jobList, job);
+                        }
+                        else
+                            insert(hopscothArr[counter], reOrderedR->tuples[j], NULL, NULL, NULL);
+                    }
+                    if (jobList != NULL) {
+                        while (countProcesses < pSumR[counter + 1] - pSumR[counter]) {
+                            pthread_cond_wait(&condVar, &condVarMutex);
+                            countProcesses++;
+                        }
+                        pthread_mutex_unlock(&condVarMutex);
+
+                        pthread_cond_destroy(&condVarMutex);
+                        pthread_mutex_destroy(&condVarMutex);
+                        pthread_mutex_destroy(hopMutexRead);
+                        pthread_mutex_destroy(hopMutexWrite);
                     }
                 }
                 counter++;
             }
             // if(pSumR[counter] != relR->num_tuples){
+            if (jobList != NULL) {
+                pthread_mutex_init(hopMutexRead, NULL);
+                pthread_mutex_init(hopMutexWrite, NULL);
+                pthread_mutex_init(&condVarMutex, NULL);
+                pthread_cond_init(&condVar, NULL);
+
+                countProcesses = 0;
+                pthread_mutex_lock(&condVarMutex);
+            }
             for(int j = pSumR[counter]; j < relR->num_tuples; j++){
-                insert(hopscothArr[counter], reOrderedR->tuples[j]);
+                if (jobList != NULL) {
+                    tuple* tuplePtr = &(reOrderedR->tuples[j]);
+                    Job* job = malloc(sizeof(Job));
+                    job->type = insertHopScotch;
+                    job->parameters = malloc(sizeof(args));
+                    job->parameters->arg1 = hopscothArr[counter];
+                    job->parameters->arg2 = tuplePtr;
+                    job->parameters->arg3 = &condVarMutex;
+                    job->parameters->arg4 = hopMutexRead;
+                    job->parameters->arg5 = hopMutexWrite;
+                    job->parameters->arg6 = noOfReaders;
+                    PushJob(jobList, job);
+                }
+                else
+                    insert(hopscothArr[counter], reOrderedR->tuples[j], NULL, NULL, NULL);
+            }
+            if (jobList != NULL) {
+                while (countProcesses < relR->num_tuples - pSumR[counter]) {
+                    pthread_cond_wait(&condVar, &condVarMutex);
+                    countProcesses++;
+                }
+                pthread_mutex_unlock(&condVarMutex);
+
+                pthread_cond_destroy(&condVarMutex);
+                pthread_mutex_destroy(&condVarMutex);
+                pthread_mutex_destroy(hopMutexRead);
+                pthread_mutex_destroy(hopMutexWrite);
             }
             // }
         }
@@ -104,8 +290,43 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
         if(stepS == 0){
             hopscotch = create_array(HOP_SIZE, H);
             reverse=1;
+            if (jobList != NULL) {
+                pthread_mutex_init(hopMutexRead, NULL);
+                pthread_mutex_init(hopMutexWrite, NULL);
+                pthread_mutex_init(&condVarMutex, NULL);
+                pthread_cond_init(&condVar, NULL);
+
+                countProcesses = 0;
+                pthread_mutex_lock(&condVarMutex);
+            }
             for(int i = 0; i < relS->num_tuples; i++){
-                insert(hopscotch, relS->tuples[i]);
+                if (jobList != NULL) {
+                    tuple* tuplePtr = &(relS->tuples[i]);
+                    Job* job = malloc(sizeof(Job));
+                    job->type = insertHopScotch;
+                    job->parameters = malloc(sizeof(args));
+                    job->parameters->arg1 = hopscotch;
+                    job->parameters->arg2 = tuplePtr;
+                    job->parameters->arg3 = &condVarMutex;
+                    job->parameters->arg4 = hopMutexRead;
+                    job->parameters->arg5 = hopMutexWrite;
+                    job->parameters->arg6 = noOfReaders;
+                    PushJob(jobList, job);
+                }
+                else
+                    insert(hopscotch, relS->tuples[i], NULL, NULL, NULL);
+            }
+            if (jobList != NULL) {
+                while (countProcesses < relS->num_tuples) {
+                    pthread_cond_wait(&condVar, &condVarMutex);
+                    countProcesses++;
+                }
+                pthread_mutex_unlock(&condVarMutex);
+
+                pthread_cond_destroy(&condVarMutex);
+                pthread_mutex_destroy(&condVarMutex);
+                pthread_mutex_destroy(hopMutexRead);
+                pthread_mutex_destroy(hopMutexWrite);
             }
         }else if(stepS == 1){
             reverse=1;
@@ -117,15 +338,85 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
             int counter = 0;
             while(counter < pow(2,N) -1){
                 if(pSumS[counter] != pSumS[counter + 1]){
+                    if (jobList != NULL) {
+                        pthread_mutex_init(hopMutexRead, NULL);
+                        pthread_mutex_init(hopMutexWrite, NULL);
+                        pthread_mutex_init(&condVarMutex, NULL);
+                        pthread_cond_init(&condVar, NULL);
+
+                        countProcesses = 0;
+                        pthread_mutex_lock(&condVarMutex);
+                    }
                     for(int j = pSumS[counter]; j < pSumS[counter + 1]; j++){
-                        insert(hopscothArr[counter], reOrderedS->tuples[j]);
+                        if (jobList != NULL) {
+                            tuple* tuplePtr = &(reOrderedS->tuples[j]);
+                            Job* job = malloc(sizeof(Job));
+                            job->type = insertHopScotch;
+                            job->parameters = malloc(sizeof(args));
+                            job->parameters->arg1 = hopscothArr[counter];
+                            job->parameters->arg2 = tuplePtr;
+                            job->parameters->arg3 = &condVarMutex;
+                            job->parameters->arg4 = hopMutexRead;
+                            job->parameters->arg5 = hopMutexWrite;
+                            job->parameters->arg6 = noOfReaders;
+                            PushJob(jobList, job);
+                        }
+                        else
+                            insert(hopscothArr[counter], reOrderedS->tuples[j], NULL, NULL, NULL);
+                    }
+                    if (jobList != NULL) {
+                        while (countProcesses < pSumS[counter + 1] - pSumS[counter]) {
+                            pthread_cond_wait(&condVar, &condVarMutex);
+                            countProcesses++;
+                        }
+                        pthread_mutex_unlock(&condVarMutex);
+
+                        pthread_cond_destroy(&condVarMutex);
+                        pthread_mutex_destroy(&condVarMutex);
+                        pthread_mutex_destroy(hopMutexRead);
+                        pthread_mutex_destroy(hopMutexWrite);
                     }
                 }
                 counter++;
             }
             if(pSumS[counter] != relS->num_tuples){
+                if (jobList != NULL) {
+                    pthread_mutex_init(hopMutexRead, NULL);
+                    pthread_mutex_init(hopMutexWrite, NULL);
+                    pthread_mutex_init(&condVarMutex, NULL);
+                    pthread_cond_init(&condVar, NULL);
+
+                    countProcesses = 0;
+                    pthread_mutex_lock(&condVarMutex);
+                }
                 for(int j = pSumS[counter]; j < relS->num_tuples; j++){
-                    insert(hopscothArr[counter], reOrderedS->tuples[j]);
+                    if (jobList != NULL) {
+                        tuple* tuplePtr = &(reOrderedS->tuples[j]);
+                        Job* job = malloc(sizeof(Job));
+                        job->type = insertHopScotch;
+                        job->parameters = malloc(sizeof(args));
+                        job->parameters->arg1 = hopscothArr[counter];
+                        job->parameters->arg2 = tuplePtr;
+                        job->parameters->arg3 = &condVarMutex;
+                        job->parameters->arg4 = hopMutexRead;
+                        job->parameters->arg5 = hopMutexWrite;
+                        job->parameters->arg6 = noOfReaders;
+                        PushJob(jobList, job);
+                    }
+                    else
+                        insert(hopscothArr[counter], reOrderedS->tuples[j], NULL, NULL, NULL);
+                }
+                if (jobList != NULL) {
+                    while (countProcesses < relS->num_tuples - pSumS[counter]) {
+                        pthread_cond_wait(&condVar, &condVarMutex);
+                        countProcesses++;
+                    }
+                    pthread_mutex_unlock(&condVarMutex);
+
+                    pthread_cond_destroy(&condVarMutex);
+                    pthread_mutex_destroy(&condVarMutex);
+                    pthread_mutex_destroy(hopMutexRead);
+                    pthread_mutex_destroy(hopMutexWrite);
                 }
             }
 
@@ -144,9 +435,43 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
 
                 while(counter < pow(2,N) -1){
                     if(pSumFinalR[i][counter] < pSumFinalR[i][counter+1]){
+                        if (jobList != NULL) {
+                            pthread_mutex_init(hopMutexRead, NULL);
+                            pthread_mutex_init(hopMutexWrite, NULL);
+                            pthread_mutex_init(&condVarMutex, NULL);
+                            pthread_cond_init(&condVar, NULL);
+
+                            countProcesses = 0;
+                            pthread_mutex_lock(&condVarMutex);
+                        }
                         for(int k = pSumFinalR[i][counter]; k < pSumFinalR[i][counter + 1]; k++){
-                            // printf("i: %d j:%d psumfinal:%d\n\n", i, j, k);
-                            insert(hopscotchTwoSteps[i][counter], reOrderedSecStepR->tuples[k]);
+                            if (jobList != NULL) {
+                                tuple* tuplePtr = &(reOrderedSecStepR->tuples[k]);
+                                Job* job = malloc(sizeof(Job));
+                                job->type = insertHopScotch;
+                                job->parameters = malloc(sizeof(args));
+                                job->parameters->arg1 = hopscotchTwoSteps[i][counter];
+                                job->parameters->arg2 = tuplePtr;
+                                job->parameters->arg3 = &condVarMutex;
+                                job->parameters->arg4 = hopMutexRead;
+                                job->parameters->arg5 = hopMutexWrite;
+                                job->parameters->arg6 = noOfReaders;
+                                PushJob(jobList, job);
+                            }
+                            else
+                                insert(hopscotchTwoSteps[i][counter], reOrderedSecStepR->tuples[k], NULL, NULL, NULL);
+                        }
+                        if (jobList != NULL) {
+                            while (countProcesses < pSumFinalR[i][counter + 1] - pSumFinalR[i][counter]) {
+                                pthread_cond_wait(&condVar, &condVarMutex);
+                                countProcesses++;
+                            }
+                            pthread_mutex_unlock(&condVarMutex);
+
+                            pthread_cond_destroy(&condVarMutex);
+                            pthread_mutex_destroy(&condVarMutex);
+                            pthread_mutex_destroy(hopMutexRead);
+                            pthread_mutex_destroy(hopMutexWrite);
                         }
                     }
                     counter++;
@@ -154,13 +479,83 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
 
                 if(i < pow(2, N) -1){
                     if(pSumFinalR[i][counter -1] != pSumFinalR[i][counter]){
+                        if (jobList != NULL) {
+                            pthread_mutex_init(hopMutexRead, NULL);
+                            pthread_mutex_init(hopMutexWrite, NULL);
+                            pthread_mutex_init(&condVarMutex, NULL);
+                            pthread_cond_init(&condVar, NULL);
+
+                            countProcesses = 0;
+                            pthread_mutex_lock(&condVarMutex);
+                        }
                         for(int k = pSumFinalR[i][counter]; k < pSumFinalR[i+1][0]; k++){
-                            insert(hopscotchTwoSteps[i][counter], reOrderedSecStepR->tuples[k]);
+                            if (jobList != NULL) {
+                                tuple* tuplePtr = &(reOrderedSecStepR->tuples[k]);
+                                Job* job = malloc(sizeof(Job));
+                                job->type = insertHopScotch;
+                                job->parameters = malloc(sizeof(args));
+                                job->parameters->arg1 = hopscotchTwoSteps[i][counter];
+                                job->parameters->arg2 = tuplePtr;
+                                job->parameters->arg3 = &condVarMutex;
+                                job->parameters->arg4 = hopMutexRead;
+                                job->parameters->arg5 = hopMutexWrite;
+                                job->parameters->arg6 = noOfReaders;
+                                PushJob(jobList, job);
+                            }
+                            else
+                                insert(hopscotchTwoSteps[i][counter], reOrderedSecStepR->tuples[k], NULL, NULL, NULL);
+                        }
+                        if (jobList != NULL) {
+                            while (countProcesses < pSumFinalR[i + 1][0] - pSumFinalR[i][counter]) {
+                                pthread_cond_wait(&condVar, &condVarMutex);
+                                countProcesses++;
+                            }
+                            pthread_mutex_unlock(&condVarMutex);
+
+                            pthread_cond_destroy(&condVarMutex);
+                            pthread_mutex_destroy(&condVarMutex);
+                            pthread_mutex_destroy(hopMutexRead);
+                            pthread_mutex_destroy(hopMutexWrite);
                         }
                     }
                 }else{
+                    if (jobList != NULL) {
+                        pthread_mutex_init(hopMutexRead, NULL);
+                        pthread_mutex_init(hopMutexWrite, NULL);
+                        pthread_mutex_init(&condVarMutex, NULL);
+                        pthread_cond_init(&condVar, NULL);
+
+                        countProcesses = 0;
+                        pthread_mutex_lock(&condVarMutex);
+                    }
                     for(int k = pSumFinalR[i][counter]; k < relR->num_tuples; k++){
-                        insert(hopscotchTwoSteps[i][counter], reOrderedSecStepR->tuples[k]);
+                        if (jobList != NULL) {
+                            tuple* tuplePtr = &(reOrderedSecStepR->tuples[k]);
+                            Job* job = malloc(sizeof(Job));
+                            job->type = insertHopScotch;
+                            job->parameters = malloc(sizeof(args));
+                            job->parameters->arg1 = hopscotchTwoSteps[i][counter];
+                            job->parameters->arg2 = tuplePtr;
+                            job->parameters->arg3 = &condVarMutex;
+                            job->parameters->arg4 = hopMutexRead;
+                            job->parameters->arg5 = hopMutexWrite;
+                            job->parameters->arg6 = noOfReaders;
+                            PushJob(jobList, job);
+                        }
+                        else
+                            insert(hopscotchTwoSteps[i][counter], reOrderedSecStepR->tuples[k], NULL, NULL, NULL);
+                    }
+                    if (jobList != NULL) {
+                        while (countProcesses < relR->num_tuples - pSumFinalR[i][counter]) {
+                            pthread_cond_wait(&condVar, &condVarMutex);
+                            countProcesses++;
+                        }
+                        pthread_mutex_unlock(&condVarMutex);
+
+                        pthread_cond_destroy(&condVarMutex);
+                        pthread_mutex_destroy(&condVarMutex);
+                        pthread_mutex_destroy(hopMutexRead);
+                        pthread_mutex_destroy(hopMutexWrite);
                     }
                 }
             }
@@ -460,5 +855,6 @@ relation PartitionedHashJoin(relation *relR, relation *relS){
     }
     
     list_destroy(final);
+    free(noOfReaders);
     return final_array;
 }

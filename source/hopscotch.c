@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include "../headers/bitmap.h"
 #include "../headers/list.h"
 #include "../headers/hopscotch.h"
-
-
 
 // node of hopscotch array
 // typedef struct node {
@@ -74,7 +74,7 @@ hop* create_array(int n, int h){
     hops->size=n;
     hops->array=create_array_of_hop(n,h);
     
-    
+
     //printf("end of creation \n");
     return hops;
 }
@@ -166,16 +166,12 @@ int resize(hop** hops_, tuple element, int n, int h){
         hops->H=h+h/2;
         blah=1;
     }
-    
     if(n<1000000){
         hops->size=2*n;
     }
     else{
         hops->size=n+n/2;
     }
-    
-    
-    
     node* new_array=create_array_of_hop(hops->size,hops->H);
     hops->array=new_array;
     //int size=hops->size;
@@ -183,7 +179,7 @@ int resize(hop** hops_, tuple element, int n, int h){
     //node* new_array=hops->array;
     for(int i=0;i<n;i++){
         if(current_array[i].occupied!=0){
-            insert(hops,current_array[i].info);
+            insert(hops,current_array[i].info, NULL, NULL, NULL);    //›˜ÔıÏÂ Í‹ÌÂÈ ﬁ‰Á lock ÙÔ write mutex
         }
         //ListNode* node;
         //node = current_array[i].overflow->head;
@@ -195,9 +191,9 @@ int resize(hop** hops_, tuple element, int n, int h){
     }
     destroy_array(current_array,n);
 
-    int new_size=insert(hops,element);
-    
-    
+    int new_size=insert(hops,element, NULL, NULL, NULL);    //����� ����� ��� lock �� write mutex
+   
+
     //*hops_=hops;
     //printf("hops=%d and old_hops=%d\n\n",hops,old_hops);
     
@@ -219,9 +215,16 @@ int dist(int j, int hash,int n){
 
 // inserts the element into hopscotch array with H size of neighberhood and n size of array
 //retruns the size of the array after the insert
-int insert(hop* hops, tuple element){
+int insert(hop* hops, tuple element, pthread_mutex_t* hopMutexRead, pthread_mutex_t* hopMutexWrite, int* noOfReaders){
+
     
-    
+    if (hopMutexRead != NULL) {
+        pthread_mutex_lock(hopMutexRead);
+        (*noOfReaders)++;
+        if ((*noOfReaders) == 1)
+            pthread_mutex_lock(hopMutexWrite);
+        pthread_mutex_unlock(hopMutexRead);
+    }
     node* array=hops->array;
     uint64_t n= hops->size;
     uint64_t H =get_H(hops);
@@ -238,12 +241,22 @@ int insert(hop* hops, tuple element){
         if(get_bit(bitmap,i)){
             if(array[hash_of_key+i].info.key==element.key){
                 list_insert(array[hash_of_key+i].duplicate,element);
-                return n; 
+                return n;
             }
         }
     }*/
+    int bitmapIsFull = bitmapisfull(bitmap, H);
+    if (hopMutexRead != NULL) {
+        pthread_mutex_lock(hopMutexRead);
+        (*noOfReaders)--;
+        if ((*noOfReaders) == 0)
+            pthread_mutex_unlock(hopMutexWrite);
+        pthread_mutex_unlock(hopMutexRead);
+    }
     // if a neighborhood is full of elements with hash(element) we need a bigger array
-    if(bitmapisfull(bitmap,H)){
+    if(bitmapIsFull){
+        if (hopMutexRead != NULL)
+            pthread_mutex_lock(hopMutexWrite);
         //print_bitmap(bitmap);
         //printf("\nYou should appear here at least once\n");
         size =n;
@@ -256,17 +269,33 @@ int insert(hop* hops, tuple element){
         }*/
         //resize
         size=resize(&hops,element,n,H);
+        if (hopMutexRead != NULL)
+            pthread_mutex_unlock(hopMutexWrite);
         return size;
     }
-    
-
+    if (hopMutexRead != NULL) {
+        pthread_mutex_lock(hopMutexRead);
+        (*noOfReaders)++;
+        if ((*noOfReaders) == 1)
+            pthread_mutex_lock(hopMutexWrite);
+        pthread_mutex_unlock(hopMutexRead);
+    }
     int j=closest_empty_spot(array,hash_of_key,n);
     //printf("\n\nJ is %d in this insert\n\n",j);
     /*if(element.payload==16646){
         printf("\n\nJ is %d in this insert\n\n",j);
     }*/
+    if (hopMutexRead != NULL) {
+        pthread_mutex_lock(hopMutexRead);
+        (*noOfReaders)--;
+        if ((*noOfReaders) == 0)
+            pthread_mutex_unlock(hopMutexWrite);
+        pthread_mutex_unlock(hopMutexRead);
+    }
     //if there is no empty spot array is full
     if(j==-1){
+        if (hopMutexRead != NULL)
+            pthread_mutex_lock(hopMutexWrite);
         size =n;
         /*if(hash_of_key==hash(key,2*n)){
             printf("things are entering the overflow list h=%d\n",hash_of_key);
@@ -278,6 +307,8 @@ int insert(hop* hops, tuple element){
         }*/
         //resize
         size=resize(&hops,element,n,H);
+        if (hopMutexRead != NULL)
+            pthread_mutex_unlock(hopMutexWrite);
         return size;
     }
     while(dist(j,hash_of_key,n)>=H){//dist(j,hash_of_key,n)
@@ -306,6 +337,8 @@ int insert(hop* hops, tuple element){
             }
         }
         if(pos_in_bitmap==-1){
+            if (hopMutexRead != NULL)
+                pthread_mutex_lock(hopMutexWrite);
             size =n;
             /*if(hash_of_key==hash(key,2*n)){
                 list_insert( array[hash_of_key].overflow,element);
@@ -313,16 +346,20 @@ int insert(hop* hops, tuple element){
             else{
                 size=resize(&hops,element,n,H);
             }*/
-            
+
             //resize
             size=resize(&hops,element,n,H);
+            if (hopMutexRead != NULL)
+
             return size;
         }
-        //printf("\nbefore if: i am to be moved here j=%d, before i was here %d and hash=%d and H=%d check=%d and n=%d\n",j, element_to_be_moved, hash(array[element_to_be_moved].info.key,n),H,check_index,n);
-        /*if(array[element_to_be_moved].info.payload==16646){
+            if (hopMutexRead != NULL)
+                pthread_mutex_unlock(hopMutexWrite);
             printf("\ni am to be moved here j=%d, before i was here %d and hash=%d and H=%d check=%d\n",j, element_to_be_moved, hash(array[element_to_be_moved].info.key,n),H,check_index);
         }*/
         //printf("pos of bitmap is=%d\n",pos_in_bitmap);
+        if (hopMutexRead != NULL)
+            pthread_mutex_lock(hopMutexWrite);
         clear_bit(array[check_index].bitmap ,pos_in_bitmap);
         //printf("where\n");
         array[element_to_be_moved].occupied=0;
@@ -331,15 +368,20 @@ int insert(hop* hops, tuple element){
         array[j].info=array[element_to_be_moved].info;
         //printf("at least here dist=%d\n",dist(element_to_be_moved,hash_of_key,n));
         set_bit(array[check_index].bitmap,dist(j,check_index,n));
+        if (hopMutexRead != NULL)
+            pthread_mutex_unlock(hopMutexWrite);
         //printf("after set bit\n");
         j=element_to_be_moved;
     }
     //printf("before if\n");
-
+    if (hopMutexRead != NULL)
+        pthread_mutex_lock(hopMutexWrite);
     array[j].info=element;
     //printf("\nset bit with index %d\n",abs(j-hash_of_key));
     set_bit((array[hash_of_key].bitmap),dist(j,hash_of_key,n));
     array[j].occupied=1;
+    if (hopMutexRead != NULL)
+        pthread_mutex_unlock(hopMutexWrite);
     //print_array(array,n);
     //printf("end of insert\n");
     return n;

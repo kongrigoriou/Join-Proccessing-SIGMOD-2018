@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <pthread.h>
 #include "./headers/structures.h"
 #include "./headers/list.h"
 #include "./headers/partitionedHashJoin.h"
@@ -9,10 +10,10 @@
 #include "./headers/queries.h"
 #include "./headers/bitmap.h"
 #include "./headers/queries_optimization.h"
+#include "./headers/jobs.h"
+#include "./headers/scheduler.h"
 #include <math.h>
 #define NUM_OF_THREADS 3
-
-
 
 //simple comparison function
 int compare(int a, char c, int b){
@@ -240,7 +241,7 @@ void print_relation(char* name, relation rel){
 }
 
 
-int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int left_Col, int right_rel, int right_Col,int* original_relations){
+int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int left_Col, int right_rel, int right_Col,int* original_relations, JobList* jobList){
     //joined** interm=*interm_;
     //if this is a self join
     if(left_rel==right_rel){
@@ -302,7 +303,7 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         //print_relation("left_rel",left_relation);
         //print_relation("right_rel",right_relation);
         //join them together
-        relation res=PartitionedHashJoin(&left_relation ,  &right_relation);
+        relation res=PartitionedHashJoin(&left_relation ,  &right_relation, jobList);
         free(right_relation.tuples);
         free(left_relation.tuples);
         //print_relation("res1",res);
@@ -387,7 +388,7 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         relation left_relation= create_relation(left_ids,data_left,RowIdsize[left_rel],0);
         
         //join them together
-        relation res=PartitionedHashJoin(&right_relation ,  &left_relation);
+        relation res=PartitionedHashJoin(&right_relation ,  &left_relation, jobList);
         //print_relation("res0",res);
         free(right_relation.tuples);
         free(left_relation.tuples);
@@ -471,7 +472,7 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         relation left_relation= create_relation(left_ids,data_left,RowIdsize[left_rel],0);
         relation right_relation= create_relation(right_ids,data_right,RowIdsize[right_rel],0);
         //printf("\nBefore join\n");
-        relation res=PartitionedHashJoin(&left_relation ,  &right_relation);
+        relation res=PartitionedHashJoin(&left_relation ,  &right_relation, jobList);
         //printf("\nAfter join\n");
 
         free(right_relation.tuples);
@@ -630,36 +631,41 @@ int main(int argc, char **argv){
     ListNode_string* node=file_list->head;
     int table_size=file_list->size;
 
-    //fill the table
-    for(int i=table_size-1;i>=0;i--){
-        //printf("\ni=%d\n",i);
-        LoadTable(node->data,&T[i]);
-        node=node->next;
+    JobList* jobList = NULL;
+    if (NUM_OF_THREADS == 0) {
+        //fill the table
+        for (int i = table_size - 1; i >= 0; i--) {
+            //printf("\ni=%d\n",i);
+            LoadTable(node->data, &T[i]);
+            node = node->next;
+        }
     }
-    /*
-    JobList* jobList;
-    pthread_t** threads;
-    pthread_barrier_t barrier_id;
-    InitializeMultithread(&jobList, &threads, NUM_OF_THREADS);
-    for(int i=table_size-1;i>=0;i--){
-        Job* job=malloc(sizeof(Job));
-        job->type=loadTable;
-        job->parameters=malloc(sizeof(char*) + sizeof(struct Table*));
-        memcpy(job->parameters,&(node->data),sizeof(node->data));
-        memcpy(job->parameters+sizeof(node->data),&(&T[i]),sizeof(&T[i]));
-        PushJob(jobList, job);
-        node=node->next;
+    else
+    {
+        pthread_t** threads;
+        pthread_barrier_t barrier_id;
+        InitializeMultithread(&jobList, &threads, NUM_OF_THREADS);
+        for (int i = table_size - 1; i >= 0; i--) {
+            Table* tableElemPtr = &T[i];
+            Job* job = malloc(sizeof(Job));
+            job->type = loadTable;
+            job->parameters = malloc(sizeof(args));
+            job->parameters->arg1 = node->data;
+            job->parameters->arg2 = &T[i];
+            PushJob(jobList, job);
+            node = node->next;
+        }
+        pthread_barrier_init(&barrier_id, NULL, NUM_OF_THREADS + 1);
+        for (int i = 0; i < NUM_OF_THREADS; i++) {
+            Job* job = malloc(sizeof(Job));
+            job->type = barrier;
+            job->parameters = malloc(sizeof(args));
+            job->parameters->arg1 = &barrier_id;
+            PushJob(jobList, job);
+        }
+        pthread_barrier_wait(&barrier_id);
+        pthread_barrier_destroy(&barrier_id);
     }
-    pthread_barrier_init(&barrier_id, NULL, NUM_OF_THREADS+1);
-    for(i=0 ; i<NUM_OF_THREADS ; i++){
-        Job* job=malloc(sizeof(Job));
-        job->type=barrier;
-        job->parameters=malloc(sizeof(pthread_barrier_t));
-        memcpy(job->parameters, &barrier_id, sizeof(pthread_barrier_t));
-        PushJob(jobList, job);
-    }
-    pthread_barrier_wait(&barrier_id);
-    pthread_barrier_destroy(&barrier_id);*/
     
     list_destroy_string(file_list);
     /*for(int i=0;i<table_size;i++){
@@ -746,7 +752,7 @@ int main(int argc, char **argv){
                 count_of_pred+=6;
                 //join
                 // printf("Join:left_rel=%d left_col=%d right_rel=%d right_col=%d\n",left_rel,left_col,right_rel,right_col);
-                join(T,interm,rowid,rowid_s,left_rel,left_col,right_rel,right_col,Q->relationsId);
+                join(T,interm,rowid,rowid_s,left_rel,left_col,right_rel,right_col,Q->relationsId, jobList);
             }
             int count_of_sel=0;
             // printf("\n");

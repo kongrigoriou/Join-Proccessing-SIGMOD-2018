@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <math.h>
 
-int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* reOrderedSecStep, int** pSumFinal){
+void num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* reOrderedSecStep, int** pSumFinal, int* step){
     int tableFits=TableFitsCache(CACHE_SIZE,rel->num_tuples,5);
-    int step = 0;
     int max = 0;
     int curMax;
     int* pSumSecStep;
 
+    *step = 0;
     if(!tableFits){
             
             //firts partition
@@ -23,7 +23,7 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
             // for(int i=0;i<pow(2,3);i++){
             //     printf("%d\n",(*pSum)[i]);
             // }       
-            step++;
+            (*step)++;
             if(TableFitsCache(CACHE_SIZE, max, 5)){
                 //printf("First partition was succesfull\n");
             }else{
@@ -68,8 +68,7 @@ int num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* r
                 //     }
                 //     printf("%d --------------\n", i);
                 // }
-                step++;
+                (*step)++;
             }
     }
-    return step;
 }

@@ -1,4 +1,8 @@
 #include "../headers/jobs.h"
+#include "../headers/functions.h"
+#include "../headers/hopscotch.h"
+#include <pthread.h>
+#include <semaphore.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -8,10 +12,8 @@ void InitializeJobList(JobList** jobList){
     (*jobList)->jobsCount = malloc(sizeof(sem_t));
     sem_init((*jobList)->editSem, 0, 1);
     sem_init((*jobList)->jobsCount, 0, 1);
-    (*jobList)->Head = malloc(sizeof(JobListElement));
-    (*jobList)->Last = malloc(sizeof(JobListElement));
-    (*jobList)->Head=NULL;
-    (*jobList)->Last=NULL;
+    (*jobList)->Head = NULL;
+    (*jobList)->Last = NULL;
 }
 
 void PushJob(JobList* jobList, Job* job){
@@ -69,7 +71,17 @@ void JobExecute(Job* job){
         LoadTable((char*)job->parameters->arg1,(Table*)(job->parameters->arg2));
     }
     else if (job->type == barrier){
-        pthread_barrier_wait(((pthread_barrier_t *)job->parameters));
+        pthread_barrier_wait(((pthread_barrier_t*)job->parameters->arg1));
+    }
+    else if (job->type == numOfPartitions) {
+        num_of_partitions((relation*)job->parameters->arg1, (relation*)job->parameters->arg2, (int**)job->parameters->arg3,
+            (relation*)job->parameters->arg4, (int**)job->parameters->arg5, (int*)job->parameters->arg6);
+        pthread_cond_signal(job->parameters->arg7);
+    }
+    else if (job->type == insertHopScotch) {
+        insert((hop*)job->parameters->arg1, *((tuple*)job->parameters->arg2), (pthread_mutex_t*)job->parameters->arg4, 
+            (pthread_mutex_t*)job->parameters->arg5, (int*)job->parameters->arg6);
+        pthread_cond_signal(job->parameters->arg3);
     }
     free(job->parameters);
     free(job);

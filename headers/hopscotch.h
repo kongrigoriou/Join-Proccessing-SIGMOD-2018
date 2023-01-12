@@ -2,6 +2,7 @@
 #define HOPSCOTCH
 
 #include <stdint.h>
+#include <pthread.h>
 #include "../headers/structures.h"
 #include "../headers/list.h"
 #include "../headers/bitmap.h"
@@ -40,7 +41,7 @@ int closest_empty_spot(node* array,int start, int size);
 void print_array(node* array, int size);
 int resize(hop** hops_, tuple element, int n, int h);
 int dist(int j, int hash,int n);
-int insert(hop* array, tuple element);
+int insert(hop* array, tuple element, pthread_mutex_t* hopMutexRead, pthread_mutex_t* hopMutexWrite, int* noOfReaders);
 List* search(hop* array,tuple element);
 
 #endif
