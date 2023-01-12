@@ -644,9 +644,8 @@ int main(int argc, char **argv){
     {
         pthread_t** threads;
         pthread_barrier_t barrier_id;
-        InitializeMultithread(&jobList, &threads, NUM_OF_THREADS);
+        InitializeMultiThread(&jobList, &threads, NUM_OF_THREADS);
         for (int i = table_size - 1; i >= 0; i--) {
-            Table* tableElemPtr = &T[i];
             Job* job = malloc(sizeof(Job));
             job->type = loadTable;
             job->parameters = malloc(sizeof(args));

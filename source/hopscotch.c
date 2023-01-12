@@ -355,7 +355,7 @@ int insert(hop* hops, tuple element, pthread_mutex_t* hopMutexRead, pthread_mute
         }
             if (hopMutexRead != NULL)
                 pthread_mutex_unlock(hopMutexWrite);
-            printf("\ni am to be moved here j=%d, before i was here %d and hash=%d and H=%d check=%d\n",j, element_to_be_moved, hash(array[element_to_be_moved].info.key,n),H,check_index);
+            /*printf("\ni am to be moved here j=%d, before i was here %d and hash=%d and H=%d check=%d\n",j, element_to_be_moved, hash(array[element_to_be_moved].info.key,n),H,check_index);
         }*/
         //printf("pos of bitmap is=%d\n",pos_in_bitmap);
         if (hopMutexRead != NULL)
