@@ -12,7 +12,7 @@ void InitializeJobList(JobList** jobList){
     (*jobList)->editSem = malloc(sizeof(sem_t));
     (*jobList)->jobsCount = malloc(sizeof(sem_t));
     sem_init((*jobList)->editSem, 0, 1);
-    sem_init((*jobList)->jobsCount, 0, 1);
+    sem_init((*jobList)->jobsCount, 0, 0);
     (*jobList)->Head = NULL;
     (*jobList)->Last = NULL;
 }
@@ -44,17 +44,22 @@ Job* PullJob(JobList* jobList){
     
     sem_wait(jobList->jobsCount);
     sem_wait(jobList->editSem);
-    if (jobList->Head->next==NULL){
-        job=jobList->Head->job;
-        free(jobList->Head);
-        jobList->Head=NULL;
-        jobList->Last=NULL;
-    }
-    else{
-        jobList->Head=jobList->Head->next;
-        job=jobList->Head->prev->job;
-        free(jobList->Head->prev);
-        jobList->Head->prev=NULL;
+    if(jobList->Head != NULL){
+        if (jobList->Head->next==NULL){
+            printf("Only one job in list\n");
+            job=jobList->Head->job;
+            free(jobList->Head);
+            jobList->Head=NULL;
+            jobList->Last=NULL;
+        }
+        else{
+            jobList->Head=jobList->Head->next;
+            job=jobList->Head->prev->job;
+            free(jobList->Head->prev);
+            jobList->Head->prev=NULL;
+        }
+    }else{
+        return NULL;
     }
     sem_post(jobList->editSem);
     return job;
