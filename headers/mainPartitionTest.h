@@ -8,7 +8,9 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <pthread.h>
 #include "../headers/structures.h"
+#include "../headers/jobs.h"
 
 void Partition(struct relation initialRelation, int startIndex, int endIndex, int partitionStep, int numberOfBytes, struct relation* reOrdered, int* max, int** pSum, JobList* jobList);
 
