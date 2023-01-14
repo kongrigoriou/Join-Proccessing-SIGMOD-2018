@@ -18,7 +18,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
     relation* reOrderedR, *reOrderedS;
     relation* reOrderedSecStepR, *reOrderedSecStepS;
     int countProcesses;
-    pthread_mutex_t condVarMutex, *hopMutexWrite, *hopMutexRead;
+    pthread_mutex_t condVarMutex, *hopMutexWrite = NULL, *hopMutexRead = NULL;
     pthread_cond_t condVar;
     int* noOfReaders = malloc(sizeof(int));
 
