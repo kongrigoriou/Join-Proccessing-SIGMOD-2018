@@ -7,7 +7,7 @@
 // #include
 
 typedef enum JobType{
-    terminate,loadTable,barrier,numOfPartitions,insertHopScotch
+    terminate,loadTable,barrier,insertHopScotch,buildHistogram
 }JobType;
 
 typedef struct args{

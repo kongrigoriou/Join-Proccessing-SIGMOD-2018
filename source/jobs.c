@@ -1,6 +1,7 @@
 #include "../headers/jobs.h"
 #include "../headers/functions.h"
 #include "../headers/hopscotch.h"
+#include "../headers/mainPartitionTest.h"
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdlib.h>
@@ -73,15 +74,14 @@ void JobExecute(Job* job){
     else if (job->type == barrier){
         pthread_barrier_wait(((pthread_barrier_t*)job->parameters->arg1));
     }
-    else if (job->type == numOfPartitions) {
-        num_of_partitions((relation*)job->parameters->arg1, (relation*)job->parameters->arg2, (int**)job->parameters->arg3,
-            (relation*)job->parameters->arg4, (int**)job->parameters->arg5, (int*)job->parameters->arg6);
-        pthread_cond_signal(job->parameters->arg7);
-    }
     else if (job->type == insertHopScotch) {
         insert((hop*)job->parameters->arg1, *((tuple*)job->parameters->arg2), (pthread_mutex_t*)job->parameters->arg4, 
             (pthread_mutex_t*)job->parameters->arg5, (int*)job->parameters->arg6);
         pthread_cond_signal(job->parameters->arg3);
+    }
+    else if (job->type == buildHistogram) {
+        BuildHistogram(*(job->parameters->arg1), *(job->parameters->arg2), *(job->parameters->arg3), job->parameters->arg4, job->parameters->arg5, job->parameters->arg6);
+        pthread_cond_signal(job->parameters->arg7);
     }
     free(job->parameters);
     free(job);

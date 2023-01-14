@@ -49,48 +49,8 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
     int** pSumFinalS = calloc(pow(2,N),sizeof(int*));
     //printf("before partitions\n");
 
-    if (jobList != NULL) {
-        pthread_mutex_init(&condVarMutex, NULL);
-        pthread_cond_init(&condVar, NULL);
-
-        countProcesses = 0;
-        pthread_mutex_lock(&condVarMutex);
-
-        Job* job = malloc(sizeof(Job));
-        job->type = numOfPartitions;
-        job->parameters = malloc(sizeof(args));
-        job->parameters->arg1 = reOrderedR;
-        job->parameters->arg2 = relR;
-        job->parameters->arg3 = pSumRPtr;
-        job->parameters->arg4 = reOrderedSecStepR;
-        job->parameters->arg5 = pSumFinalR;
-        job->parameters->arg6 = stepRPtr;
-        job->parameters->arg7 = &condVarMutex;
-        PushJob(jobList, job);
-
-        job = malloc(sizeof(Job));
-        job->type = numOfPartitions;
-        job->parameters = malloc(sizeof(args));
-        job->parameters->arg1 = reOrderedS;
-        job->parameters->arg2 = relS;
-        job->parameters->arg3 = pSumSPtr;
-        job->parameters->arg4 = reOrderedSecStepS;
-        job->parameters->arg5 = pSumFinalS;
-        job->parameters->arg6 = stepSPtr;
-        job->parameters->arg7 = &condVarMutex;
-        PushJob(jobList, job);
-
-        while (countProcesses < 2) {
-            pthread_cond_wait(&condVar, &condVarMutex);
-            countProcesses++;
-        }
-        pthread_mutex_unlock(&condVarMutex);
-        pthread_cond_destroy(&condVar);
-    }
-    else {
-        num_of_partitions(reOrderedR, relR, pSumRPtr, reOrderedSecStepR, pSumFinalR, stepRPtr);
-        num_of_partitions(reOrderedS, relS, pSumSPtr, reOrderedSecStepS, pSumFinalS, stepSPtr);
-    }
+    num_of_partitions(reOrderedR, relR, pSumRPtr, reOrderedSecStepR, pSumFinalR, stepRPtr, jobList);
+    num_of_partitions(reOrderedS, relS, pSumSPtr, reOrderedSecStepS, pSumFinalS, stepSPtr, jobList);
     
     //printf("steps for R %d\n", stepR);
     //printf("steps for S %d\n", stepS);
