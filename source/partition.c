@@ -28,7 +28,7 @@ void Partition(struct relation initialRelation, int startIndex, int endIndex, in
         pthread_cond_init(condVar, NULL);
 
         countProcesses = 0;
-        pthread_mutex_lock(&condVarMutex);
+        pthread_mutex_lock(condVarMutex);
     }
     for(int j=startIndex;j<=endIndex;j++){
         if(jobList !=NULL){
@@ -49,7 +49,7 @@ void Partition(struct relation initialRelation, int startIndex, int endIndex, in
     }
     if(jobList!=NULL){
         while (countProcesses <= endIndex-startIndex) {
-            pthread_cond_wait(&condVar, &condVarMutex);
+            pthread_cond_wait(condVar, condVarMutex);
             countProcesses++;
         }
         pthread_mutex_unlock(condVarMutex);
