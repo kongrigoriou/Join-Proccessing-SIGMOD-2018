@@ -85,8 +85,8 @@ void JobExecute(Job* job){
         pthread_cond_signal(job->parameters->arg3);
     }
     else if (job->type == buildHistogram) {
-        BuildHistogram(*(job->parameters->arg1), *(job->parameters->arg2), *(job->parameters->arg3), job->parameters->arg4, job->parameters->arg5, job->parameters->arg6);
-        pthread_cond_signal(job->parameters->arg7);
+        Partition(*((struct relation*)job->parameters->arg1), *((int*)job->parameters->arg2), *((int*)job->parameters->arg3), *((int*)job->parameters->arg4), *((int*)job->parameters->arg5), (int*)job->parameters->arg6, (int**)job->parameters->arg7);
+        pthread_cond_signal(job->parameters->arg8);
     }
     free(job->parameters);
     free(job);

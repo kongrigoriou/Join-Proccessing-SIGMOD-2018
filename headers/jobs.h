@@ -18,6 +18,7 @@ typedef struct args{
     void* arg5;
     void* arg6;
     void* arg7;
+    void* arg8;
 }args;
 
 typedef struct Job{

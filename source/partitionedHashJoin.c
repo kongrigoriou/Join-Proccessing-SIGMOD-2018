@@ -11,7 +11,7 @@
 
 int TableFitsCache(int cacheSize, int tableSize, int offSet);
 
-relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
+relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList, int numberOfThreads){
     //1. partitioning
     //2. building (hopschoch hashing)
     //3. probing 
@@ -49,8 +49,8 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
     int** pSumFinalS = calloc(pow(2,N),sizeof(int*));
     //printf("before partitions\n");
 
-    num_of_partitions(reOrderedR, relR, pSumRPtr, reOrderedSecStepR, pSumFinalR, stepRPtr, jobList);
-    num_of_partitions(reOrderedS, relS, pSumSPtr, reOrderedSecStepS, pSumFinalS, stepSPtr, jobList);
+    num_of_partitions(reOrderedR, relR, pSumRPtr, reOrderedSecStepR, pSumFinalR, stepRPtr, jobList, numberOfThreads);
+    num_of_partitions(reOrderedS, relS, pSumSPtr, reOrderedSecStepS, pSumFinalS, stepSPtr, jobList, numberOfThreads);
     
     //printf("steps for R %d\n", stepR);
     //printf("steps for S %d\n", stepS);

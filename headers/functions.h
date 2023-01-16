@@ -14,7 +14,7 @@
 typedef struct relation relation;
 typedef struct result result;
 
-void num_of_partitions(relation*,relation*, int**,relation*,int**,int*,JobList*);
-relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList);
+void num_of_partitions(relation*,relation*, int**,relation*,int**,int*,JobList*,int);
+relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList, int numberOfThreads);
 
 #endif
