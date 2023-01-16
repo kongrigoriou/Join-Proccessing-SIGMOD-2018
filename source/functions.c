@@ -10,7 +10,7 @@ void num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* 
     int max = 0, completedTuples, *maxThreads;
     int curMax, allProcesses;
     int* pSumSecStep, *startIndexThreads, *endIndexThreads, *partitionStepThreads, *NThreads;
-    int*** pSumThreads, **histThreads, *hist;
+    int** histThreads, *hist;
     int countProcesses;
     pthread_mutex_t* condVarMutex=NULL;
     pthread_cond_t* condVar=NULL;
@@ -112,7 +112,7 @@ void num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* 
             free(maxThreads);
         }
         else
-            Partition(*rel, 0, rel->num_tuples -1, 1, N,reOrdered, &max, &hist);
+            Partition(*rel, 0, rel->num_tuples -1, 1, N, &max, &hist);
         
         BuildReorderedFromPSum(*rel, pSum, 0, rel->num_tuples -1, 1, N, reOrdered, hist);
         free(hist);
@@ -170,7 +170,7 @@ void num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* 
                          }
                          
                          maxThreads[allProcesses-1]=0;
-                         startIndexThreads[allProcesses-1]=completedTuples+(*pSum)[j]);
+                         startIndexThreads[allProcesses-1]=completedTuples+(*pSum)[j];
                          endIndexThreads[allProcesses-1]=(*pSum)[j + 1]-1;
                          Job* job = malloc(sizeof(Job));
                          job->type = buildHistogram;
@@ -274,7 +274,7 @@ void num_of_partitions(relation* reOrdered, relation* rel, int** pSum,relation* 
                     }
                     
                     maxThreads[allProcesses-1]=0;
-                    startIndexThreads[allProcesses-1]=completedTuples+(*pSum)[j]);
+                    startIndexThreads[allProcesses-1]=completedTuples+(*pSum)[j];
                     endIndexThreads[allProcesses-1]=reOrdered->num_tuples-1;
                     Job* job = malloc(sizeof(Job));
                     job->type = buildHistogram;
