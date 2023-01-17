@@ -6,7 +6,7 @@
 #define CACHE_SIZE 256000//sysconf(_SC_LEVEL2_CACHE_SIZE)
 #define HOP_SIZE 100000
 #define N 2
-#define H 100
+#define HN 100
 
 #include "list.h"
 #include "structures.h"

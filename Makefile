@@ -12,7 +12,7 @@ HEADER	= $(HEADERS)/bitmap.h $(HEADERS)/functions.h $(HEADERS)/list.h $(HEADERS)
 OUT	= exec
 CC	 = gcc
 FLAGS	 = -g -c -Wall 
-LFLAGS	 = -lm
+LFLAGS	 = -lm -pthread
 
 all: $(OBJS)
 	@ mkdir -p ./build

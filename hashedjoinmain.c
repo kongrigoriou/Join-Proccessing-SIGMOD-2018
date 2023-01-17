@@ -236,7 +236,7 @@ relation create_relation(int* indexes, uint64_t* data,int ind_size,int j){
 
 void print_relation(char* name, relation rel){
     for(int i=0;i<rel.num_tuples; i++){
-        printf("%s[%d]= key=%ld | payload=%ld\n",name,i ,rel.tuples[i].key, rel.tuples[i].payload );
+        //printf("%s[%d]= key=%ld | payload=%ld\n",name,i ,rel.tuples[i].key, rel.tuples[i].payload );
     }
 }
 
@@ -303,7 +303,7 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         //print_relation("left_rel",left_relation);
         //print_relation("right_rel",right_relation);
         //join them together
-        relation res=PartitionedHashJoin(&left_relation ,  &right_relation, jobList);
+        relation res=PartitionedHashJoin(&left_relation ,  &right_relation, jobList,NUM_OF_THREADS);
         free(right_relation.tuples);
         free(left_relation.tuples);
         //print_relation("res1",res);
@@ -388,7 +388,7 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         relation left_relation= create_relation(left_ids,data_left,RowIdsize[left_rel],0);
         
         //join them together
-        relation res=PartitionedHashJoin(&right_relation ,  &left_relation, jobList);
+        relation res=PartitionedHashJoin(&right_relation ,  &left_relation, jobList,NUM_OF_THREADS);
         //print_relation("res0",res);
         free(right_relation.tuples);
         free(left_relation.tuples);
@@ -472,7 +472,7 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         relation left_relation= create_relation(left_ids,data_left,RowIdsize[left_rel],0);
         relation right_relation= create_relation(right_ids,data_right,RowIdsize[right_rel],0);
         //printf("\nBefore join\n");
-        relation res=PartitionedHashJoin(&left_relation ,  &right_relation, jobList);
+        relation res=PartitionedHashJoin(&left_relation ,  &right_relation, jobList,NUM_OF_THREADS);
         //printf("\nAfter join\n");
 
         free(right_relation.tuples);
@@ -598,7 +598,7 @@ int get_sum(Table* T,int rel,int col, joined** interm,int* original_rel){
         sum=T[original_rel[rel]].relations[col][index]+sum;
     }
     //printf("after loop sum:\n\n");
-    fprintf(stdout, "%ld",sum);
+    //fprintf(stdout, "%ld",sum);
     //printf("\n\n sum\n");
     return 0;
 }

@@ -10,7 +10,7 @@
 #include <pthread.h>
 
 void Partition(struct relation initialRelation, int startIndex, int endIndex, int partitionStep, int numberOfBytes, int* max, int** hist){
-    int hashedValue, countProcesses;
+    int hashedValue;
     
     (*hist)=malloc((int)pow(2,numberOfBytes)*sizeof(int));
     for(int i=0;i<(int)pow(2,numberOfBytes);i++){

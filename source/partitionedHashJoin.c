@@ -66,7 +66,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList, i
     hop*** hopscotchTwoSteps = NULL;
     int reverse=0;
     if(stepR == 0){
-        hopscotch = create_array(HOP_SIZE, H);
+        hopscotch = create_array(HOP_SIZE, HN);
         if (jobList != NULL) {
             *noOfReaders = 0;
             pthread_mutex_init(hopMutexRead, NULL);
@@ -110,7 +110,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList, i
     }else if(stepR == 1){
         //array of hopscotch hash tables
         if(stepS == 0){
-            hopscotch = create_array(HOP_SIZE, H);
+            hopscotch = create_array(HOP_SIZE, HN);
             reverse=1;
             if (jobList != NULL) {
                 pthread_mutex_init(hopMutexWrite, NULL);
@@ -152,7 +152,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList, i
         }else{
             hopscothArr = malloc(pow(2,N) * sizeof(hop*));
             for(int i = 0; i < pow(2,N); i++){
-                hopscothArr[i] = create_array(HOP_SIZE,H);
+                hopscothArr[i] = create_array(HOP_SIZE,HN);
             }
 
             int counter = 0;
@@ -245,7 +245,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList, i
         //2d array of psums
         
         if(stepS == 0){
-            hopscotch = create_array(HOP_SIZE, H);
+            hopscotch = create_array(HOP_SIZE, HN);
             reverse=1;
             if (jobList != NULL) {
                 pthread_mutex_init(hopMutexRead, NULL);
@@ -289,7 +289,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList, i
             reverse=1;
             hopscothArr = malloc(pow(2,N) * sizeof(hop*));
             for(int i = 0; i < pow(2,N); i++){
-                hopscothArr[i] = create_array(HOP_SIZE,H);
+                hopscothArr[i] = create_array(HOP_SIZE,HN);
             }
 
             int counter = 0;
@@ -383,7 +383,7 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList, i
             for(int i = 0; i < pow(2,N); i++){
                 hopscotchTwoSteps[i] = malloc(pow(2,N) * sizeof(hop*));
                 for(int j = 0; j < pow(2,N); j++){
-                    hopscotchTwoSteps[i][j] = create_array(HOP_SIZE,H);
+                    hopscotchTwoSteps[i][j] = create_array(HOP_SIZE,HN);
                 }
             }
 
