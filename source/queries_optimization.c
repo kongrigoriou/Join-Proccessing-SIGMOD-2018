@@ -198,7 +198,7 @@ int update_filter(Table* T,int rel, int Col, int c, int b, int b_is_col, stats* 
         stat_rel[Col].min=b;
         if(exists_in_array(T[original_i].relations[Col],T[original_i].numRows,b)){
             //printf("filter 1 col=%d\n",Col);
-            stat_rel[Col].count=stat_rel[Col].count/stat_rel[Col].distinct_count;
+            stat_rel[Col].count=stat_rel[Col].count/(float)stat_rel[Col].distinct_count;
             stat_rel[Col].distinct_count=1;
         }
         else{
@@ -223,13 +223,15 @@ int update_filter(Table* T,int rel, int Col, int c, int b, int b_is_col, stats* 
                 k2=stat_rel[Col].min;
             }
         }
+        
+        stat_rel[Col].distinct_count=(k2-k1)/(float)(stat_rel[Col].max-stat_rel[Col].min)*stat_rel[Col].distinct_count;
+        stat_rel[Col].count=(k2-k1)/(float)(stat_rel[Col].max-stat_rel[Col].min)*stat_rel[Col].count;
         stat_rel[Col].min=k1;
         stat_rel[Col].max=k2;
-        stat_rel[Col].distinct_count=(k2-k1)/(stat_rel[Col].max-stat_rel[Col].min)*stat_rel[Col].distinct_count;
-        stat_rel[Col].count=(k2-k1)/(stat_rel[Col].max-stat_rel[Col].min)*stat_rel[Col].count;
     }
     //same filter
     if(b_is_col==1){
+        //printf("I am here now\n");
         int max_min=maxim(stat_rel[Col].min,T[original_i].stats[b].min);
         int min_max=minim(stat_rel[Col].max,T[original_i].stats[b].max);
         int n=min_max-max_min+1;
@@ -237,15 +239,15 @@ int update_filter(Table* T,int rel, int Col, int c, int b, int b_is_col, stats* 
         stat_rel[b].min=max_min;
         stat_rel[Col].max=min_max;
         stat_rel[b].max=min_max;
-        stat_rel[Col].count=old_count/n;
-        stat_rel[b].count=old_count/n;
-        int temp_num=stat_rel[Col].distinct_count*(1-pow(1-stat_rel[Col].count/old_count,stat_rel[Col].count/stat_rel[Col].distinct_count)) ;
+        stat_rel[Col].count=old_count/(float)n;
+        stat_rel[b].count=old_count/(float)n;
+        uint64_t temp_num=stat_rel[Col].distinct_count*(1-pow(1-stat_rel[Col].count/old_count,stat_rel[Col].count/stat_rel[Col].distinct_count)) ;
         stat_rel[b].distinct_count=temp_num;
         stat_rel[Col].distinct_count=temp_num;
     }
     
     for(int i=0;i<T[original_i].numColumns;i++){
-        //leave the collumn filter was aplied to unchanged
+        //leave the column filter was applied to unchanged
         if(Col==i){
             continue;
         }
@@ -256,7 +258,7 @@ int update_filter(Table* T,int rel, int Col, int c, int b, int b_is_col, stats* 
             }
         }
         //printf("d[dc]=%ld,f[a]=%ld,f[old]=%ld d[c]=%ld\n",stat_rel[i].distinct_count,stat_rel[Col].count,old_count,stat_rel[i].count);
-        int temp_num=(int)stat_rel[i].distinct_count*(1-pow(1-stat_rel[Col].count/(float)old_count,stat_rel[i].count/(float)stat_rel[i].distinct_count)) ;
+        uint64_t temp_num=stat_rel[i].distinct_count*(1-pow(1-stat_rel[Col].count/(float)old_count,stat_rel[i].count/(float)stat_rel[i].distinct_count)) ;
         stat_rel[i].distinct_count=temp_num;
         stat_rel[i].count=stat_rel[Col].count;
         
@@ -270,7 +272,7 @@ int update_filter(Table* T,int rel, int Col, int c, int b, int b_is_col, stats* 
                 if(rel==i){
                     continue;
                 }
-                int temp_num=inter->stat[j][i].distinct_count*(1-pow(1-stat_rel[Col].count/old_count,inter->stat[j][i].count/inter->stat[j][i].distinct_count)) ;
+                uint64_t temp_num=inter->stat[j][i].distinct_count*(1-pow(1-stat_rel[Col].count/(float)old_count,inter->stat[j][i].count/inter->stat[j][i].distinct_count)) ;
                 inter->stat[j][i].distinct_count=temp_num;
                 inter->stat[j][i].count=stat_rel[Col].count;
             }
@@ -305,22 +307,67 @@ int update_join(join_op j,q_inter* inter, stats* stat_right1, int stat_right_siz
     inter->relations[inter->rel_count]=right_rel;
     inter->columns[inter->rel_count]=stat_right_size;
     inter->rel_count++;
-    //printf("Help right=%d right_col=%d left=%d left_col=%d\n",right_rel,right_Col,left_rel,left_Col);
-    //printf("stats_right: %ld %ld %ld %ld\n",stat_right[right_Col].count,stat_right[right_Col].distinct_count,stat_right[right_Col].max,stat_right[right_Col].min);
-    //printf("stats_left: %ld %ld %ld %ld\n",stat_left[left_Col].count,stat_left[left_Col].distinct_count,stat_left[left_Col].max,stat_left[left_Col].min);
-    //if(j.left!=j.right){
-        uint64_t old_right_count=stat_right[right_Col].distinct_count;
-        uint64_t old_left_count=stat_left[left_Col].distinct_count;
+    
+
         
     
+        //do an unofficial filter
+        uint64_t filter_old_right_count=stat_right[right_Col].count;
+        uint64_t filter_old_left_count=stat_left[left_Col].count;
+        uint64_t old_right_count=stat_right[right_Col].distinct_count;
+        uint64_t old_left_count=stat_left[left_Col].distinct_count;
+
+        //printf("old stats_right: %ld %ld %ld %ld\n",stat_right[right_Col].count,stat_right[right_Col].distinct_count,stat_right[right_Col].max,stat_right[right_Col].min);
+        //printf("old stats_left: %ld %ld %ld %ld\n",stat_left[left_Col].count,stat_left[left_Col].distinct_count,stat_left[left_Col].max,stat_left[left_Col].min);
+
         int max_min=maxim(stat_left[left_Col].min,stat_right[right_Col].min);
         int min_max=minim(stat_left[left_Col].max,stat_right[right_Col].max);
-        //printf("After_maxim and minimum\n");
-        int n=min_max-max_min+1;
+
+        stat_left[left_Col].count=(min_max-max_min)/(float)(stat_left[left_Col].max-stat_left[left_Col].min)*stat_left[left_Col].count;
+        stat_left[left_Col].distinct_count=(min_max-max_min)/(float)(stat_left[left_Col].max-stat_left[left_Col].min)*stat_left[left_Col].distinct_count;
+        stat_right[right_Col].count=(min_max-max_min)/(float)(stat_right[right_Col].max-stat_right[right_Col].min)*stat_right[right_Col].count;
+        stat_right[right_Col].distinct_count=(min_max-max_min)/(float)(stat_right[right_Col].max-stat_right[right_Col].min)*stat_right[right_Col].distinct_count;
+
         stat_left[left_Col].min=max_min;
         stat_right[right_Col].min=max_min;
         stat_left[left_Col].max=min_max;
         stat_right[right_Col].max=min_max;
+
+        for(int j=0;j<inter->rel_count;j++ ){
+            for(int i=0;i<inter->columns[j];i++){
+                if(left_rel==inter->relations[j] &&left_Col==i){
+                    continue;
+                }
+                if(right_rel==inter->relations[j] &&right_Col==i){
+                    continue;
+                }
+                uint64_t temp_num;
+                
+                if(right_rel==inter->relations[j]){
+                    temp_num=stat_right[i].distinct_count*(1-pow(1-stat_right[right_Col].count/(float)filter_old_right_count,stat_right[i].count/(float)stat_right[i].distinct_count)) ;
+                }
+                else{
+                    temp_num=inter->stat[j][i].distinct_count*(1-pow(1-stat_left[left_Col].distinct_count/(float)filter_old_left_count,inter->stat[j][i].count/(float)inter->stat[j][i].distinct_count)) ;
+                }
+                inter->stat[j][i].distinct_count=temp_num;
+                inter->stat[j][i].count =stat_left[left_Col].count;
+                
+
+            }
+        }
+        
+        //end of filter
+
+        
+        
+    
+        
+
+        
+        //printf("After_maxim and minimum\n");
+        int n=min_max-max_min+1;
+        
+        
 
         stat_left[left_Col].count=(stat_left[left_Col].count*stat_right[right_Col].count)/(float)n; 
         stat_right[right_Col].count=stat_left[left_Col].count;
@@ -338,8 +385,9 @@ int update_join(join_op j,q_inter* inter, stats* stat_right1, int stat_right_siz
                 if(right_rel==inter->relations[j] &&right_Col==i){
                     continue;
                 }
-                inter->stat[j][i].count =stat_left[left_Col].count;
-                int temp_num;
+                
+                uint64_t temp_num;
+                
                 if(right_rel==inter->relations[j]){
                     temp_num=stat_right[i].distinct_count*(1-pow(1-stat_right[right_Col].distinct_count/(float)old_right_count,stat_right[i].count/(float)stat_right[i].distinct_count)) ;
                 }
@@ -349,6 +397,8 @@ int update_join(join_op j,q_inter* inter, stats* stat_right1, int stat_right_siz
                 
                 //printf("temp_num is %d\n",temp_num);
                 inter->stat[j][i].distinct_count=temp_num;
+                inter->stat[j][i].count =stat_left[left_Col].count;
+                
             }
         }
     //}
@@ -572,27 +622,28 @@ int cost(Table* T,besttree* tree,stats** stat,pred* join_array, int count_of_joi
         inter->stat[0][j].number =stat[tree->relations[0]][j].number;
     }
     //printf("After cpy1\n");
-    int query_len=0;
-    for(int i=1;i<tree->size;i++){
+    int sum_count=inter->stat[0][0].count;
+    for(int i=1;i<tree->size-1;i++){
         //printf("start of loop i=%d\n",i);
         int B=tree->relations[i];
         join_op joins[10];
-        int joins_count=find_col(join_array,count_of_joins,tree->relations,i,B,joins);
+        find_col(join_array,count_of_joins,tree->relations,i,B,joins);
         //update stats
         //printf("Before update join j.righ=%d b=%d stat[B][0].count=%d\n",joins[0].right,B,stat[B][0].count);
         update_join(joins[0],inter,stat[B],T[original_rel[B]].numColumns);
         //printf("After update join\n");
-        query_len=query_len+sprintf(&tree->query[query_len],"%d%d=%d%d ",joins[0].left,joins[0].left_col,joins[0].right,joins[0].right_col);
+        /*query_len=query_len+sprintf(&tree->query[query_len],"%d%d=%d%d ",joins[0].left,joins[0].left_col,joins[0].right,joins[0].right_col);
         for(int j=1;j<joins_count;j++){
             query_len=+sprintf(&tree->query[query_len],"%d%d=%d%d ",joins[j].left,joins[j].left_col,joins[j].right,joins[j].right_col);
             //update_filter(T,joins[i].right,joins[i].right_col)
             //filter  the rest of the joins that involve B and everyone else in intermidiate
-        }
+        }*/
+        sum_count+=inter->stat[i][joins[0].right_col].count;
     }
-    tree->query[query_len]='\0';
+    //tree->query[query_len]='\0';
     //get size of intermidiate result
     //printf("before count\n");
-    int count=inter->stat[0][0].count;
+    //int count=inter->stat[0][0].count;
     //printf("after count\n");
     for(int i=0;i<inter->rel_count;i++){
 
@@ -601,7 +652,8 @@ int cost(Table* T,besttree* tree,stats** stat,pred* join_array, int count_of_joi
     }
     free(inter);
     //printf("End\n");
-    return count;
+    //tree->cost=sum_count;
+    return sum_count;
 }
 
 int get_query(char* buffer, pred* join_array, int count_of_joins, besttree* tree){
@@ -653,7 +705,14 @@ int Q_op(QueryArray* batch,Table* T){
         stats* stat[4];
                 
         copy_stats(T,Q->relationsCount,Q->relationsId,stat);
-                
+        /*for(int i=0;i<size_r;i++){
+            for(int j=0;j<T[Q->relationsId[i]].numColumns;j++){
+                printf("Old Stat[%d][%d]count=%ld\n",i,j,stat[i][j].count);
+                printf("Old Stat[%d][%d]dist=%ld\n",i,j,stat[i][j].distinct_count);
+                printf("Old Stat[%d][%d]max=%ld\n",i,j,stat[i][j].max);
+                printf("Old Stat[%d][%d]min=%ld\n\n",i,j,stat[i][j].min);
+            }
+        }*/     
         while(count_of_filters<Q->filtersCount){
                 
             int rel=Q->filters[count_of_filters]-48;        //-48
@@ -671,8 +730,8 @@ int Q_op(QueryArray* batch,Table* T){
             //update stats
             update_filter(T,rel,col,comp,num,0,stat[rel],Q->relationsId,NULL);    
         }
-        /*print stats so far
-        for(int i=0;i<size_r;i++){
+        //print stats so far
+        /*for(int i=0;i<size_r;i++){
             for(int j=0;j<T[Q->relationsId[i]].numColumns;j++){
                 printf("Stat[%d][%d]count=%ld\n",i,j,stat[i][j].count);
                 printf("Stat[%d][%d]dist=%ld\n",i,j,stat[i][j].distinct_count);
@@ -799,7 +858,7 @@ int Q_op(QueryArray* batch,Table* T){
         get_query(buffer_q,join_array,size_of_join_array,best_tree[get_number(result_set,size_r)]);
         //printf("Query=%s\n",Q->predicates);
         strcpy(Q->predicates,buffer_q);
-        //printf("Query=%s\n",Q->predicates);
+        //printf("Query %d: %s\n",j+1,Q->predicates);
         /*for(int i=0;i<best_tree[get_number(result_set,size_r)]->size;i++){
             printf("tree[%d]=%d\n",i,best_tree[get_number(result_set,size_r)]->relations[i]);
         }*/
