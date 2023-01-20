@@ -29,7 +29,7 @@ void test_tuples(void){
     TEST_ASSERT(data->key ==279832);
     TEST_ASSERT(data->payload == 324983);
 
-    TEST_ASSERT(sizeof(tuple) == 2*sizeof(uint64_t));
+    TEST_ASSERT(sizeof(tuple) == 2*sizeof(uint32_t));
 
     free(data);
 }
@@ -37,13 +37,12 @@ void test_tuples(void){
 void test_insert(void){
     hop* array = create_array(10, 3);
     int hash_value;
-    int size;
 
     tuple temp;
     temp.key = 2;
     temp.payload = 0;
 
-    size = insert(array, temp,NULL);
+    insert(array, temp,NULL);
     TEST_ASSERT(get_H(array) == 3);
 
     hash_value = hash(temp.key, array->size);
@@ -51,12 +50,12 @@ void test_insert(void){
 
     temp.payload = 1;
 
-    size = insert(array, temp,NULL);
+    insert(array, temp,NULL);
     TEST_ASSERT(array->array[hash_value].duplicate->size == 1);
 
     temp.payload = 2;
 
-    size = insert(array, temp,NULL);
+    insert(array, temp,NULL);
     TEST_ASSERT(array->array[hash_value].duplicate->size == 2);
 
     // size = insert(array, temp,NULL);
