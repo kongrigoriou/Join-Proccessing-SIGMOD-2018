@@ -113,7 +113,7 @@ tests: hop_test partition_test utilities_test list_test q_test
 	./$(BUILD)/q_test
 
 valgrind_join:
-	cat input/default.txt| valgrind --track-origins=yes $(BUILD)/$(OUT)
+	cat input/default.txt| valgrind --fair-sched=yes --leak-check=full $(BUILD)/$(OUT)
 
 valgrind_tests: hop_test partition_test utilities_test list_test
 	valgrind --leak-check=full --show-leak-kinds=all ./$(BUILD)/hop_test
