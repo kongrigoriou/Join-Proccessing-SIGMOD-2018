@@ -12,7 +12,7 @@
 #include "../headers/structures.h"
 #include "../headers/jobs.h"
 
-void Partition(struct relation initialRelation, int startIndex, int endIndex, int partitionStep, int numberOfBytes, int* max, int** hist);
+void Partition(struct relation initialRelation, int startIndex, int endIndex, int partitionStep, int numberOfBytes, struct relation* reOrdered, int* max, int** pSum);
 
-void BuildReorderedFromPSum(struct relation initialRelation, int** pSum, int startIndex, int endIndex, int partitionStep, int numberOfBytes, struct relation* reOrdered, int* hist);
+void BuildHistogram(int tupleKey, int partitionStep, int numberOfBytes, int* hist, int* max, pthread_mutex_t* writeMutex);
 #endif /* mainPartitionTest_h */
