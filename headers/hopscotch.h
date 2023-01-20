@@ -2,7 +2,6 @@
 #define HOPSCOTCH
 
 #include <stdint.h>
-#include <pthread.h>
 #include "../headers/structures.h"
 #include "../headers/list.h"
 #include "../headers/bitmap.h"
@@ -12,14 +11,14 @@ typedef struct node {
     struct tuple info;  //the tuple
     bitmap_t  bitmap;   //the bitmap
     int occupied;        //whether node is empty or not
-    //List* duplicate;
-    List* overflow;
+    List* duplicate;
+    //List* overflow;
 } node;
 
 typedef struct hopscotch_array {
     node* array;
-    uint64_t H;
-    uint64_t size;
+    int H;
+    int size;
 } hop;
 
 typedef struct result_node {
@@ -28,7 +27,7 @@ typedef struct result_node {
     int occupied;       //whether node is empty or not
 } result_node;
 
-uint64_t hash2(uint64_t key);
+unsigned int hash2(unsigned int key);
 int hash(int key,int size_of_array);
 node* create_array_of_hop(int n, int h);
 hop* create_array(int n, int i);
@@ -41,7 +40,7 @@ int closest_empty_spot(node* array,int start, int size);
 void print_array(node* array, int size);
 int resize(hop** hops_, tuple element, int n, int h);
 int dist(int j, int hash,int n);
-int insert(hop* array, tuple element, pthread_mutex_t* hopMutexRead, pthread_mutex_t* hopMutexWrite, int* noOfReaders);
+int insert(hop* array, tuple element,List* dup);
 List* search(hop* array,tuple element);
 
 #endif
