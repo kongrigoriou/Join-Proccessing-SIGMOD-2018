@@ -1,7 +1,6 @@
 #include "../headers/jobs.h"
 #include "../headers/functions.h"
 #include "../headers/hopscotch.h"
-#include "../headers/mainPartitionTest.h"
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdlib.h>
@@ -41,12 +40,11 @@ void PushJob(JobList* jobList, Job* job){
 
 Job* PullJob(JobList* jobList){
     Job* job;
-    
     sem_wait(jobList->jobsCount);
     sem_wait(jobList->editSem);
+    // printf("After semaphoes\n");
     if(jobList->Head != NULL){
         if (jobList->Head->next==NULL){
-            printf("Only one job in list\n");
             job=jobList->Head->job;
             free(jobList->Head);
             jobList->Head=NULL;
@@ -78,16 +76,19 @@ void JobExecute(Job* job){
     }
     else if (job->type == barrier){
         pthread_barrier_wait(((pthread_barrier_t*)job->parameters->arg1));
+    }else if(job->type == probing){
+        Probing((hop*)job->parameters->arg1, (relation*)job->parameters->arg2, (int*)job->parameters->arg3, 
+        (int*)job->parameters->arg4, (List**)job->parameters->arg5);
     }
-    else if (job->type == insertHopScotch) {
-        insert((hop*)job->parameters->arg1, *((tuple*)job->parameters->arg2), (pthread_mutex_t*)job->parameters->arg4, 
-            (pthread_mutex_t*)job->parameters->arg5, (int*)job->parameters->arg6);
-        pthread_cond_signal(job->parameters->arg3);
-    }
-    else if (job->type == buildHistogram) {
-        Partition(*((struct relation*)job->parameters->arg1), *((int*)job->parameters->arg2), *((int*)job->parameters->arg3), *((int*)job->parameters->arg4), *((int*)job->parameters->arg5), (int*)job->parameters->arg6, (int**)job->parameters->arg7);
-        pthread_cond_signal(job->parameters->arg8);
-    }
+    // else if (job->type == numOfPartitions) {
+    //     num_of_partitions((relation*)job->parameters->arg1, (relation*)job->parameters->arg2, (int**)job->parameters->arg3, (relation*)job->parameters->arg4, (int**)job->parameters->arg5, (int*)job->parameters->arg6);
+    //     pthread_cond_signal(job->parameters->arg7);
+    // }
+    // else if (job->type == insertHopScotch) {
+    //     insert((hop*)job->parameters->arg1, *((tuple*)job->parameters->arg2), (pthread_mutex_t*)job->parameters->arg4, 
+    //         (pthread_mutex_t*)job->parameters->arg5, (int*)job->parameters->arg6);
+    //     pthread_cond_signal(job->parameters->arg3);
+    // }
     free(job->parameters);
     free(job);
 }
