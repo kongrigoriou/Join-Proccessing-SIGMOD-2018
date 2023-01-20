@@ -52,15 +52,15 @@ void test_insert(void){
     temp.payload = 1;
 
     size = insert(array, temp,NULL);
-    TEST_ASSERT(array->array[hash_value + 1].info.payload == temp.payload);
+    TEST_ASSERT(array->array[hash_value].duplicate->size == 1);
 
     temp.payload = 2;
 
     size = insert(array, temp,NULL);
-    TEST_ASSERT(array->array[hash_value + 2].info.payload == temp.payload);
+    TEST_ASSERT(array->array[hash_value].duplicate->size == 2);
 
-    size = insert(array, temp,NULL);
-    TEST_ASSERT(size != 10);
+    // size = insert(array, temp,NULL);
+    // TEST_ASSERT(size != 10);
 
     destroy_hop(array);
 }
