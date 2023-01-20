@@ -22,6 +22,7 @@ all: $(OBJS)
 	chmod +x run.sh
 
 
+
 hop_test: $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/bitmap.o $(OBJ)/hopscotch_test.o
 	@ mkdir -p ./$(BUILD)
 	$(CC) -g $(OBJ)/hopscotch.o $(OBJ)/list.o $(OBJ)/bitmap.o $(OBJ)/hopscotch_test.o -o $(BUILD)/hop_test $(LFLAGS)
