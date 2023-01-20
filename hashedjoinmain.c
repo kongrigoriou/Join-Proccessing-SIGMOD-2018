@@ -13,7 +13,6 @@
 #include "./headers/jobs.h"
 #include "./headers/scheduler.h"
 #include <math.h>
-#define NUM_OF_THREADS 3
 
 //simple comparison function
 int compare(int a, char c, int b){
@@ -33,7 +32,6 @@ int compare(int a, char c, int b){
 
 //find if relation exists in any intermidate result that you have(there can be maximum of 2 intermidiate results)
 int is_in_join(int rel,joined** interm){
-    //printf("at least here\n");
     if(interm[0]!=NULL){
         int col=interm[0]->columns;
         for(int i=0;i<col;i++){
@@ -68,16 +66,13 @@ void update_joined(joined* interm,int* survivedIds,int size){
     for(int i=0;i<4;i++){
         new_result[i]=calloc(size,sizeof(int));
     }
-    //printf("before for\n");
     for(int i=0;i<size;i++){
-        //printf("[%d]=\n",i);
         for(int j=0;j<4;j++){
             if(j< interm->columns){
                 new_result[j][i]=interm->inter[j][survivedIds[i]];
             }
         }
     }
-    //printf("after for\n");
     for(int i=0;i<4;i++){
         free(interm->inter[i]);
     }
@@ -105,7 +100,6 @@ int filter_join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_re
     uint64_t* data_right=T_right.relations[right_Col];              //get relations
     int* newrowids=malloc(sizeof(int)*interm[left_inter]->rows);
     int newrowids_index=0;
-    //printf("before if in filter join after all data has been extracted\n");
     if(left_inter==right_inter){
         for(int i=0;i<interm[left_inter]->rows;i++){
             if(data_left[left_ids[i]]==data_right[right_ids[i]]){
@@ -113,7 +107,6 @@ int filter_join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_re
                 newrowids_index++;
             }
         }
-        //printf("before update join newrowids=%d and rows=%d\n",newrowids_index,interm[left_inter]->rows);
         update_joined(interm[left_inter],newrowids,newrowids_index);
         free(newrowids);
     }
@@ -123,7 +116,6 @@ int filter_join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_re
 //this filter is the actual filter and is called when there is a self filter or a regular filter
 int filter(Table* T,joined** interm,int** RowIds,int* RowIdsize,int rel, int Col, int c, int b, int b_is_col, int* original_relations){
     int exists_in_join=is_in_join(rel,interm);
-    //printf("\nexists=%d\n",exists_in_join);
     //relations isn't in intermidiate result
     if(exists_in_join==-1){
         if(RowIdsize[rel]==0){
@@ -136,9 +128,7 @@ int filter(Table* T,joined** interm,int** RowIds,int* RowIdsize,int rel, int Col
         int original_i=original_relations[rel];                 //get original relation id
         Table T_i=T[original_i];                                //get original relation
         uint64_t* data=T_i.relations[Col];                      //get relations
-        /*for(int i=0;i<RowIdsize[rel];i++){
-            printf("Rowid[%d] of rel=%d is %d \n",i,rel,RowIds[rel][i]);
-        }*/
+
 
         //if filter is isn't a weird join
         //meaning b will refer to an other column of the same relation
@@ -236,7 +226,7 @@ relation create_relation(int* indexes, uint64_t* data,int ind_size,int j){
 
 void print_relation(char* name, relation rel){
     for(int i=0;i<rel.num_tuples; i++){
-        //printf("%s[%d]= key=%ld | payload=%ld\n",name,i ,rel.tuples[i].key, rel.tuples[i].payload );
+        // printf("%s[%d]= key=%ld | payload=%ld\n",name,i ,rel.tuples[i].key, rel.tuples[i].payload );
     }
 }
 
@@ -254,18 +244,15 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
     //left is in interm and right is not
     if(left_inter!=-1&&right_inter==-1){
         //create left relation
-        //printf("left is in inter right is not\n");
         int left_i=find_place(left_rel,*interm[left_inter]);
 
         //if left rel is empty
         if(interm[left_inter]->rows==0){
-            //printf("in if of empty\n");
             int** new_result=NULL;
             interm[left_inter]->inter=new_result;
             interm[left_inter]->relations[interm[left_inter]->columns]=right_rel;
             interm[left_inter]->columns++;
             interm[left_inter]->rows=0;
-            //printf("end of if\n");
             return 0;
         }
 
@@ -296,17 +283,13 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
             return 0;
         }
         
-        //printf("before creation size=%d\n",interm[left_inter]->rows);
         relation left_relation= create_relation(left_ids,data_left,interm[left_inter]->rows,1);
         relation right_relation= create_relation(right_ids,data_right,RowIdsize[right_rel],0);
-        //printf("Rowidsize=%d\n",RowIdsize[right_rel]);
-        //print_relation("left_rel",left_relation);
-        //print_relation("right_rel",right_relation);
+
         //join them together
-        relation res=PartitionedHashJoin(&left_relation ,  &right_relation, jobList,NUM_OF_THREADS);
+        relation res=PartitionedHashJoin(&left_relation ,  &right_relation, jobList);
         free(right_relation.tuples);
         free(left_relation.tuples);
-        //print_relation("res1",res);
         
         //create new intermidiate
         int** new_result=calloc(4,sizeof(int*));
@@ -317,7 +300,6 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
             for(int j=0;j<4;j++){
                 if(j<interm[left_inter]->columns){  //for the relations that were already there
                     new_result[j][i]=interm[left_inter]->inter[j][res.tuples[i].key];
-                    //printf("rel[%d]=%d\n",j,interm[left_inter]->relations[j]);
                 }
                 if(j==interm[left_inter]->columns){ //for the relation to be added
                     new_result[j][i]=res.tuples[i].payload;
@@ -345,7 +327,6 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
     //left is not in interm and right is
     else if(left_inter==-1&&right_inter!=-1){
         //create right relation
-        //printf("left relation is not in inermidiate and right is\n");
         int right_i=find_place(right_rel,*interm[right_inter]);
         
         //if there is nothing to be joined in right
@@ -388,11 +369,10 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         relation left_relation= create_relation(left_ids,data_left,RowIdsize[left_rel],0);
         
         //join them together
-        relation res=PartitionedHashJoin(&right_relation ,  &left_relation, jobList,NUM_OF_THREADS);
+        relation res=PartitionedHashJoin(&right_relation ,  &left_relation, jobList);
         //print_relation("res0",res);
         free(right_relation.tuples);
         free(left_relation.tuples);
-        //print_relation("res",res);
         
         //create new intermidiate
         int** new_result=calloc(4,sizeof(int*));
@@ -431,7 +411,6 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
 
     //left is not in interm and right is not
     else if(left_inter==-1&&right_inter==-1){
-        //printf("No one in intermidiate yet\n");
 
         //get left
         int* left_ids=RowIds[left_rel];                                   //current Rowids
@@ -471,9 +450,7 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         //join them together
         relation left_relation= create_relation(left_ids,data_left,RowIdsize[left_rel],0);
         relation right_relation= create_relation(right_ids,data_right,RowIdsize[right_rel],0);
-        //printf("\nBefore join\n");
-        relation res=PartitionedHashJoin(&left_relation ,  &right_relation, jobList,NUM_OF_THREADS);
-        //printf("\nAfter join\n");
+        relation res=PartitionedHashJoin(&left_relation ,  &right_relation, jobList);
 
         free(right_relation.tuples);
         free(left_relation.tuples);
@@ -513,14 +490,10 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
         interm[interm_i]->relations[1]=right_rel;
         interm[interm_i]->columns=2;
         interm[interm_i]->rows=res.num_tuples;
-        //printf("after filling up of interm\n");
         free(res.tuples);
     }
     //both are in interm
     else{
-        
-        //printf("both relations are in intermidiate\n");
-
         //if either of them is empty
         //not tested yet i think
         if(interm[left_inter]->rows==0||interm[right_inter]->rows==0){
@@ -581,44 +554,35 @@ int join(Table* T,joined** interm,int** RowIds,int* RowIdsize,int left_rel, int 
 
 int get_sum(Table* T,int rel,int col, joined** interm,int* original_rel){
     int interm_i=is_in_join(rel,interm);
-    //printf("interm_i in sum is %d\n",interm_i);
     int rowid_i=find_place(rel,*interm[interm_i]);
     int size =interm[interm_i]->rows;
-    //printf("size is %d\n",size);
     if(size==0){
         fprintf(stdout, "%s", "NULL");
         return 0;
     }
-    //printf("where  is the problem rowid_i=%d\n",rowid_i);
     uint64_t sum=0;
     for(int i=0;i<size;i++){
-        //printf("first loop\n");
         int index=interm[interm_i]->inter[rowid_i][i];
-        //printf("before sum\n");
         sum=T[original_rel[rel]].relations[col][index]+sum;
     }
-    //printf("after loop sum:\n\n");
-    //fprintf(stdout, "%ld",sum);
-    //printf("\n\n sum\n");
+    fprintf(stdout, "%ld",sum);
     return 0;
 }
 
 
 
 int main(int argc, char **argv){
-    int q_op=1;
+    int q_op= 1;
     char* buffer=malloc(64);
     char* buffer1=malloc(64);
     size_t bufsize = 64;
-    //size_t characters;
-    //printf("start\n");
     List_string* file_list=list_create_string();
     getline(&buffer,&bufsize,stdin);
-    
+
+
 
     while(strcmp(buffer, "Done\n")){
         buffer[strlen(buffer)-1]='\0';
-        //printf("\nbuff=%s",buffer);
         snprintf(buffer1,64,"%s",buffer);
         list_insert_string(file_list,buffer1);
         getline(&buffer,&bufsize,stdin);
@@ -626,7 +590,6 @@ int main(int argc, char **argv){
     }
     free(buffer);
     free(buffer1);
-    //list_print_string(file_list);
     Table* T=malloc(file_list->size*sizeof(Table));
     ListNode_string* node=file_list->head;
     int table_size=file_list->size;
@@ -635,7 +598,6 @@ int main(int argc, char **argv){
     if (NUM_OF_THREADS == 0) {
         //fill the table
         for (int i = table_size - 1; i >= 0; i--) {
-            //printf("\ni=%d\n",i);
             LoadTable(node->data, &T[i]);
             node = node->next;
         }
@@ -665,11 +627,9 @@ int main(int argc, char **argv){
         pthread_barrier_wait(&barrier_id);
         pthread_barrier_destroy(&barrier_id);
     }
-    
+
     list_destroy_string(file_list);
-    /*for(int i=0;i<table_size;i++){
-        printf("\nrow=%ld col=%ld i[0][0]=%ld\n",T[i].numRows, T[i].numColumns,T[i].relations[0][0]);
-    }*/
+
     if(q_op){
         fill_distinct_count(T,table_size);
     }
@@ -680,15 +640,9 @@ int main(int argc, char **argv){
 
     QueryArray* batch;
     char c;
-    //printf("\n before batch\n");
     batch = get_batch();
-    //printf("\n after batch\n");
-    //print_queries(queries);
 
     while(batch != NULL){
-        // QueryArray* Batch_i= queries->batches[i];
-        // print_batch(batch);
-
         //query optimization
 
         if(q_op){
@@ -699,9 +653,7 @@ int main(int argc, char **argv){
         for(int j=0;j<batch->size;j++){
             QueryInfo* Q=batch->array[j];
             int count_of_filters=0;
-            // printf("J: ")
             int size_r=Q->relationsCount;
-            // printf("sizeof(r)=%d\n",size_r);
 
             //initialize these arrays to run the filter and the join
             int** rowid=malloc(size_r*sizeof(int*));
@@ -713,7 +665,6 @@ int main(int argc, char **argv){
             for(int i=0;i<size_r;i++){
                 rowid_s[i]=T[Q->relationsId[i]].numRows;
                 rowid[i]=calloc(T[Q->relationsId[i]].numRows,sizeof(int));
-                // printf("Rowid of rel=%d has %ld size\n",i, T[Q->relationsId[i]].numRows);
                 for(int j=0;j<T[Q->relationsId[i]].numRows;j++){
                     rowid[i][j]=j;
                 }
@@ -734,7 +685,6 @@ int main(int argc, char **argv){
                     count_of_filters++;
                 }
                 count_of_filters++;
-                // printf("Filter:rel=%d col=%d comp=%c num=%d\n",rel,col,comp,num);
                 filter(T,interm,rowid,rowid_s,rel,col,comp,num,0,Q->relationsId);
             }
 
@@ -750,11 +700,9 @@ int main(int argc, char **argv){
                 int right_col=Q->predicates[count_of_pred+4]-48;
                 count_of_pred+=6;
                 //join
-                // printf("Join:left_rel=%d left_col=%d right_rel=%d right_col=%d\n",left_rel,left_col,right_rel,right_col);
                 join(T,interm,rowid,rowid_s,left_rel,left_col,right_rel,right_col,Q->relationsId, jobList);
             }
             int count_of_sel=0;
-            // printf("\n");
             //get the sums
             while(count_of_sel< Q->selectionsCount ){
                 if(count_of_sel!=0){
@@ -764,14 +712,10 @@ int main(int argc, char **argv){
                 int col=Q->selections[count_of_sel+1]-48;
                 count_of_sel+=2;
                 //sum
-                // printf("Sum:rel=%d col=%d\n",rel,col);
-                //printf("[%d]=%d",count_of_sel,Q->selections[count_of_sel]);
-                
                 get_sum(T,rel,col,interm,Q->relationsId);
             }
 
             printf("\n");
-
 
             for(int i=0;i<size_r;i++){
                 if(rowid[i]!=NULL){
@@ -783,7 +727,6 @@ int main(int argc, char **argv){
             }
             
             free(rowid_s);
-            // printf("after rowid's freed\n");
             if(interm[0]!=NULL){
                 if(interm[0]->inter!=NULL){
                     for(int i=0;i< 4;i++ ){
@@ -792,11 +735,9 @@ int main(int argc, char **argv){
                         }
                     }
                     free(interm[0]->inter);
-                    // printf("please\n");
                 }
                 
                 free(interm[0]->relations);
-                // printf("relesed everything\n");
                 free(interm[0]);
             }
             if(interm[1]!=NULL){
@@ -807,34 +748,19 @@ int main(int argc, char **argv){
                         }
                     }
                     free(interm[1]->inter);
-                    // printf("please\n");
                 }
                 
                 free(interm[1]->relations);
-                // printf("relesed everything\n");
                 free(interm[1]);
             }
-            // free(Q->filters);
-            // free(Q->predicates);
-            // free(Q->selections);
-            // free(Q->relationsId);
-            // free(Q);
-
         }
-        // free(batch->array);
-        // fflush(stdout);
-
         scanf("%c", &c);
-        // printf("C in main: %c", c);
         fflush(stdout);
 
         destroy(batch);
         batch = get_batch();
     }
-    // destroy(batch);
-    /*free(queries->batches);
-    free(queries);*/
-    // destroy(queries);
+
     for(int i=0;i<table_size;i++){
         for(int j=0;j<T[i].numColumns;j++){
             free(T[i].relations[j]);
