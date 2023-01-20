@@ -43,7 +43,7 @@ void test_insert(void){
     temp.key = 2;
     temp.payload = 0;
 
-    size = insert(array, temp);
+    size = insert(array, temp,NULL);
     TEST_ASSERT(get_H(array) == 3);
 
     hash_value = hash(temp.key, array->size);
@@ -51,15 +51,15 @@ void test_insert(void){
 
     temp.payload = 1;
 
-    size = insert(array, temp);
+    size = insert(array, temp,NULL);
     TEST_ASSERT(array->array[hash_value + 1].info.payload == temp.payload);
 
     temp.payload = 2;
 
-    size = insert(array, temp);
+    size = insert(array, temp,NULL);
     TEST_ASSERT(array->array[hash_value + 2].info.payload == temp.payload);
 
-    size = insert(array, temp);
+    size = insert(array, temp,NULL);
     TEST_ASSERT(size != 10);
 
     destroy_hop(array);
@@ -75,7 +75,7 @@ void test_search(void){
         tuple_array[i].key = i;
         tuple_array[i].payload = i;
 
-        insert(array, tuple_array[i]);
+        insert(array, tuple_array[i],NULL);
     }
 
     for(int i = 0; i < 5; i++){
