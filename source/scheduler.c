@@ -16,10 +16,12 @@ void* ThreadStart(void* jobL){
     while(1){
         if(jobList->Head != NULL){
             job=PullJob(jobList);
-            if(job->type==terminate)
-                pthread_exit(NULL);
-            else
-                JobExecute(job);
+            if(job != NULL){
+                if(job->type==terminate)
+                    pthread_exit(NULL);
+                else
+                    JobExecute(job);
+            }
         }
     }
 }
