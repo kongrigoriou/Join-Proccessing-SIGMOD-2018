@@ -36,6 +36,7 @@ void DestroyMultiThread(JobList* jobList, pthread_t** threads, int numOfThreads)
     }
     for(int i=0;i<numOfThreads;i++){
         pthread_join(*(threads[i]), (void**)NULL);
+        free((threads)[i]);
     }
     free(threads);
     DestroyJobList(jobList);

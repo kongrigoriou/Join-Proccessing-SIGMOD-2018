@@ -7,7 +7,7 @@
 #define N 2
 #define HN  100
 
-#define NUM_OF_THREADS 4
+#define NUM_OF_THREADS 2
 
 #include "list.h"
 #include "structures.h"
@@ -20,6 +20,7 @@ typedef struct result result;
 int num_of_partitions(relation*,relation*, int**,relation*,int**);
 relation PartitionedHashJoin(relation *relR, relation *relS, JobList*);
 void Probing(hop* hopscotch, relation* reOrdered,int* start, int* finish, List** final);
+void destroy_mutexes();
 
 
 #endif

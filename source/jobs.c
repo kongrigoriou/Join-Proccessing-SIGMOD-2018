@@ -66,6 +66,11 @@ Job* PullJob(JobList* jobList){
 void DestroyJobList(JobList* jobList){
     sem_destroy(jobList->editSem);
     sem_destroy(jobList->jobsCount);
+
+    free(jobList->Head);
+    free(jobList->Last);
+    free(jobList->editSem);
+    free(jobList->jobsCount);
     free(jobList);
 }
 

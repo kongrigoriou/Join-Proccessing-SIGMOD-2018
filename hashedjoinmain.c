@@ -595,6 +595,7 @@ int main(int argc, char **argv){
     int table_size=file_list->size;
 
     JobList* jobList = NULL;
+    pthread_t** threads;
     if (NUM_OF_THREADS == 0) {
         //fill the table
         for (int i = table_size - 1; i >= 0; i--) {
@@ -604,7 +605,6 @@ int main(int argc, char **argv){
     }
     else
     {
-        pthread_t** threads;
         pthread_barrier_t barrier_id;
         InitializeMultiThread(&jobList, &threads, NUM_OF_THREADS);
         for (int i = table_size - 1; i >= 0; i--) {
@@ -629,7 +629,7 @@ int main(int argc, char **argv){
     }
 
     list_destroy_string(file_list);
-
+    
     if(q_op){
         fill_distinct_count(T,table_size);
     }
@@ -641,7 +641,7 @@ int main(int argc, char **argv){
     QueryArray* batch;
     char c;
     batch = get_batch();
-
+    
     while(batch != NULL){
         //query optimization
 
@@ -760,6 +760,8 @@ int main(int argc, char **argv){
         destroy(batch);
         batch = get_batch();
     }
+    
+    destroy_mutexes();
 
     for(int i=0;i<table_size;i++){
         for(int j=0;j<T[i].numColumns;j++){
@@ -769,5 +771,7 @@ int main(int argc, char **argv){
         free(T[i].stats);
     }
     free(T);
-    
+    if(NUM_OF_THREADS){
+        DestroyMultiThread(jobList, threads, NUM_OF_THREADS);
+    }
 }

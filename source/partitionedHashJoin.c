@@ -58,15 +58,9 @@ relation PartitionedHashJoin(relation *relR, relation *relS, JobList* jobList){
     if(stepR == 0){
         hopscotch = create_array(HOP_SIZE, HN);
         for(int i = 0; i < relR->num_tuples; i++){
-            //relR->tuples[i];
             insert(hopscotch, relR->tuples[i],NULL);
-            //printf("wtf\n");
         }
-        //printf("end\n\n");
-        //return *relR;
-        //print_array(hopscotch->array, hopscotch->size);
     }else if(stepR == 1){
-        //array of hopscotch hash tables
         if(stepS == 0){
             hopscotch = create_array(HOP_SIZE, HN);
             reverse=1;
@@ -802,4 +796,9 @@ void Probing(hop* hopscotch, relation* reOrdered,int* start, int* finish, List**
         (*final) = temp;
         pthread_mutex_unlock(&mutex);
     }
+}
+
+void destroy_mutexes(){
+    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&queryMutex);
 }
