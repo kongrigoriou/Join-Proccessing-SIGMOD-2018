@@ -6,8 +6,8 @@
 #include "../headers/bitmap.h"
 
 typedef struct tuple {
-    int64_t key;
-    int64_t payload;
+    int32_t key;
+    int32_t payload;
 } tuple;
 /**
 * Type definition for a relation.

@@ -11,7 +11,7 @@ SOURCE	= $(MODULES)/bitmap.c $(MODULES)/functions.c $(MODULES)/hashedjoinmain.c 
 HEADER	= $(HEADERS)/bitmap.h $(HEADERS)/funtions.h $(HEADERS)/list.h $(HEADERS)/mainPartitionTest.h $(HEADERS)/structures.h $(HEADERS)/hopscotch.h $(HEADERS).queries.h $(HEADERS)/jobs.h $(HEADERS)/scheduler.h 
 OUT	= exec
 CC	 = gcc
-FLAGS	 = -g -c -Wall -o2
+FLAGS	 = -g -c -Wall
 LFLAGS	 = -lm -pthread
 
 all: $(OBJS)
