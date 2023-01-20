@@ -3,11 +3,13 @@
 #include <semaphore.h>
 #include "../headers/structures.h"
 #include <pthread.h>
+#include <stdio.h>
+
 
 // #include
 
 typedef enum JobType{
-    terminate,loadTable,barrier,insertHopScotch,buildHistogram
+    terminate,loadTable,barrier,insertHopScotch,buildHistogram,probing
 }JobType;
 
 typedef struct args{
@@ -18,7 +20,6 @@ typedef struct args{
     void* arg5;
     void* arg6;
     void* arg7;
-    void* arg8;
 }args;
 
 typedef struct Job{
